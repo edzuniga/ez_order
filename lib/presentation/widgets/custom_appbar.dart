@@ -1,6 +1,8 @@
+import 'package:ez_order_ezr/presentation/config/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:ez_order_ezr/presentation/providers/dashboard_page_title.dart';
@@ -32,7 +34,10 @@ class CustomAppBar extends ConsumerWidget {
           ),
           const Spacer(),
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              //TODO construir lógica de logout
+              context.goNamed(Routes.login);
+            },
             tooltip: 'Cerrar sesión',
             style: IconButton.styleFrom(
               backgroundColor: AppColors.kGeneralPrimaryOrange,

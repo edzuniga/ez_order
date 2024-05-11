@@ -1,8 +1,11 @@
-import 'package:ez_order_ezr/presentation/config/app_colors.dart';
-import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
+
+import 'package:ez_order_ezr/presentation/config/app_colors.dart';
+import 'package:ez_order_ezr/presentation/config/routes.dart';
+import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
 
 class DashboardBottomNavigationBar extends ConsumerWidget {
   const DashboardBottomNavigationBar({
@@ -15,6 +18,28 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
     return BottomNavigationBar(
       onTap: (index) {
         ref.read(dashboardPageIndexProvider.notifier).changePageIndex(index);
+        /*
+        i = 0 -> Pedidos
+        i = 1 -> Cocina
+        i = 2 -> Reportes
+        i = 3 -> Administración
+        */
+        String pageTitle = '';
+        switch (index) {
+          case 0:
+            pageTitle = Routes.pedidos;
+            break;
+          case 1:
+            pageTitle = Routes.cocina;
+            break;
+          case 2:
+            pageTitle = Routes.reportes;
+            break;
+          case 3:
+            pageTitle = Routes.administracion;
+            break;
+        }
+        navigateTo(context, pageTitle);
       },
       currentIndex: selectedPageIndex,
       backgroundColor: Colors.white,
@@ -34,5 +59,9 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
             label: 'Administración'),
       ],
     );
+  }
+
+  void navigateTo(BuildContext ctx, String pageName) {
+    ctx.goNamed(pageName);
   }
 }

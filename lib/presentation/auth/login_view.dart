@@ -233,7 +233,7 @@ class _LoginViewState extends State<LoginView> {
                             onPressed: () {
                               //Validar el formulario de login
                               //if (_loginFormKey.currentState!.validate()) {}
-                              context.goNamed(Routes.menu);
+                              context.goNamed(Routes.pedidos);
                             },
                             child: Text(
                               'Iniciar sesión',

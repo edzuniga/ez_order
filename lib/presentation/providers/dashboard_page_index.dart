@@ -1,4 +1,10 @@
+import 'package:ez_order_ezr/presentation/dashboard/administracion_view.dart';
+import 'package:ez_order_ezr/presentation/dashboard/cocina_view.dart';
+import 'package:ez_order_ezr/presentation/dashboard/pedidos_view.dart';
+import 'package:ez_order_ezr/presentation/dashboard/reportes_view.dart';
 import 'package:ez_order_ezr/presentation/providers/dashboard_page_title.dart';
+import 'package:ez_order_ezr/presentation/providers/dashboard_view.dart';
+import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'dashboard_page_index.g.dart';
 
@@ -20,20 +26,26 @@ i = 3 -> Administración
     state = i;
     //Change page title
     String pageTitle = '';
+    Widget view = Container();
     switch (i) {
       case 0:
         pageTitle = 'Pedidos';
+        view = const PedidosView();
         break;
       case 1:
         pageTitle = 'Cocina';
+        view = const CocinaView();
         break;
       case 2:
         pageTitle = 'Reportes';
+        view = const ReportesView();
         break;
       case 3:
         pageTitle = 'Administración';
+        view = const AdminView();
         break;
     }
     ref.read(dashboardPageTitleProvider.notifier).changePageTitle(pageTitle);
+    ref.read(dashboardViewProvider.notifier).changeDashboardView(view);
   }
 }

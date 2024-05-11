@@ -5,5 +5,7 @@ class Routes {
 
   //Dashboard Route Names
   static const String pedidos = 'pedidos';
-  static const String menu = 'menu';
+  static const String cocina = 'cocina';
+  static const String reportes = 'reportes';
+  static const String administracion = 'administracion';
 }

@@ -1,3 +1,4 @@
+import 'package:ez_order_ezr/presentation/providers/dashboard_view.dart';
 import 'package:ez_order_ezr/presentation/widgets/dashboard_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,11 +8,11 @@ import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:gap/gap.dart';
 
 class DashboardLayout extends ConsumerWidget {
-  const DashboardLayout({required this.child, super.key});
-  final Widget child;
+  const DashboardLayout({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final Widget view = ref.watch(dashboardViewProvider);
     return Container(
       height: double.infinity,
       width: double.infinity,
@@ -39,7 +40,7 @@ class DashboardLayout extends ConsumerWidget {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: child,
+                    child: view,
                   ),
                 ),
                 const Gap(20),
