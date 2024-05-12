@@ -7,6 +7,8 @@ import 'package:ez_order_ezr/presentation/dashboard/cocina_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/dashboard_layout.dart';
 import 'package:ez_order_ezr/presentation/dashboard/pedidos_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/reportes_view.dart';
+import 'package:ez_order_ezr/presentation/providers/auth_supabase_manager.dart';
+import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -109,5 +111,42 @@ GoRouter router(Ref ref) {
         ],
       ),
     ],
+    redirect: (context, state) {
+      //Obtener el estado de autenticación
+      final isAuthenticated = ref.read(authManagerProvider);
+
+      //Rutas accesibles e inaccesibles dependiendo autenticación
+      const accessibleRoutes = ['/', '/recovery'];
+      const unaccessibleRoutes = [
+        '/pedidos',
+        '/cocina',
+        '/reportes',
+        '/administracion'
+      ];
+
+      //Permitir acceso a AUTH sin autenticación
+      if (!isAuthenticated &&
+          (accessibleRoutes.contains(state.matchedLocation))) {
+        return null;
+      }
+
+      // Si el usuario no está autenticado y está intentando acceder a una
+      // ruta que requiere autenticación
+      if (!isAuthenticated &&
+          (unaccessibleRoutes.contains(state.matchedLocation))) {
+        // Redirige al usuario a la pantalla de login
+        return '/';
+      }
+
+      // Si el usuario está autenticado y trata de acceder a una ruta de AUTH
+      if (isAuthenticated && accessibleRoutes.contains(state.matchedLocation)) {
+        //Antes de redirigir cambia el pageIndex, pageTitle y pageView
+        ref.read(dashboardPageIndexProvider.notifier).changePageIndex(0);
+        // Redirige al usuario al dashboard
+        return '/pedidos';
+      }
+
+      return null;
+    },
   );
 }

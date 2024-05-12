@@ -45,6 +45,7 @@ i = 3 -> Administración
         view = const AdminView();
         break;
     }
+    //Dependiendo el index se ajusta el title y view
     ref.read(dashboardPageTitleProvider.notifier).changePageTitle(pageTitle);
     ref.read(dashboardViewProvider.notifier).changeDashboardView(view);
   }

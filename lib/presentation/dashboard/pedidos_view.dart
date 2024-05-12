@@ -11,7 +11,7 @@ class _PedidosViewState extends State<PedidosView> {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text('Menu View'),
+      child: Text('Pedidos VIEW'),
     );
   }
 }

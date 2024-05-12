@@ -1,24 +1,24 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'router_config.dart';
+part of 'auth_supabase_manager.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$routerHash() => r'd0bf57e63e2b649e82a987858b000401abe0f5b7';
+String _$authManagerHash() => r'cf6564ca71f3107e3ac59e620c8973e05cf82c44';
 
-/// See also [router].
-@ProviderFor(router)
-final routerProvider = Provider<GoRouter>.internal(
-  router,
-  name: r'routerProvider',
+/// See also [AuthManager].
+@ProviderFor(AuthManager)
+final authManagerProvider = NotifierProvider<AuthManager, bool>.internal(
+  AuthManager.new,
+  name: r'authManagerProvider',
   debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$routerHash,
+      const bool.fromEnvironment('dart.vm.product') ? null : _$authManagerHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef RouterRef = ProviderRef<GoRouter>;
+typedef _$AuthManager = Notifier<bool>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

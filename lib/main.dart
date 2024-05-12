@@ -1,10 +1,12 @@
 import 'package:ez_order_ezr/presentation/providers/router_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_strategy/url_strategy.dart';
 
-void main() async {
+Future<void> main() async {
   //ensure flutter
   WidgetsFlutterBinding.ensureInitialized();
   //Set preferred orientation
@@ -12,6 +14,12 @@ void main() async {
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
+  await dotenv.load(fileName: 'assets/dotENV.env');
+  //Supabase initialize
+  await Supabase.initialize(
+    url: dotenv.env['URL'].toString(),
+    anonKey: dotenv.env['ANONKEY'].toString(),
+  );
   setPathUrlStrategy();
   runApp(
     const ProviderScope(child: MyApp()),
