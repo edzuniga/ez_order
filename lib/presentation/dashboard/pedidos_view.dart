@@ -1,15 +1,14 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/config/routes.dart';
 import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
 import 'package:ez_order_ezr/presentation/widgets/pedidos_widgets/estadistica_minimalista_widget.dart';
 import 'package:ez_order_ezr/presentation/widgets/pedidos_widgets/estadistica_sencilla_widget.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class PedidosView extends ConsumerStatefulWidget {
   const PedidosView({super.key});

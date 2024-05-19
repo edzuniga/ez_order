@@ -1,7 +1,4 @@
-import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -18,7 +15,6 @@ class CocinaPage extends StatefulWidget {
 class _CocinaPageState extends State<CocinaPage> {
   @override
   Widget build(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
     return Container(
       width: double.infinity,
       height: double.infinity,
