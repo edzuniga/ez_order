@@ -1,30 +1,28 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:ez_order_ezr/presentation/config/routes.dart';
-import 'package:ez_order_ezr/presentation/providers/auth_supabase_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:ez_order_ezr/presentation/providers/dashboard_page_title.dart';
+import 'package:ez_order_ezr/presentation/config/routes.dart';
+import 'package:ez_order_ezr/presentation/providers/auth_supabase_manager.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 
-class CustomAppBar extends ConsumerStatefulWidget {
-  const CustomAppBar({
+class CocinaAppBar extends ConsumerStatefulWidget {
+  const CocinaAppBar({
     super.key,
   });
 
   @override
-  ConsumerState<CustomAppBar> createState() => _CustomAppBarState();
+  ConsumerState<CocinaAppBar> createState() => _CocinaAppBarState();
 }
 
-class _CustomAppBarState extends ConsumerState<CustomAppBar> {
+class _CocinaAppBarState extends ConsumerState<CocinaAppBar> {
   bool _tryingLogout = false;
 
   @override
   Widget build(BuildContext context) {
-    final selectedPageTitle = ref.watch(dashboardPageTitleProvider);
     return Container(
       width: double.infinity,
       height: 60,
@@ -36,36 +34,12 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
         children: [
           const Gap(15),
           Text(
-            selectedPageTitle,
+            'Cocina',
             style: GoogleFonts.inter(
               fontSize: 20,
             ),
           ),
           const Spacer(),
-          OutlinedButton.icon(
-            onPressed: () {
-              context.pushNamed(Routes.cocina);
-            },
-            style: OutlinedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                side: const BorderSide(width: 1.0),
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            icon: const Icon(
-              Icons.soup_kitchen_sharp,
-              color: AppColors.kGeneralPrimaryOrange,
-              size: 15,
-            ),
-            label: Text(
-              'Cocina',
-              style: GoogleFonts.inter(
-                color: Colors.black,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          const Gap(20),
           IconButton(
             onPressed: () async {
               _tryingLogout ? null : await _tryLogout();

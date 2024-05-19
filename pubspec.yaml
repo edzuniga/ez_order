@@ -29,6 +29,7 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   animate_do: ^3.3.4
+  auto_size_text: ^3.0.0
   cupertino_icons: ^1.0.6
   email_validator: ^2.1.17
   flutter:

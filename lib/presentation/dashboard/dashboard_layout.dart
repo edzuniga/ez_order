@@ -33,17 +33,10 @@ class DashboardLayout extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const CustomAppBar(),
-                const Gap(20),
+                const Gap(8),
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: view,
-                  ),
+                  child: view,
                 ),
-                const Gap(20),
               ],
             ),
           ),

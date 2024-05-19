@@ -1,3 +1,4 @@
+import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/providers/router_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -37,7 +38,8 @@ class MyApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       title: 'EZOrder',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme:
+            ColorScheme.fromSeed(seedColor: AppColors.kGeneralPrimaryOrange),
         useMaterial3: true,
       ),
       routerConfig: router,

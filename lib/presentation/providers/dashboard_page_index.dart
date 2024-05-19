@@ -1,5 +1,5 @@
 import 'package:ez_order_ezr/presentation/dashboard/administracion_view.dart';
-import 'package:ez_order_ezr/presentation/dashboard/cocina_view.dart';
+import 'package:ez_order_ezr/presentation/dashboard/agregar_pedido_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/pedidos_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/reportes_view.dart';
 import 'package:ez_order_ezr/presentation/providers/dashboard_page_title.dart';
@@ -17,7 +17,7 @@ class DashboardPageIndex extends _$DashboardPageIndex {
 
 /*
 i = 0 -> Pedidos
-i = 1 -> Cocina
+i = 1 -> Agregar Pedido
 i = 2 -> Reportes
 i = 3 -> Administración
 */
@@ -33,8 +33,8 @@ i = 3 -> Administración
         view = const PedidosView();
         break;
       case 1:
-        pageTitle = 'Cocina';
-        view = const CocinaView();
+        pageTitle = 'Agregar Pedido';
+        view = const AgregarPedidoView();
         break;
       case 2:
         pageTitle = 'Reportes';

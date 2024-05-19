@@ -20,7 +20,7 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
         ref.read(dashboardPageIndexProvider.notifier).changePageIndex(index);
         /*
         i = 0 -> Pedidos
-        i = 1 -> Cocina
+        i = 1 -> Agregar Pedido
         i = 2 -> Reportes
         i = 3 -> Administración
         */
@@ -30,7 +30,7 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
             pageTitle = Routes.pedidos;
             break;
           case 1:
-            pageTitle = Routes.cocina;
+            pageTitle = Routes.agregarPedido;
             break;
           case 2:
             pageTitle = Routes.reportes;
@@ -51,7 +51,7 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
         BottomNavigationBarItem(
             icon: Icon(Icons.shopping_bag_outlined), label: 'Pedidos'),
         BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.kitchenSet), label: 'Cocina'),
+            icon: FaIcon(FontAwesomeIcons.kitchenSet), label: 'Agregar Pedido'),
         BottomNavigationBarItem(
             icon: Icon(Icons.playlist_add_check_outlined), label: 'Reportes'),
         BottomNavigationBarItem(

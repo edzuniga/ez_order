@@ -1,12 +1,14 @@
 import 'package:ez_order_ezr/presentation/auth/auth_layout.dart';
 import 'package:ez_order_ezr/presentation/auth/login_view.dart';
 import 'package:ez_order_ezr/presentation/auth/recovery_view.dart';
+import 'package:ez_order_ezr/presentation/cocina/cocina_page.dart';
 import 'package:ez_order_ezr/presentation/config/routes.dart';
 import 'package:ez_order_ezr/presentation/dashboard/administracion_view.dart';
-import 'package:ez_order_ezr/presentation/dashboard/cocina_view.dart';
+import 'package:ez_order_ezr/presentation/dashboard/agregar_pedido_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/dashboard_layout.dart';
 import 'package:ez_order_ezr/presentation/dashboard/pedidos_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/reportes_view.dart';
+import 'package:ez_order_ezr/presentation/error_page.dart';
 import 'package:ez_order_ezr/presentation/providers/auth_supabase_manager.dart';
 import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
 import 'package:flutter/widgets.dart';
@@ -18,6 +20,14 @@ part 'router_config.g.dart';
 @Riverpod(keepAlive: true)
 GoRouter router(Ref ref) {
   return GoRouter(
+    errorPageBuilder: (context, state) => CustomTransitionPage(
+      child: const ErrorPage(),
+      transitionsBuilder: ((context, animation, secondaryAnimation, child) =>
+          FadeTransition(
+            opacity: animation,
+            child: child,
+          )),
+    ),
     initialLocation: '/',
     routes: [
       //Auth routes
@@ -70,10 +80,10 @@ GoRouter router(Ref ref) {
             ),
           ),
           GoRoute(
-            name: Routes.cocina,
-            path: '/cocina',
+            name: Routes.agregarPedido,
+            path: '/agregar_pedido',
             pageBuilder: (context, state) => CustomTransitionPage(
-              child: const CocinaView(),
+              child: const AgregarPedidoView(),
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) =>
                       FadeTransition(
@@ -110,6 +120,18 @@ GoRouter router(Ref ref) {
           ),
         ],
       ),
+      GoRoute(
+        name: Routes.cocina,
+        path: '/cocina',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: const CocinaPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        ),
+      ),
     ],
     redirect: (context, state) {
       //Obtener el estado de autenticación
@@ -119,9 +141,10 @@ GoRouter router(Ref ref) {
       const accessibleRoutes = ['/', '/recovery'];
       const unaccessibleRoutes = [
         '/pedidos',
-        '/cocina',
+        '/agregar_pedido',
         '/reportes',
-        '/administracion'
+        '/administracion',
+        '/cocina',
       ];
 
       //Permitir acceso a AUTH sin autenticación
