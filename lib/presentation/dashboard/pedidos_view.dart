@@ -204,7 +204,7 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                               width: 100.0,
                               height: 81.0,
                               child: Image.asset(
-                                'images/pedidos.jpg',
+                                'assets/images/pedidos.jpg',
                                 fit: BoxFit.cover,
                               ),
                             ),
