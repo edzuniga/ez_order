@@ -7,7 +7,7 @@ part of 'dashboard_page_index.dart';
 // **************************************************************************
 
 String _$dashboardPageIndexHash() =>
-    r'ca8b23c15933f8448a90d855a326a128cc8b05d2';
+    r'c1683382f632b1b940d1b81c5a43c294701a16dc';
 
 /// See also [DashboardPageIndex].
 @ProviderFor(DashboardPageIndex)

@@ -38,6 +38,7 @@ class MyApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       title: 'EZOrder',
       theme: ThemeData(
+        dialogBackgroundColor: Colors.transparent,
         colorScheme:
             ColorScheme.fromSeed(seedColor: AppColors.kGeneralPrimaryOrange),
         useMaterial3: true,

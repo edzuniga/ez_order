@@ -11,7 +11,7 @@ class AuthManager extends _$AuthManager {
   }
 
   SupabaseClient getSupabaseInstance() {
-    return ref.watch(supabaseInstanceProvider);
+    return ref.watch(supabaseManagementProvider);
   }
 
   //Check auth status

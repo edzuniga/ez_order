@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:ez_order_ezr/presentation/dashboard/modals/add_menu_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -44,7 +45,9 @@ class _AgregarPedidoViewState extends State<AgregarPedidoView> {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        await _addMenuModal();
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.kTextPrimaryBlack,
                         shape: RoundedRectangleBorder(
@@ -342,6 +345,7 @@ class _AgregarPedidoViewState extends State<AgregarPedidoView> {
                   ),
                   const Gap(10),
                   Expanded(
+                    flex: 1,
                     child: ListView.builder(
                       itemCount: 5,
                       itemBuilder: (ctx, index) {
@@ -465,5 +469,18 @@ class _AgregarPedidoViewState extends State<AgregarPedidoView> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _addMenuModal() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.white.withOpacity(0),
+      builder: (_) => const Dialog(
+        elevation: 8,
+        backgroundColor: Colors.transparent,
+        child: AgregarMenuModal(),
+      ),
+    );
   }
 }
