@@ -9,6 +9,7 @@ class MenuItemModel extends MenuItem {
     super.img,
     required super.precio,
     required super.nombreItem,
+    required super.idRestaurante,
   });
 
   factory MenuItemModel.fromJson(Map<String, dynamic> json) {
@@ -18,8 +19,9 @@ class MenuItemModel extends MenuItem {
       descripcion: json["descripcion"],
       otraInfo: json["otra_info"],
       img: json["img"],
-      precio: json["precio"],
+      precio: double.tryParse(json["precio"].toString())!,
       nombreItem: json["nombre_item"],
+      idRestaurante: json["id_restaurante"],
     );
   }
 
@@ -31,25 +33,29 @@ class MenuItemModel extends MenuItem {
       "img": img,
       "precio": precio,
       "nombre_item": nombreItem,
+      "id_restaurante": idRestaurante,
     };
   }
 
   MenuItemModel copyWith({
-    String? idMenu,
+    int? idMenu,
     String? numMenu,
     String? descripcion,
     String? otraInfo,
     String? img,
     double? precio,
     String? nombreItem,
+    int? idRestaurante,
   }) {
     return MenuItemModel(
       idMenu: idMenu ?? this.idMenu,
       numMenu: numMenu ?? this.numMenu,
       descripcion: descripcion ?? this.descripcion,
       otraInfo: otraInfo ?? this.otraInfo,
+      img: img ?? this.img,
       precio: precio ?? this.precio,
       nombreItem: nombreItem ?? this.nombreItem,
+      idRestaurante: idRestaurante ?? this.idRestaurante,
     );
   }
 }

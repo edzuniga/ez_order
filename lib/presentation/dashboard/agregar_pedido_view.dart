@@ -1,22 +1,45 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:ez_order_ezr/presentation/dashboard/modals/add_menu_modal.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/menu_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/data/menu_item_model.dart';
+import 'package:ez_order_ezr/presentation/dashboard/modals/add_menu_modal.dart';
+import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 
-class AgregarPedidoView extends StatefulWidget {
+class AgregarPedidoView extends ConsumerStatefulWidget {
   const AgregarPedidoView({super.key});
 
   @override
-  State<AgregarPedidoView> createState() => _AgregarPedidoViewState();
+  ConsumerState<AgregarPedidoView> createState() => _AgregarPedidoViewState();
 }
 
-class _AgregarPedidoViewState extends State<AgregarPedidoView> {
+class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
+  late SupabaseClient _supabase;
+  late SupabaseStreamBuilder _stream;
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _pedidoListController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(menuItemPedidoListProvider.notifier).resetMenuItem();
+    _supabase = ref.read(supabaseManagementProvider);
+    _stream = _supabase
+        .from('menus')
+        .stream(primaryKey: ['id_menu'])
+        .eq('id_restaurante', 1)
+        .order('nombre_item', ascending: true);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final listadoPedido = ref.watch(menuItemPedidoListProvider);
     return Row(
       children: [
         Expanded(
@@ -125,94 +148,195 @@ class _AgregarPedidoViewState extends State<AgregarPedidoView> {
                 ),
                 const Gap(5),
                 Expanded(
-                  child: GridView.builder(
-                    itemCount: 25,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 10.0,
-                      mainAxisSpacing: 10.0,
-                      childAspectRatio: 0.75,
-                    ),
-                    itemBuilder: (ctx, index) {
-                      return Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8.0),
-                          border: Border.all(
-                            color: const Color(0xFFC6C6C6),
-                            width: 1.0,
+                  child: StreamBuilder(
+                    stream: _stream,
+                    builder: (BuildContext context,
+                        AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(),
+                              Text('Cargando datos, por favor espere.'),
+                            ],
                           ),
-                        ),
-                        child: ListView(
-                          //crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            //Imagen del plato
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: const AspectRatio(
-                                aspectRatio: 2.15,
-                                child: SizedBox(
-                                  child: Placeholder(),
-                                ),
-                              ),
+                        );
+                      }
+
+                      if (snapshot.hasError) {
+                        return const Center(
+                          child: Text(
+                              'Ocurrió un error al querer cargar el menú!!'),
+                        );
+                      }
+
+                      if (!snapshot.hasData) {
+                        return const Center(
+                          child:
+                              Text('Aún no hay pedidos para el día de hoy!!'),
+                        );
+                      } else {
+                        List<Map<String, dynamic>> listadoMap = snapshot.data!;
+                        List<MenuItemModel> listadoMenuItems = [];
+                        for (var element in listadoMap) {
+                          listadoMenuItems.add(MenuItemModel.fromJson(element));
+                        }
+                        return RefreshIndicator(
+                          onRefresh: () async {
+                            await Future.delayed(const Duration(seconds: 2))
+                                .then((value) => setState(() {}));
+                          },
+                          child: GridView.builder(
+                            itemCount: listadoMenuItems.length,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 10.0,
+                              mainAxisSpacing: 10.0,
+                              childAspectRatio: 0.85,
                             ),
-                            const Gap(10),
-                            //Nombre del producto y correlativo
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: AutoSizeText(
-                                    'Nombre del producto ',
-                                    textAlign: TextAlign.start,
-                                    maxLines: 2,
-                                    style: GoogleFonts.inter(
-                                      height: 1,
-                                      fontSize: 14.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.w700,
+                            itemBuilder: (ctx, index) {
+                              MenuItemModel itemMenu = listadoMenuItems[index];
+                              return InkWell(
+                                onTap: () {
+                                  if (_tryToAddPedidoItem(itemMenu)) {
+                                    //Desplazarse hasta el final
+                                    _pedidoListController.animateTo(
+                                      _pedidoListController
+                                              .position.maxScrollExtent +
+                                          120,
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      curve: Curves.easeOut,
+                                    );
+                                  }
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    border: Border.all(
+                                      color: const Color(0xFFC6C6C6),
+                                      width: 1.0,
                                     ),
                                   ),
-                                ),
-                                const Gap(5),
-                                Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.kTextSecondaryGray,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    shape: BoxShape.rectangle,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      //Imagen del plato
+                                      ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        child: AspectRatio(
+                                          aspectRatio: 2.15,
+                                          child: SizedBox(
+                                            child: Image.network(
+                                              loadingBuilder: (context, child,
+                                                  loadingProgress) {
+                                                if (loadingProgress == null) {
+                                                  return child;
+                                                } else {
+                                                  return Center(
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      value: loadingProgress
+                                                                  .expectedTotalBytes !=
+                                                              null
+                                                          ? loadingProgress
+                                                                  .cumulativeBytesLoaded /
+                                                              (loadingProgress
+                                                                      .expectedTotalBytes ??
+                                                                  1)
+                                                          : null,
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                              errorBuilder: (context, error,
+                                                      stackTrace) =>
+                                                  const Center(
+                                                child: Text(
+                                                    'Error al querer cargar imagen'),
+                                              ),
+                                              itemMenu.img.toString(),
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const Gap(10),
+                                      //Nombre del producto y correlativo
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: AutoSizeText(
+                                              '${itemMenu.nombreItem} ',
+                                              textAlign: TextAlign.start,
+                                              maxLines: 2,
+                                              style: GoogleFonts.inter(
+                                                height: 1,
+                                                fontSize: 14.0,
+                                                letterSpacing: 0.0,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ),
+                                          const Gap(5),
+                                          Container(
+                                            padding: const EdgeInsets.all(4),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFE0E3E7),
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                              shape: BoxShape.rectangle,
+                                            ),
+                                            child: Text(
+                                              itemMenu.numMenu,
+                                              style: const TextStyle(
+                                                  color: AppColors
+                                                      .kTextSecondaryGray),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const Gap(5),
+                                      //Descripción del producto
+                                      Text(
+                                        'Descripción del producto:',
+                                        style: GoogleFonts.inter(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: AutoSizeText(
+                                          itemMenu.descripcion,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 12,
+                                            color: AppColors.kTextSecondaryGray,
+                                          ),
+                                        ),
+                                      ),
+                                      //Otra información relevante del producto
+                                      Text(
+                                        itemMenu.otraInfo,
+                                        style: GoogleFonts.inter(
+                                          fontSize: 10,
+                                          color:
+                                              AppColors.kGeneralPrimaryOrange,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  child: Text(
-                                    '${index + 1}',
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
                                 ),
-                              ],
-                            ),
-                            const Gap(5),
-                            //Descripción del producto
-                            const Text('Descripción del producto:'),
-                            Expanded(
-                              child: AutoSizeText(
-                                '1 Chuleta con tajadas de plátano, salsa agridulce, chismol, 1 chorizo barbacoa y 3 tortillas.\n*Viene con refresco incluido.',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  color: AppColors.kTextSecondaryGray,
-                                ),
-                              ),
-                            ),
-                            //Otra información relevante del producto
-                            Text(
-                              'Otra información opcional',
-                              style: GoogleFonts.inter(
-                                fontSize: 10,
-                                color: AppColors.kGeneralPrimaryOrange,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
+                              );
+                            },
+                          ),
+                        );
+                      }
                     },
                   ),
                 ),
@@ -344,11 +468,14 @@ class _AgregarPedidoViewState extends State<AgregarPedidoView> {
                     color: AppColors.kTextSecondaryGray,
                   ),
                   const Gap(10),
+                  //Área para agregar producto al pedido
                   Expanded(
                     flex: 1,
                     child: ListView.builder(
-                      itemCount: 5,
+                      controller: _pedidoListController,
+                      itemCount: listadoPedido.length,
                       itemBuilder: (ctx, index) {
+                        MenuItemModel itemPedido = listadoPedido[index];
                         return SizedBox(
                           width: double.infinity,
                           child: Column(
@@ -360,10 +487,13 @@ class _AgregarPedidoViewState extends State<AgregarPedidoView> {
                                   ClipRRect(
                                     clipBehavior: Clip.hardEdge,
                                     borderRadius: BorderRadius.circular(8),
-                                    child: const SizedBox(
+                                    child: SizedBox(
                                       width: 80,
                                       height: 40,
-                                      child: Placeholder(),
+                                      child: Image.network(
+                                        itemPedido.img!,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
                                   const Gap(5),
@@ -374,7 +504,7 @@ class _AgregarPedidoViewState extends State<AgregarPedidoView> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Nombre del producto',
+                                          itemPedido.nombreItem,
                                           style: GoogleFonts.inter(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700),
@@ -386,7 +516,7 @@ class _AgregarPedidoViewState extends State<AgregarPedidoView> {
                                             Text('Precio:',
                                                 style: GoogleFonts.inter(
                                                     fontSize: 10)),
-                                            Text('L 250.00',
+                                            Text(itemPedido.precio.toString(),
                                                 style: GoogleFonts.inter(
                                                     fontSize: 10)),
                                           ],
@@ -403,7 +533,14 @@ class _AgregarPedidoViewState extends State<AgregarPedidoView> {
                                   Transform.scale(
                                     scale: 0.8,
                                     child: IconButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          setState(() {
+                                            ref
+                                                .read(menuItemPedidoListProvider
+                                                    .notifier)
+                                                .removeMenuItem(itemPedido);
+                                          });
+                                        },
                                         style: IconButton.styleFrom(
                                           backgroundColor:
                                               AppColors.kGeneralErrorColor,
@@ -468,6 +605,7 @@ class _AgregarPedidoViewState extends State<AgregarPedidoView> {
   @override
   void dispose() {
     _searchController.dispose();
+    _pedidoListController.dispose();
     super.dispose();
   }
 
@@ -482,5 +620,29 @@ class _AgregarPedidoViewState extends State<AgregarPedidoView> {
         child: AgregarMenuModal(),
       ),
     );
+  }
+
+  bool _tryToAddPedidoItem(MenuItemModel itemMenu) {
+    final listadoPedido = ref.read(menuItemPedidoListProvider);
+    bool containsWhere =
+        listadoPedido.any((element) => element.idMenu == itemMenu.idMenu);
+    if (!containsWhere) {
+      ref.read(menuItemPedidoListProvider.notifier).addMenuItem(itemMenu);
+      return true;
+    } else {
+      Fluttertoast.cancel();
+      Fluttertoast.showToast(
+        msg: 'Este producto ya está agregado!!',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 3,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+        webPosition: 'center',
+        webBgColor: 'red',
+      );
+      return false;
+    }
   }
 }
