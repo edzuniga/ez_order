@@ -1,5 +1,4 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:ez_order_ezr/presentation/providers/menus_providers/menu_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -7,6 +6,11 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/presentation/providers/menus_providers/pedido_detalles_provider.dart';
+import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
+import 'package:ez_order_ezr/data/pedido_model.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/menu_provider.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/pedido_actual_provider.dart';
 import 'package:ez_order_ezr/data/menu_item_model.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/add_menu_modal.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
@@ -28,7 +32,11 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
   @override
   void initState() {
     super.initState();
-    ref.read(menuItemPedidoListProvider.notifier).resetMenuItem();
+    //Ejecutar los siguiente después que se haya montado el árbol de widgets
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      //ref.read(menuItemPedidoListProvider.notifier).resetMenuItem();
+      ref.read(menuItemPedidoListProvider.notifier).hacerCalculosDelPedido();
+    });
     _supabase = ref.read(supabaseManagementProvider);
     _stream = _supabase
         .from('menus')
@@ -40,6 +48,9 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
   @override
   Widget build(BuildContext context) {
     final listadoPedido = ref.watch(menuItemPedidoListProvider);
+    PedidoModel pedidoActualInfo = ref.watch(pedidoActualProvider);
+    List<PedidoDetalleModel> pedidoDetallesList =
+        ref.watch(pedidoDetallesManagementProvider);
     return Row(
       children: [
         Expanded(
@@ -205,7 +216,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                     _pedidoListController.animateTo(
                                       _pedidoListController
                                               .position.maxScrollExtent +
-                                          120,
+                                          100,
                                       duration:
                                           const Duration(milliseconds: 300),
                                       curve: Curves.easeOut,
@@ -358,6 +369,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
               child: Column(
                 children: [
+                  //Área de orden de cliente
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -365,113 +377,17 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                         'Orden Actual',
                         style: GoogleFonts.inter(fontWeight: FontWeight.w700),
                       ),
-                      const Text('#00233'),
-                    ],
-                  ),
-                  const Gap(10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Cliente:',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.w700),
-                      ),
-                      const Text('Juan Carlos Jiménez'),
-                    ],
-                  ),
-                  const Gap(15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.circle_outlined,
-                        color: AppColors.kTextSecondaryGray,
-                        size: 8,
-                      ),
-                      const Gap(5),
-                      Text(
-                        'Descuento:',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                        ),
-                      ),
-                      const Spacer(),
-                      const Text('L 240.00'),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.circle_outlined,
-                        color: AppColors.kTextSecondaryGray,
-                        size: 8,
-                      ),
-                      const Gap(5),
-                      Text(
-                        'ISV (15%):',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                        ),
-                      ),
-                      const Spacer(),
-                      const Text('L 240.00'),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.check,
-                        color: AppColors.kTextSecondaryGray,
-                        size: 20,
-                      ),
-                      const Gap(5),
-                      Text(
-                        'Subtotal:',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                        ),
-                      ),
-                      const Spacer(),
-                      const Text('L 240.00'),
+                      Text('# ${pedidoActualInfo.orden}'),
                     ],
                   ),
                   const Divider(
-                    color: AppColors.kTextSecondaryGray,
+                    color: Colors.black,
                   ),
-                  const Gap(10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.kGeneralPrimaryOrange,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          )),
-                      child: Text(
-                        'Confirmar orden',
-                        style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w400,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Gap(10),
-                  const Divider(
-                    color: AppColors.kTextSecondaryGray,
-                  ),
-                  const Gap(10),
                   //Área para agregar producto al pedido
                   Expanded(
                     flex: 1,
                     child: ListView.builder(
+                      physics: const ClampingScrollPhysics(),
                       controller: _pedidoListController,
                       itemCount: listadoPedido.length,
                       itemBuilder: (ctx, index) {
@@ -526,7 +442,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                   ),
                                 ],
                               ),
-                              const Gap(8),
+                              const Gap(3),
                               //Botones de remover, cantidad de producto
                               Row(
                                 children: [
@@ -544,6 +460,8 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                         style: IconButton.styleFrom(
                                           backgroundColor:
                                               AppColors.kGeneralErrorColor,
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
                                         ),
                                         icon: const Icon(
                                           Icons.delete_forever,
@@ -554,10 +472,40 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                   Transform.scale(
                                     scale: 0.8,
                                     child: IconButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          if (pedidoDetallesList
+                                                  .firstWhere((element) =>
+                                                      element.idMenu ==
+                                                      itemPedido.idMenu!)
+                                                  .cantidad >
+                                              1) {
+                                            ref
+                                                .read(
+                                                    pedidoDetallesManagementProvider
+                                                        .notifier)
+                                                .decrementarCantidad(
+                                                    itemPedido.idMenu!);
+                                          } else {
+                                            Fluttertoast.cancel();
+                                            Fluttertoast.showToast(
+                                              msg:
+                                                  'No puede dejar en 0 el producto!!',
+                                              toastLength: Toast.LENGTH_LONG,
+                                              gravity: ToastGravity.CENTER,
+                                              timeInSecForIosWeb: 3,
+                                              backgroundColor: Colors.red,
+                                              textColor: Colors.white,
+                                              fontSize: 16.0,
+                                              webPosition: 'center',
+                                              webBgColor: 'red',
+                                            );
+                                          }
+                                        },
                                         style: IconButton.styleFrom(
                                           backgroundColor:
                                               const Color(0xFFEE8A64),
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
                                         ),
                                         icon: const Icon(
                                           Icons.remove,
@@ -565,15 +513,26 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                         )),
                                   ),
                                   const Gap(8),
-                                  const Text('1'),
+                                  Text((pedidoDetallesList.isNotEmpty)
+                                      ? '${pedidoDetallesList.firstWhere((element) => element.idMenu == itemPedido.idMenu!).cantidad}'
+                                      : '0'),
                                   const Gap(8),
                                   Transform.scale(
                                     scale: 0.8,
                                     child: IconButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          ref
+                                              .read(
+                                                  pedidoDetallesManagementProvider
+                                                      .notifier)
+                                              .incrementarCantidad(
+                                                  itemPedido.idMenu!);
+                                        },
                                         style: IconButton.styleFrom(
                                           backgroundColor:
                                               const Color(0xFFEE8A64),
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
                                         ),
                                         icon: const Icon(
                                           Icons.add,
@@ -582,15 +541,200 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                   ),
                                 ],
                               ),
-                              const Gap(8),
+                              const Gap(1),
                               const Divider(
-                                color: AppColors.kTextSecondaryGray,
+                                color: Color(0xFFE0E3E7),
                               ),
-                              const Gap(8),
+                              const Gap(3),
                             ],
                           ),
                         );
                       },
+                    ),
+                  ),
+                  const Divider(
+                    color: Colors.black,
+                  ),
+                  //Área de Subtotal
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.circle_outlined,
+                        color: AppColors.kTextSecondaryGray,
+                        size: 8,
+                      ),
+                      const Gap(5),
+                      Text(
+                        'Subtotal:',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        'L ${pedidoActualInfo.subtotal}',
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                    ],
+                  ),
+                  //Área de Exonerado
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.circle_outlined,
+                        color: AppColors.kTextSecondaryGray,
+                        size: 8,
+                      ),
+                      const Gap(5),
+                      Text(
+                        'Importe exonerado:',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        'L ${pedidoActualInfo.importeExonerado}',
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                    ],
+                  ),
+                  //Área de Exento
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.circle_outlined,
+                        color: AppColors.kTextSecondaryGray,
+                        size: 8,
+                      ),
+                      const Gap(5),
+                      Text(
+                        'Importe exento:',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        'L ${pedidoActualInfo.importeExento}',
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                    ],
+                  ),
+                  //Área de Gravado
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.circle_outlined,
+                        color: AppColors.kTextSecondaryGray,
+                        size: 8,
+                      ),
+                      const Gap(5),
+                      Text(
+                        'Importe gravado:',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        'L ${pedidoActualInfo.importeGravado}',
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                    ],
+                  ),
+                  //Área de descuento
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.circle_outlined,
+                        color: AppColors.kTextSecondaryGray,
+                        size: 8,
+                      ),
+                      const Gap(5),
+                      Text(
+                        'Descuento:',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10,
+                        ),
+                      ),
+                      Transform.scale(
+                        scale: 0.5,
+                        child: Padding(
+                          padding: EdgeInsets.zero,
+                          child: IconButton(
+                            onPressed: () {},
+                            constraints: const BoxConstraints(),
+                            padding: EdgeInsets.zero,
+                            style: IconButton.styleFrom(
+                              backgroundColor: Colors.blueGrey,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            icon: const Icon(
+                              Icons.add,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        'L ${pedidoActualInfo.descuento}',
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                    ],
+                  ),
+                  //Área de ISV
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.circle_outlined,
+                        color: AppColors.kTextSecondaryGray,
+                        size: 8,
+                      ),
+                      const Gap(5),
+                      Text(
+                        'ISV (15%):',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        'L ${pedidoActualInfo.impuestos}',
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.kGeneralPrimaryOrange,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          )),
+                      child: Text(
+                        'Confirmar orden por L ${pedidoActualInfo.total}',
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w400,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                   ),
                 ],
