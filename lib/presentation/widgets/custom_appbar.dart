@@ -2,6 +2,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:ez_order_ezr/presentation/config/routes.dart';
 import 'package:ez_order_ezr/presentation/providers/auth_supabase_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -21,6 +22,7 @@ class CustomAppBar extends ConsumerStatefulWidget {
 
 class _CustomAppBarState extends ConsumerState<CustomAppBar> {
   bool _tryingLogout = false;
+  bool _isFullScreen = false;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +44,30 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
             ),
           ),
           const Spacer(),
+          IconButton(
+            onPressed: () {
+              if (!_isFullScreen) {
+                setState(() {
+                  _isFullScreen = true;
+                  SystemChrome.setEnabledSystemUIMode(
+                      SystemUiMode.immersiveSticky);
+                });
+              } else {
+                setState(() {
+                  _isFullScreen = false;
+                  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+                });
+              }
+            },
+            tooltip: '¿Pantalla completa?',
+            style: IconButton.styleFrom(
+                backgroundColor: AppColors.kIconGrayishIcon),
+            icon: Icon(
+              !_isFullScreen ? Icons.fullscreen : Icons.fullscreen_exit,
+              color: Colors.white,
+            ),
+          ),
+          const Gap(10),
           OutlinedButton.icon(
             onPressed: () {
               context.pushNamed(Routes.cocina);

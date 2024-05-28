@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -14,14 +13,15 @@ import 'package:ez_order_ezr/data/menu_item_model.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 
-class AgregarMenuModal extends ConsumerStatefulWidget {
-  const AgregarMenuModal({super.key});
+class UpdateMenuModal extends ConsumerStatefulWidget {
+  const UpdateMenuModal({required this.itemMenu, super.key});
+  final MenuItemModel itemMenu;
 
   @override
-  ConsumerState<AgregarMenuModal> createState() => _AgregarMenuModalState();
+  ConsumerState<UpdateMenuModal> createState() => _UpdateMenuModalState();
 }
 
-class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
+class _UpdateMenuModalState extends ConsumerState<UpdateMenuModal> {
   final GlobalKey<FormState> _agregarMenuKey = GlobalKey<FormState>();
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _precioController = TextEditingController();
@@ -33,6 +33,44 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
   bool _vaParaCocinaSelected = true;
   File? _selectedImage;
   bool _isTryingUpload = false;
+  late final String _imgUrl;
+  late Widget imagenDisplay;
+
+  @override
+  void initState() {
+    super.initState();
+    _nombreController.text = widget.itemMenu.nombreItem;
+    _precioController.text = widget.itemMenu.precio.toString();
+    _descripcionController.text = widget.itemMenu.descripcion;
+    _correlativoController.text = widget.itemMenu.numMenu;
+    _informacionAdicionalController.text = widget.itemMenu.otraInfo;
+    _vaParaCocinaSelected = widget.itemMenu.vaParaCocina;
+    _precioIncluyeIsvSelected = widget.itemMenu.precioIncluyeIsv;
+    _imgUrl = widget.itemMenu.img!;
+    imagenDisplay = Image.network(
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) {
+          return child;
+        } else {
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      (loadingProgress.expectedTotalBytes ?? 1)
+                  : null,
+            ),
+          );
+        }
+      },
+      errorBuilder: (context, error, stackTrace) => const Center(
+        child: Text('Error al querer cargar imagen'),
+      ),
+      _imgUrl.toString(),
+      width: double.infinity,
+      height: 233.0,
+      fit: BoxFit.cover,
+    );
+  }
 
   @override
   void dispose() {
@@ -43,13 +81,6 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
     _informacionAdicionalController.dispose();
     super.dispose();
   }
-
-  Widget imagenDisplay = Image.asset(
-    'assets/images/pedidos.jpg',
-    width: double.infinity,
-    height: 233.0,
-    fit: BoxFit.cover,
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -487,42 +518,29 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                                   onPressed: () async {
                                     if (_agregarMenuKey.currentState!
                                         .validate()) {
-                                      if (_selectedImage != null) {
-                                        final menuItem = MenuItemModel(
-                                          numMenu: _correlativoController.text,
-                                          descripcion:
-                                              _descripcionController.text,
-                                          otraInfo:
-                                              _informacionAdicionalController
-                                                  .text,
-                                          img: _selectedImage!.path,
-                                          precio: double.parse(
-                                              _precioController.text),
-                                          nombreItem: _nombreController.text,
-                                          idRestaurante: int.parse(ref
-                                              .read(userPublicDataProvider)[
-                                                  'id_restaurante']
-                                              .toString()),
-                                          precioIncluyeIsv:
-                                              _precioIncluyeIsvSelected,
-                                          vaParaCocina: _vaParaCocinaSelected,
-                                        );
-                                        await _tryAddMenu(menuItem);
-                                      } else {
-                                        Fluttertoast.cancel();
-                                        Fluttertoast.showToast(
-                                          msg:
-                                              'Debe proveer de una imagen para el producto',
-                                          toastLength: Toast.LENGTH_LONG,
-                                          gravity: ToastGravity.CENTER,
-                                          timeInSecForIosWeb: 3,
-                                          backgroundColor: Colors.red,
-                                          textColor: Colors.white,
-                                          fontSize: 16.0,
-                                          webPosition: 'center',
-                                          webBgColor: 'red',
-                                        );
-                                      }
+                                      final menuItem = MenuItemModel(
+                                        idMenu: widget.itemMenu.idMenu,
+                                        numMenu: _correlativoController.text,
+                                        descripcion:
+                                            _descripcionController.text,
+                                        otraInfo:
+                                            _informacionAdicionalController
+                                                .text,
+                                        img: _selectedImage != null
+                                            ? _selectedImage!.path
+                                            : widget.itemMenu.img,
+                                        precio: double.parse(
+                                            _precioController.text),
+                                        nombreItem: _nombreController.text,
+                                        idRestaurante: int.parse(ref
+                                            .read(userPublicDataProvider)[
+                                                'id_restaurante']
+                                            .toString()),
+                                        precioIncluyeIsv:
+                                            _precioIncluyeIsvSelected,
+                                        vaParaCocina: _vaParaCocinaSelected,
+                                      );
+                                      await _tryUpdateMenu(menuItem);
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -533,7 +551,7 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                                     ),
                                   ),
                                   child: Text(
-                                    'Agregar producto',
+                                    'Actualizar producto',
                                     style: GoogleFonts.inter(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,
@@ -553,12 +571,12 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
           );
   }
 
-  Future<void> _tryAddMenu(MenuItemModel menuItemModel) async {
+  Future<void> _tryUpdateMenu(MenuItemModel menuItemModel) async {
     //llamar la única instancia de supabase
     final supabaseClient = ref.read(supabaseManagementProvider.notifier);
     setState(() => _isTryingUpload = true);
     await supabaseClient
-        .addMenuItem(menuItemModel, _selectedImage!)
+        .updateMenuItem(menuItemModel, _selectedImage)
         .then((message) {
       setState(() => _isTryingUpload = false);
       if (message == 'success') {

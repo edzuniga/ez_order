@@ -8,6 +8,8 @@ abstract class MenuItem {
     required this.precio,
     required this.nombreItem,
     required this.idRestaurante,
+    required this.precioIncluyeIsv,
+    required this.vaParaCocina,
   });
 
   final int? idMenu;
@@ -18,4 +20,6 @@ abstract class MenuItem {
   final double precio;
   final String nombreItem;
   final int idRestaurante;
+  final bool precioIncluyeIsv;
+  final bool vaParaCocina;
 }

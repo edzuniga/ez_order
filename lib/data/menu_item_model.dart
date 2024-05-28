@@ -10,6 +10,8 @@ class MenuItemModel extends MenuItem {
     required super.precio,
     required super.nombreItem,
     required super.idRestaurante,
+    required super.precioIncluyeIsv,
+    required super.vaParaCocina,
   });
 
   factory MenuItemModel.fromJson(Map<String, dynamic> json) {
@@ -22,6 +24,8 @@ class MenuItemModel extends MenuItem {
       precio: double.tryParse(json["precio"].toString())!,
       nombreItem: json["nombre_item"],
       idRestaurante: json["id_restaurante"],
+      precioIncluyeIsv: json["precio_incluye_isv"],
+      vaParaCocina: json["va_para_cocina"],
     );
   }
 
@@ -34,6 +38,8 @@ class MenuItemModel extends MenuItem {
       "precio": precio,
       "nombre_item": nombreItem,
       "id_restaurante": idRestaurante,
+      "precio_incluye_isv": precioIncluyeIsv,
+      "va_para_cocina": vaParaCocina,
     };
   }
 
@@ -46,6 +52,8 @@ class MenuItemModel extends MenuItem {
     double? precio,
     String? nombreItem,
     int? idRestaurante,
+    bool? precioIncluyeIsv,
+    bool? vaParaCocina,
   }) {
     return MenuItemModel(
       idMenu: idMenu ?? this.idMenu,
@@ -56,6 +64,8 @@ class MenuItemModel extends MenuItem {
       precio: precio ?? this.precio,
       nombreItem: nombreItem ?? this.nombreItem,
       idRestaurante: idRestaurante ?? this.idRestaurante,
+      precioIncluyeIsv: precioIncluyeIsv ?? this.precioIncluyeIsv,
+      vaParaCocina: vaParaCocina ?? this.vaParaCocina,
     );
   }
 }
