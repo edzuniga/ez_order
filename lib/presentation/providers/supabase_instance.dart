@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'package:ez_order_ezr/data/cliente_modelo.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/cliente_actual_provider.dart';
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:path/path.dart' as p;
 import 'package:ez_order_ezr/data/menu_item_model.dart';
 import 'package:random_string/random_string.dart';
@@ -110,6 +113,50 @@ class SupabaseManagement extends _$SupabaseManagement {
       await state
           .from('menus')
           .update({'activo': false}).eq('id_menu', menuItemId);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return e.message;
+    }
+  }
+
+  //Obtener todos los clientes - filtrados por el id del restaurante
+  Future<List<ClienteModelo>> obtenerClientesPorIdRestaurante(
+      String filtro) async {
+    int currentIdRestaurante =
+        int.parse(ref.read(userPublicDataProvider)['id_restaurante']!);
+    try {
+      List<Map<String, dynamic>> resMap = [];
+      if (filtro.isEmpty) {
+        resMap = await state
+            .from('clientes')
+            .select()
+            .eq('id_restaurante', currentIdRestaurante)
+            .order('nombre_cliente', ascending: true);
+      } else {
+        resMap = await state
+            .from('clientes')
+            .select()
+            .eq('id_restaurante', currentIdRestaurante)
+            .contains('nombre_cliente', filtro)
+            .order('nombre_cliente', ascending: true);
+      }
+
+      List<ClienteModelo> listadoClientesModelo = [];
+      listadoClientesModelo.add(ref.read(clientePedidoActualProvider));
+      for (var element in resMap) {
+        listadoClientesModelo.add(ClienteModelo.fromJson(element));
+      }
+      return listadoClientesModelo;
+    } on PostgrestException catch (e) {
+      throw 'Error al querer cargar clientes: ${e.message}';
+    }
+  }
+
+  //Agregar un cliente nuevo
+  Future<String> agregarCliente(ClienteModelo cliente) async {
+    Map<String, dynamic> mapaCliente = cliente.toJson();
+    try {
+      await state.from('clientes').insert(mapaCliente);
       return 'success';
     } on PostgrestException catch (e) {
       return e.message;

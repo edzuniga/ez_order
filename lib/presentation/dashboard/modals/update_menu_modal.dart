@@ -24,7 +24,8 @@ class UpdateMenuModal extends ConsumerStatefulWidget {
 class _UpdateMenuModalState extends ConsumerState<UpdateMenuModal> {
   final GlobalKey<FormState> _agregarMenuKey = GlobalKey<FormState>();
   final TextEditingController _nombreController = TextEditingController();
-  final TextEditingController _precioController = TextEditingController();
+  final TextEditingController _precioSinIsvController = TextEditingController();
+  final TextEditingController _precioConIsvController = TextEditingController();
   final TextEditingController _descripcionController = TextEditingController();
   final TextEditingController _correlativoController = TextEditingController();
   final TextEditingController _informacionAdicionalController =
@@ -40,7 +41,8 @@ class _UpdateMenuModalState extends ConsumerState<UpdateMenuModal> {
   void initState() {
     super.initState();
     _nombreController.text = widget.itemMenu.nombreItem;
-    _precioController.text = widget.itemMenu.precio.toString();
+    _precioSinIsvController.text = widget.itemMenu.precioSinIsv.toString();
+    _precioConIsvController.text = widget.itemMenu.precioConIsv.toString();
     _descripcionController.text = widget.itemMenu.descripcion;
     _correlativoController.text = widget.itemMenu.numMenu;
     _informacionAdicionalController.text = widget.itemMenu.otraInfo;
@@ -75,7 +77,8 @@ class _UpdateMenuModalState extends ConsumerState<UpdateMenuModal> {
   @override
   void dispose() {
     _nombreController.dispose();
-    _precioController.dispose();
+    _precioSinIsvController.dispose();
+    _precioConIsvController.dispose();
     _descripcionController.dispose();
     _correlativoController.dispose();
     _informacionAdicionalController.dispose();
@@ -160,13 +163,14 @@ class _UpdateMenuModalState extends ConsumerState<UpdateMenuModal> {
                           children: [
                             Row(
                               children: [
+                                //Nombre del producto
                                 SizedBox(
                                   width: 350,
                                   child: TextFormField(
                                     controller: _nombreController,
                                     autofillHints: const [AutofillHints.name],
                                     decoration: InputDecoration(
-                                      labelText: 'Nombre del plato',
+                                      labelText: 'Nombre del producto',
                                       labelStyle: GoogleFonts.inter(
                                         color: AppColors.kTextPrimaryBlack,
                                       ),
@@ -217,21 +221,19 @@ class _UpdateMenuModalState extends ConsumerState<UpdateMenuModal> {
                                   ),
                                 ),
                                 const Gap(8),
+                                //Correlativo del producto
                                 Expanded(
                                   child: TextFormField(
-                                    controller: _precioController,
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                            decimal: true),
-                                    inputFormatters: <TextInputFormatter>[
-                                      FilteringTextInputFormatter.allow(
-                                          RegExp(r'^\d+\.?\d{0,2}')),
-                                    ],
+                                    controller: _correlativoController,
                                     autofillHints: const [AutofillHints.name],
                                     decoration: InputDecoration(
-                                      labelText: 'Precio',
+                                      labelText: 'Correlativo',
                                       labelStyle: GoogleFonts.inter(
                                         color: AppColors.kTextPrimaryBlack,
+                                      ),
+                                      hintText: 'Ej. 1, a, #1...',
+                                      hintStyle: GoogleFonts.inter(
+                                        color: Colors.black26,
                                       ),
                                       enabledBorder: OutlineInputBorder(
                                         borderSide: const BorderSide(
@@ -285,6 +287,7 @@ class _UpdateMenuModalState extends ConsumerState<UpdateMenuModal> {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                //Descripción del producto
                                 SizedBox(
                                   width: 350,
                                   child: TextFormField(
@@ -349,68 +352,175 @@ class _UpdateMenuModalState extends ConsumerState<UpdateMenuModal> {
                                   ),
                                 ),
                                 const Gap(8),
+                                //Precios
                                 Expanded(
-                                  child: TextFormField(
-                                    controller: _correlativoController,
-                                    autofillHints: const [AutofillHints.name],
-                                    decoration: InputDecoration(
-                                      labelText: 'Correlativo',
-                                      labelStyle: GoogleFonts.inter(
-                                        color: AppColors.kTextPrimaryBlack,
-                                      ),
-                                      hintText: 'Ej. 1, a, #1...',
-                                      hintStyle: GoogleFonts.inter(
-                                        color: Colors.black26,
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                          color: Color(0xFFe0e3e7),
-                                          width: 2.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                          color:
-                                              AppColors.kGeneralPrimaryOrange,
-                                          width: 2.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                          color: AppColors.kGeneralErrorColor,
-                                          width: 2.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      focusedErrorBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                          color: AppColors.kGeneralErrorColor,
-                                          width: 2.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      filled: true,
-                                      fillColor: AppColors.kInputLiteGray,
-                                    ),
-                                    style: GoogleFonts.inter(),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Campo obligatorio';
-                                      }
+                                  child: Column(
+                                    children: [
+                                      //Precio SIN ISV
+                                      SizedBox(
+                                        height: 48,
+                                        child: TextFormField(
+                                          controller: _precioSinIsvController,
+                                          keyboardType: const TextInputType
+                                              .numberWithOptions(decimal: true),
+                                          inputFormatters: <TextInputFormatter>[
+                                            FilteringTextInputFormatter.allow(
+                                                RegExp(r'^\d+\.?\d{0,2}')),
+                                          ],
+                                          autofillHints: const [
+                                            AutofillHints.name
+                                          ],
+                                          decoration: InputDecoration(
+                                            labelText: 'Precio',
+                                            labelStyle: GoogleFonts.inter(
+                                              color:
+                                                  AppColors.kTextPrimaryBlack,
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderSide: const BorderSide(
+                                                color: Color(0xFFe0e3e7),
+                                                width: 2.0,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12.0),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderSide: const BorderSide(
+                                                color: AppColors
+                                                    .kGeneralPrimaryOrange,
+                                                width: 2.0,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12.0),
+                                            ),
+                                            errorBorder: OutlineInputBorder(
+                                              borderSide: const BorderSide(
+                                                color: AppColors
+                                                    .kGeneralErrorColor,
+                                                width: 2.0,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12.0),
+                                            ),
+                                            focusedErrorBorder:
+                                                OutlineInputBorder(
+                                              borderSide: const BorderSide(
+                                                color: AppColors
+                                                    .kGeneralErrorColor,
+                                                width: 2.0,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12.0),
+                                            ),
+                                            filled: true,
+                                            fillColor: AppColors.kInputLiteGray,
+                                          ),
+                                          style: GoogleFonts.inter(),
+                                          onChanged: (v) {
+                                            if (v == '' || v.isEmpty) {
+                                              _precioConIsvController.text =
+                                                  '0.00';
+                                            } else {
+                                              _calcularPrecioDeVenta();
+                                            }
+                                          },
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'Campo obligatorio';
+                                            }
 
-                                      return null;
-                                    },
+                                            return null;
+                                          },
+                                        ),
+                                      ),
+                                      const Gap(10),
+                                      //Precio CON ISV
+                                      SizedBox(
+                                        height: 45,
+                                        child: TextFormField(
+                                          controller: _precioConIsvController,
+                                          enabled: false,
+                                          keyboardType: const TextInputType
+                                              .numberWithOptions(decimal: true),
+                                          inputFormatters: <TextInputFormatter>[
+                                            FilteringTextInputFormatter.allow(
+                                                RegExp(r'^\d+\.?\d{0,2}')),
+                                          ],
+                                          autofillHints: const [
+                                            AutofillHints.name
+                                          ],
+                                          decoration: InputDecoration(
+                                            labelText: 'Precio de venta',
+                                            labelStyle: GoogleFonts.inter(
+                                              color:
+                                                  AppColors.kTextPrimaryBlack,
+                                            ),
+                                            disabledBorder: OutlineInputBorder(
+                                              borderSide: const BorderSide(
+                                                color: Color(0xFFe0e3e7),
+                                                width: 0.5,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12.0),
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderSide: const BorderSide(
+                                                color: Color(0xFFe0e3e7),
+                                                width: 2.0,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12.0),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderSide: const BorderSide(
+                                                color: AppColors
+                                                    .kGeneralPrimaryOrange,
+                                                width: 2.0,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12.0),
+                                            ),
+                                            errorBorder: OutlineInputBorder(
+                                              borderSide: const BorderSide(
+                                                color: AppColors
+                                                    .kGeneralErrorColor,
+                                                width: 2.0,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12.0),
+                                            ),
+                                            focusedErrorBorder:
+                                                OutlineInputBorder(
+                                              borderSide: const BorderSide(
+                                                color: AppColors
+                                                    .kGeneralErrorColor,
+                                                width: 2.0,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12.0),
+                                            ),
+                                            filled: true,
+                                            fillColor: const Color(0xFFe0e3e7),
+                                          ),
+                                          style: GoogleFonts.inter(),
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'Campo obligatorio';
+                                            }
+
+                                            return null;
+                                          },
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                             const Gap(12),
+                            //Información adicional
                             TextFormField(
                               controller: _informacionAdicionalController,
                               autofillHints: const [AutofillHints.name],
@@ -459,34 +569,103 @@ class _UpdateMenuModalState extends ConsumerState<UpdateMenuModal> {
                               style: GoogleFonts.inter(),
                             ),
                             const Gap(12),
+                            //Sección de Cupertino Switches
                             Row(
                               children: [
-                                const Text('¿precio incluye ISV?'),
-                                const Gap(4),
-                                Transform.scale(
-                                  scale: 0.7,
-                                  child: CupertinoSwitch(
-                                    value: _precioIncluyeIsvSelected,
-                                    onChanged: (v) {
-                                      setState(() {
-                                        _precioIncluyeIsvSelected =
-                                            !_precioIncluyeIsvSelected;
-                                      });
-                                    },
+                                Container(
+                                  height: 150,
+                                  width: 180,
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: const Color(0xFFDFE3E7),
+                                      width: 2.0,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(
+                                        Icons.percent,
+                                        color: AppColors.kGeneralPrimaryOrange,
+                                        size: 25,
+                                      ),
+                                      const Gap(10),
+                                      const Text(
+                                        '¿Precio incluye ISV?',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                      const Gap(4),
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Transform.scale(
+                                          scale: 0.7,
+                                          child: CupertinoSwitch(
+                                            value: _precioIncluyeIsvSelected,
+                                            onChanged: (v) {
+                                              setState(() {
+                                                _precioIncluyeIsvSelected =
+                                                    !_precioIncluyeIsvSelected;
+                                                _calcularPrecioDeVenta();
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const Text('¿Es producto para cocina?'),
-                                const Gap(4),
-                                Transform.scale(
-                                  scale: 0.7,
-                                  child: CupertinoSwitch(
-                                    value: _vaParaCocinaSelected,
-                                    onChanged: (v) {
-                                      setState(() {
-                                        _vaParaCocinaSelected =
-                                            !_vaParaCocinaSelected;
-                                      });
-                                    },
+                                const Gap(10),
+                                Container(
+                                  height: 150,
+                                  width: 180,
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: const Color(0xFFDFE3E7),
+                                      width: 2.0,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(
+                                        Icons.soup_kitchen_rounded,
+                                        color: AppColors.kGeneralPrimaryOrange,
+                                        size: 25,
+                                      ),
+                                      const Gap(10),
+                                      const Text(
+                                        '¿Es producto para cocina?',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                      const Gap(4),
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Transform.scale(
+                                          scale: 0.7,
+                                          child: CupertinoSwitch(
+                                            value: _vaParaCocinaSelected,
+                                            onChanged: (v) {
+                                              setState(() {
+                                                _vaParaCocinaSelected =
+                                                    !_vaParaCocinaSelected;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
@@ -529,8 +708,10 @@ class _UpdateMenuModalState extends ConsumerState<UpdateMenuModal> {
                                         img: _selectedImage != null
                                             ? _selectedImage!.path
                                             : widget.itemMenu.img,
-                                        precio: double.parse(
-                                            _precioController.text),
+                                        precioSinIsv: double.parse(
+                                            _precioSinIsvController.text),
+                                        precioConIsv: double.parse(
+                                            _precioConIsvController.text),
                                         nombreItem: _nombreController.text,
                                         idRestaurante: int.parse(ref
                                             .read(userPublicDataProvider)[
@@ -616,5 +797,20 @@ class _UpdateMenuModalState extends ConsumerState<UpdateMenuModal> {
         fit: BoxFit.cover,
       );
     });
+  }
+
+  void _calcularPrecioDeVenta() {
+    if (_precioIncluyeIsvSelected) {
+      _precioConIsvController.text = _precioSinIsvController.text;
+    } else {
+      if (_precioSinIsvController.text.isNotEmpty) {
+        double precioSin =
+            double.tryParse(_precioSinIsvController.text.toString())!;
+        double precioCon = precioSin * 1.15;
+        String precioFinalDeVenta = precioCon.toStringAsFixed(2);
+
+        _precioConIsvController.text = precioFinalDeVenta;
+      }
+    }
   }
 }

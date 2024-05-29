@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:ez_order_ezr/presentation/dashboard/modals/update_menu_modal.dart';
+import 'package:dropdown_search/dropdown_search.dart';
+import 'package:ez_order_ezr/data/cliente_modelo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -7,6 +8,10 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/presentation/dashboard/modals/cliente_modal.dart';
+import 'package:ez_order_ezr/presentation/dashboard/modals/descuento_modal.dart';
+import 'package:ez_order_ezr/presentation/dashboard/modals/update_menu_modal.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/cliente_actual_provider.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/delete_menu_modal.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/pedido_detalles_provider.dart';
@@ -48,10 +53,18 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
         .stream(primaryKey: ['id_menu'])
         .eq('id_restaurante', userIdRestaurante)
         .order('nombre_item', ascending: true);
+    _getClientesForDropdown('');
+  }
+
+  Future<List<ClienteModelo>> _getClientesForDropdown(String filter) async {
+    return await ref
+        .read(supabaseManagementProvider.notifier)
+        .obtenerClientesPorIdRestaurante('');
   }
 
   @override
   Widget build(BuildContext context) {
+    final clienteActual = ref.watch(clientePedidoActualProvider);
     final listadoPedido = ref.watch(menuItemPedidoListProvider);
     PedidoModel pedidoActualInfo = ref.watch(pedidoActualProvider);
     List<PedidoDetalleModel> pedidoDetallesList =
@@ -372,7 +385,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                                         const Color(0xFFFFDFCF),
                                                   ),
                                                   child: Text(
-                                                    'L ${itemMenu.precio}',
+                                                    'L ${itemMenu.precioConIsv}',
                                                     style: const TextStyle(
                                                         fontWeight:
                                                             FontWeight.w700),
@@ -478,13 +491,41 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                 children: [
                   //Área de orden de cliente
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        'Orden Actual',
+                        'Cliente:',
                         style: GoogleFonts.inter(fontWeight: FontWeight.w700),
                       ),
-                      Text('# ${pedidoActualInfo.orden}'),
+                      const Gap(10),
+                      Expanded(
+                        child: DropdownSearch<ClienteModelo>(
+                          asyncItems: (filter) async {
+                            return await _getClientesForDropdown(filter);
+                          },
+                          popupProps: const PopupProps.menu(
+                            showSearchBox: true,
+                          ),
+                          itemAsString: (ClienteModelo c) =>
+                              c.clienteAsString(),
+                          onChanged: (ClienteModelo? data) {
+                            print(data);
+                          },
+                          selectedItem: clienteActual,
+                        ),
+                      ),
+                      //Text(clienteActual.nombreCliente),
+                      Transform.scale(
+                        scale: 0.8,
+                        child: IconButton(
+                            onPressed: () async {
+                              await _showAgregarClienteModal();
+                            },
+                            icon: const Icon(
+                              Icons.add_box_rounded,
+                              color: Colors.blueGrey,
+                            )),
+                      ),
                     ],
                   ),
                   const Divider(
@@ -536,10 +577,12 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text('Precio:',
+                                            Text('Precio sin ISV:',
                                                 style: GoogleFonts.inter(
                                                     fontSize: 10)),
-                                            Text(itemPedido.precio.toString(),
+                                            Text(
+                                                itemPedido.precioSinIsv
+                                                    .toString(),
                                                 style: GoogleFonts.inter(
                                                     fontSize: 10)),
                                           ],
@@ -780,7 +823,9 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                         child: Padding(
                           padding: EdgeInsets.zero,
                           child: IconButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              await _addDescuentoModal();
+                            },
                             constraints: const BoxConstraints(),
                             padding: EdgeInsets.zero,
                             style: IconButton.styleFrom(
@@ -873,6 +918,19 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
     );
   }
 
+  Future<void> _addDescuentoModal() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.white.withOpacity(0),
+      builder: (_) => const Dialog(
+        elevation: 8,
+        backgroundColor: Colors.transparent,
+        child: DescuentoModal(),
+      ),
+    );
+  }
+
   Future<void> _updateMenuModal(MenuItemModel itemMenu) async {
     showDialog(
       context: context,
@@ -921,5 +979,18 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
       );
       return false;
     }
+  }
+
+  Future<void> _showAgregarClienteModal() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.white.withOpacity(0),
+      builder: (_) => const Dialog(
+        elevation: 8,
+        backgroundColor: Colors.transparent,
+        child: ClienteModal(),
+      ),
+    );
   }
 }

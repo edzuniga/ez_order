@@ -5,7 +5,8 @@ abstract class MenuItem {
     required this.descripcion,
     required this.otraInfo,
     this.img,
-    required this.precio,
+    required this.precioSinIsv,
+    required this.precioConIsv,
     required this.nombreItem,
     required this.idRestaurante,
     required this.precioIncluyeIsv,
@@ -17,7 +18,8 @@ abstract class MenuItem {
   final String descripcion;
   final String otraInfo;
   final String? img;
-  final double precio;
+  final double precioSinIsv;
+  final double precioConIsv;
   final String nombreItem;
   final int idRestaurante;
   final bool precioIncluyeIsv;

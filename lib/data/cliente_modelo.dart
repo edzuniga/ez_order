@@ -17,7 +17,9 @@ class ClienteModelo extends Cliente {
       rtnCliente: json["rtn_cliente"],
       nombreCliente: json["nombre_cliente"],
       correoCliente: json["correo_cliente"],
-      descuentoCliente: double.tryParse(json["descuento_cliente"].toString())!,
+      descuentoCliente: json["descuento_cliente"] != null
+          ? double.tryParse(json["descuento_cliente"].toString())
+          : 0.0,
       idRestaurante: json["id_restaurante"],
       exonerado: json["exonerado"],
     );
@@ -25,7 +27,6 @@ class ClienteModelo extends Cliente {
 
   Map<String, dynamic> toJson() {
     return {
-      "id_cliente": idCliente,
       "rtn_cliente": rtnCliente,
       "nombre_cliente": nombreCliente,
       "correo_cliente": correoCliente,
@@ -35,7 +36,7 @@ class ClienteModelo extends Cliente {
     };
   }
 
-  ClienteModelo copyWith(
+  ClienteModelo copyWith({
     int? idCliente,
     String? rtnCliente,
     String? nombreCliente,
@@ -43,7 +44,7 @@ class ClienteModelo extends Cliente {
     double? descuentoCliente,
     int? idRestaurante,
     bool? exonerado,
-  ) {
+  }) {
     return ClienteModelo(
       idCliente: idCliente ?? this.idCliente,
       rtnCliente: rtnCliente ?? this.rtnCliente,
@@ -53,5 +54,10 @@ class ClienteModelo extends Cliente {
       idRestaurante: idRestaurante ?? this.idRestaurante,
       exonerado: exonerado ?? this.exonerado,
     );
+  }
+
+  ///this method will prevent the override of toString
+  String clienteAsString() {
+    return nombreCliente;
   }
 }

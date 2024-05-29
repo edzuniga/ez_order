@@ -1,3 +1,4 @@
+import 'package:ez_order_ezr/presentation/providers/menus_providers/descuento_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ez_order_ezr/data/menu_item_model.dart';
 import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
@@ -22,14 +23,36 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
         //Obtener la cantidad seleccionada por cada ítem del menú
         final pediDeta =
             detallesPedido.where((element) => element.idMenu == e.idMenu).first;
-        return e.precio * pediDeta.cantidad;
+        if (e.precioIncluyeIsv == false) {
+          return e.precioSinIsv * pediDeta.cantidad;
+        } else {
+          return (e.precioSinIsv / 1.15) * pediDeta.cantidad;
+        }
       }).reduce((value, element) => value + element);
+      //Obtención de los cálculos finales
+      double subTotal = double.parse(sumaPrecios.toStringAsFixed(2));
       double impuestos = double.parse((sumaPrecios * 0.15).toStringAsFixed(2));
-      ref
-          .read(pedidoActualProvider.notifier)
-          .actualizarInfo(sumaPrecios, impuestos);
+      double descuentoActual = ref.read(descuentoPedidoActualProvider);
+      double total = subTotal + impuestos - descuentoActual;
+      ref.read(pedidoActualProvider.notifier).actualizarInfo(
+            subtotl: subTotal,
+            isv: impuestos,
+            importeExonerado: 0,
+            importeExento: 0,
+            importeGravado: 0,
+            descuento: descuentoActual,
+            total: total,
+          );
     } else {
-      ref.read(pedidoActualProvider.notifier).actualizarInfo(0, 0);
+      ref.read(pedidoActualProvider.notifier).actualizarInfo(
+            subtotl: 0,
+            isv: 0,
+            importeExonerado: 0,
+            importeExento: 0,
+            importeGravado: 0,
+            descuento: 0,
+            total: 0,
+          );
     }
   }
 
