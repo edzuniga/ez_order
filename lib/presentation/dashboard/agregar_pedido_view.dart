@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:ez_order_ezr/data/cliente_modelo.dart';
+import 'package:ez_order_ezr/presentation/dashboard/modals/metodo_pago_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -885,18 +886,30 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        await _metodoPagoModal();
+                      },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.kGeneralPrimaryOrange,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           )),
-                      child: Text(
-                        'Confirmar orden por L ${pedidoActualInfo.total}',
-                        style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w400,
-                          fontSize: 16,
+                      child: RichText(
+                        text: TextSpan(
+                          text: 'Enviar orden por ',
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16,
+                          ),
+                          children: [
+                            TextSpan(
+                                text: 'L ${pedidoActualInfo.total}',
+                                style: GoogleFonts.inter(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                )),
+                          ],
                         ),
                       ),
                     ),
@@ -941,6 +954,43 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
         child: DescuentoModal(),
       ),
     );
+  }
+
+  Future<void> _metodoPagoModal() async {
+    final listadoPedido = ref.watch(menuItemPedidoListProvider);
+    if (listadoPedido.isNotEmpty) {
+      bool? res = await showDialog(
+        context: context,
+        barrierDismissible: false,
+        barrierColor: Colors.white.withOpacity(0),
+        builder: (_) => const Dialog(
+          elevation: 8,
+          backgroundColor: Colors.transparent,
+          child: MetodoPagoModal(),
+        ),
+      );
+
+      if (res != null && res == true) {
+        setState(() {
+          ref
+              .read(pedidoDetallesManagementProvider.notifier)
+              .resetPedidosDetallesList();
+        });
+      }
+    } else {
+      Fluttertoast.cancel();
+      Fluttertoast.showToast(
+        msg: 'No puede enviar una orden vacía!!',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 3,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+        webPosition: 'center',
+        webBgColor: 'red',
+      );
+    }
   }
 
   Future<void> _updateMenuModal(MenuItemModel itemMenu) async {

@@ -1,8 +1,15 @@
 import 'dart:io';
+import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/cliente_actual_provider.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/menu_provider.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/metodo_pago_actual.dart';
 import 'package:path/path.dart' as p;
 import 'package:random_string/random_string.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:ez_order_ezr/data/pedido_model.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/pedido_actual_provider.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/pedido_detalles_provider.dart';
 import 'package:ez_order_ezr/data/menu_item_model.dart';
 import 'package:ez_order_ezr/data/cliente_modelo.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
@@ -165,6 +172,38 @@ class SupabaseManagement extends _$SupabaseManagement {
     Map<String, dynamic> mapaCliente = cliente.toJson();
     try {
       await state.from('clientes').insert(mapaCliente);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return e.message;
+    }
+  }
+
+  //Agregar pedido
+  Future<String> agregarPedido(PedidoModel pedido) async {
+    Map<String, dynamic> mapaPedido = pedido.toJson();
+    try {
+      final resPedido = await state.from('pedidos').insert(mapaPedido).select();
+      String pedidoUuid = resPedido.first['uuid_pedido'];
+
+      //Guardar los detalles del pedido
+      List<PedidoDetalleModel> listadoProviDetalles =
+          ref.read(pedidoDetallesManagementProvider);
+      for (PedidoDetalleModel element in listadoProviDetalles) {
+        PedidoDetalleModel detalleModelFinal =
+            element.copyWith(uuidPedido: pedidoUuid);
+        Map<String, dynamic> detalleMap = detalleModelFinal.toJson();
+        await state.from('pedidos_items').insert(detalleMap);
+      }
+
+      //Resetear el pedido actual y vacíar los detalles
+      ref.read(pedidoActualProvider.notifier).resetearPedidoActual();
+      //Resetear Menu Pedido (incluído el listado de detalles)
+      ref.read(menuItemPedidoListProvider.notifier).resetMenuItem();
+      //Regresar al cliente "Consumidor final"
+      ref.read(clientePedidoActualProvider.notifier).resetClienteOriginal();
+      //Regresar al método de pago "efectivo"
+      ref.read(metodoPagoActualProvider.notifier).resetMetodoDePago();
+
       return 'success';
     } on PostgrestException catch (e) {
       return e.message;

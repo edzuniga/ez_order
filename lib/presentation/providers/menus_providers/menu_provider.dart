@@ -1,5 +1,8 @@
 import 'package:ez_order_ezr/presentation/providers/menus_providers/cliente_actual_provider.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/descuento_provider.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/metodo_pago_actual.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/num_pedido_actual.dart';
+import 'package:ez_order_ezr/utils/metodo_pago_enum.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ez_order_ezr/data/menu_item_model.dart';
 import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
@@ -19,9 +22,25 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
     final detallesPedido = ref.read(pedidoDetallesManagementProvider);
     //Obtener el cliente actual
     final clienteActual = ref.read(clientePedidoActualProvider);
+    //Obtener el número de pedido actual
+    final numPedidoActual = ref.read(numeroPedidoActualProvider);
+    //Metodo de pago del pedido actual
+    final metodoPagoActual = ref.read(metodoPagoActualProvider);
+    int metPagoInt = 0;
+    switch (metodoPagoActual) {
+      case MetodoDePagoEnum.efectivo:
+        metPagoInt = 1;
+        break;
+      case MetodoDePagoEnum.tarjeta:
+        metPagoInt = 2;
+        break;
+      case MetodoDePagoEnum.transferencia:
+        metPagoInt = 3;
+        break;
+    }
     //Efectuar operaciones para actualizar info general del pedido actual
     //sumar los precios, es la operación más básica
-    if (state.isNotEmpty) {
+    if (state.isNotEmpty && detallesPedido.isNotEmpty) {
       double sumaPrecios = state.map((e) {
         //Obtener la cantidad seleccionada por cada ítem del menú
         final pediDeta =
@@ -38,18 +57,17 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
       double impuestos = double.parse((sumaPrecios * 0.15).toStringAsFixed(2));
       double descuentoActual = ref.read(descuentoPedidoActualProvider);
       double total = subTotal + impuestos - descuentoActual;
-      double importeExonerado = 0.0;
-      double importeExento = 0.0;
-      double importeGravado = 0.0;
+      double importeExonerado = 0.00;
+      double importeExento = 0.00;
+      double importeGravado = 0.00;
 
       //condición general de exoneración del cliente
       if (clienteActual.exonerado) {
         importeExonerado = subTotal;
-        impuestos = 0.0;
+        impuestos = 0.00;
       } else {
         importeGravado = subTotal;
       }
-
       //!Obtención de los cálculos finales
 
       //Actualizar datos del pedido actual
@@ -62,6 +80,8 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
             descuento: descuentoActual,
             total: total,
             idCliente: clienteActual.idCliente!,
+            numPedido: numPedidoActual,
+            idMetodoPago: metPagoInt,
           );
     } else {
       ref.read(pedidoActualProvider.notifier).actualizarInfo(
@@ -73,6 +93,8 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
             descuento: 0,
             total: 0,
             idCliente: 1,
+            numPedido: numPedidoActual,
+            idMetodoPago: metPagoInt,
           );
     }
   }
@@ -103,7 +125,7 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
 
   //Resetear todo el menú
   void resetMenuItem() {
-    state.clear();
+    state = [];
     //También resetearlo en provider de detalles del pedido
     ref
         .read(pedidoDetallesManagementProvider.notifier)

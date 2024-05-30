@@ -38,4 +38,18 @@ class ClientePedidoActual extends _$ClientePedidoActual {
     );
     ref.read(menuItemPedidoListProvider.notifier).hacerCalculosDelPedido();
   }
+
+  void resetClienteOriginal() {
+    final datosUsuario = ref.read(userPublicDataProvider);
+    int idRes = int.parse(datosUsuario['id_restaurante'].toString());
+    state = ClienteModelo(
+      idCliente: 1,
+      rtnCliente: '',
+      nombreCliente: 'Consumidor final',
+      correoCliente: '',
+      descuentoCliente: 0.0,
+      idRestaurante: idRes,
+      exonerado: false,
+    );
+  }
 }

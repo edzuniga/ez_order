@@ -22,7 +22,7 @@ class PedidoDetallesManagement extends _$PedidoDetallesManagement {
 
   //Resetear el listado de detalles del pedido actual
   void resetPedidosDetallesList() {
-    state.clear();
+    state = [];
   }
 
   //INCREMENTAR la cantidad en una instancia en específico

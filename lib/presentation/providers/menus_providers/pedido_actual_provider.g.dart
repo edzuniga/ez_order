@@ -6,7 +6,7 @@ part of 'pedido_actual_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$pedidoActualHash() => r'0a58b9d7b9f024b7f3853c6e1def18d6fbdf93f9';
+String _$pedidoActualHash() => r'653d705dca17e68aca9b0f933c14425689ab7670';
 
 /// See also [PedidoActual].
 @ProviderFor(PedidoActual)

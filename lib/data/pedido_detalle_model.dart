@@ -17,6 +17,14 @@ class PedidoDetalleModel extends PedidoDetalle {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      "uuid_pedido": uuidPedido,
+      "id_menu": idMenu,
+      "cantidad": cantidad,
+    };
+  }
+
   PedidoDetalleModel copyWith({
     int? idPedidosItem,
     String? uuidPedido,

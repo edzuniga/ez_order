@@ -13,6 +13,8 @@ abstract class Pedido {
     this.isvAplicado,
     required this.orden,
     required this.idCliente,
+    required this.numPedido,
+    required this.idMetodoPago,
   });
 
   final String? uuidPedido;
@@ -28,4 +30,6 @@ abstract class Pedido {
   final String? isvAplicado;
   final String orden;
   final int idCliente;
+  final int numPedido;
+  final int idMetodoPago;
 }

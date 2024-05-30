@@ -1,6 +1,8 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:ez_order_ezr/presentation/config/routes.dart';
 import 'package:ez_order_ezr/presentation/providers/auth_supabase_manager.dart';
+import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/num_pedido_actual.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +29,8 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
   @override
   Widget build(BuildContext context) {
     final selectedPageTitle = ref.watch(dashboardPageTitleProvider);
+    final selectedPageIndex = ref.watch(dashboardPageIndexProvider);
+    final numOrdenActual = ref.watch(numeroPedidoActualProvider);
     return Container(
       width: double.infinity,
       height: 60,
@@ -44,6 +48,24 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
             ),
           ),
           const Spacer(),
+          selectedPageIndex == 1
+              ? Container(
+                  width: 200,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      width: 0.5,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '# Orden Actual: $numOrdenActual',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                )
+              : const SizedBox(),
+          const Gap(10),
           IconButton(
             onPressed: () {
               if (!_isFullScreen) {

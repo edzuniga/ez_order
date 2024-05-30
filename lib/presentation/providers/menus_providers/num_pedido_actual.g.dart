@@ -1,27 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'cliente_actual_provider.dart';
+part of 'num_pedido_actual.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$clientePedidoActualHash() =>
-    r'e160d8441b13a0371cb0f48b5904a0cede26525d';
+String _$numeroPedidoActualHash() =>
+    r'57a60e2aedd1a440850aa946a565527414578c0d';
 
-/// See also [ClientePedidoActual].
-@ProviderFor(ClientePedidoActual)
-final clientePedidoActualProvider =
-    NotifierProvider<ClientePedidoActual, ClienteModelo>.internal(
-  ClientePedidoActual.new,
-  name: r'clientePedidoActualProvider',
+/// See also [NumeroPedidoActual].
+@ProviderFor(NumeroPedidoActual)
+final numeroPedidoActualProvider =
+    NotifierProvider<NumeroPedidoActual, int>.internal(
+  NumeroPedidoActual.new,
+  name: r'numeroPedidoActualProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$clientePedidoActualHash,
+      : _$numeroPedidoActualHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$ClientePedidoActual = Notifier<ClienteModelo>;
+typedef _$NumeroPedidoActual = Notifier<int>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
