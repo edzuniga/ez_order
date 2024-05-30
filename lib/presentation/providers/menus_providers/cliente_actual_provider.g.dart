@@ -7,7 +7,7 @@ part of 'cliente_actual_provider.dart';
 // **************************************************************************
 
 String _$clientePedidoActualHash() =>
-    r'e2d04c257d8f997629d340ef461972e7d438e06d';
+    r'a0f0a925fafa8cf66ea221b8eb43dfcf2ae19150';
 
 /// See also [ClientePedidoActual].
 @ProviderFor(ClientePedidoActual)

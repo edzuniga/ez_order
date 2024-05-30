@@ -7,7 +7,7 @@ part of 'menu_provider.dart';
 // **************************************************************************
 
 String _$menuItemPedidoListHash() =>
-    r'c2863f1599d75a54ecf264249c3963095407ce25';
+    r'b0e463491238b20455094f41aa7d34f18f1a80bc';
 
 /// See also [MenuItemPedidoList].
 @ProviderFor(MenuItemPedidoList)

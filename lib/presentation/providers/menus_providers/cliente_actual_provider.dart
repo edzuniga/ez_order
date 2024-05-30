@@ -1,4 +1,5 @@
 import 'package:ez_order_ezr/data/cliente_modelo.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/menu_provider.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'cliente_actual_provider.g.dart';
@@ -35,5 +36,6 @@ class ClientePedidoActual extends _$ClientePedidoActual {
       descuentoCliente: descuentoCliente,
       exonerado: exonerado,
     );
+    ref.read(menuItemPedidoListProvider.notifier).hacerCalculosDelPedido();
   }
 }

@@ -1,3 +1,4 @@
+import 'package:ez_order_ezr/presentation/providers/menus_providers/cliente_actual_provider.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/descuento_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ez_order_ezr/data/menu_item_model.dart';
@@ -16,6 +17,8 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
   void hacerCalculosDelPedido() {
     //Primero obtener el provider de los detalles del pedido
     final detallesPedido = ref.read(pedidoDetallesManagementProvider);
+    //Obtener el cliente actual
+    final clienteActual = ref.read(clientePedidoActualProvider);
     //Efectuar operaciones para actualizar info general del pedido actual
     //sumar los precios, es la operación más básica
     if (state.isNotEmpty) {
@@ -29,19 +32,36 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
           return (e.precioSinIsv / 1.15) * pediDeta.cantidad;
         }
       }).reduce((value, element) => value + element);
-      //Obtención de los cálculos finales
+
+      //!Obtención de los cálculos finales
       double subTotal = double.parse(sumaPrecios.toStringAsFixed(2));
       double impuestos = double.parse((sumaPrecios * 0.15).toStringAsFixed(2));
       double descuentoActual = ref.read(descuentoPedidoActualProvider);
       double total = subTotal + impuestos - descuentoActual;
+      double importeExonerado = 0.0;
+      double importeExento = 0.0;
+      double importeGravado = 0.0;
+
+      //condición general de exoneración del cliente
+      if (clienteActual.exonerado) {
+        importeExonerado = subTotal;
+        impuestos = 0.0;
+      } else {
+        importeGravado = subTotal;
+      }
+
+      //!Obtención de los cálculos finales
+
+      //Actualizar datos del pedido actual
       ref.read(pedidoActualProvider.notifier).actualizarInfo(
             subtotl: subTotal,
             isv: impuestos,
-            importeExonerado: 0,
-            importeExento: 0,
-            importeGravado: 0,
+            importeExonerado: importeExonerado,
+            importeExento: importeExento,
+            importeGravado: importeGravado,
             descuento: descuentoActual,
             total: total,
+            idCliente: clienteActual.idCliente!,
           );
     } else {
       ref.read(pedidoActualProvider.notifier).actualizarInfo(
@@ -52,6 +72,7 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
             importeGravado: 0,
             descuento: 0,
             total: 0,
+            idCliente: 1,
           );
     }
   }

@@ -509,7 +509,19 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                           itemAsString: (ClienteModelo c) =>
                               c.clienteAsString(),
                           onChanged: (ClienteModelo? data) {
-                            print(data);
+                            //Asignar el cliente selecto al provider
+                            if (data != null) {
+                              ref
+                                  .read(clientePedidoActualProvider.notifier)
+                                  .actualizarInfoCliente(
+                                    rtnCliente: data.rtnCliente ?? '',
+                                    nombreCliente: data.nombreCliente,
+                                    correoCliente: data.correoCliente ?? '',
+                                    descuentoCliente:
+                                        data.descuentoCliente ?? 0.0,
+                                    exonerado: data.exonerado,
+                                  );
+                            }
                           },
                           selectedItem: clienteActual,
                         ),

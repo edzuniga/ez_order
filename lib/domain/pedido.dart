@@ -12,6 +12,7 @@ abstract class Pedido {
     this.importeGravado,
     this.isvAplicado,
     required this.orden,
+    required this.idCliente,
   });
 
   final String? uuidPedido;
@@ -26,4 +27,5 @@ abstract class Pedido {
   final double? importeGravado;
   final String? isvAplicado;
   final String orden;
+  final int idCliente;
 }

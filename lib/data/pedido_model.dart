@@ -14,23 +14,25 @@ class PedidoModel extends Pedido {
     super.importeGravado,
     super.isvAplicado,
     required super.orden,
+    required super.idCliente,
   });
 
   factory PedidoModel.fromJson(Map<String, dynamic> json) {
     return PedidoModel(
-      uuidPedido: json["uuid_pedido"],
-      idRestaurante: json["id_restaurante"],
-      descuento: double.tryParse(json["descuento"].toString())!,
-      impuestos: double.tryParse(json["impuestos"].toString())!,
-      subtotal: double.tryParse(json["subtotal"].toString())!,
-      total: double.tryParse(json["total"].toString())!,
-      notaAdicional: json["nota_adicional"],
-      importeExonerado: double.tryParse(json["importe_Exonerado"].toString())!,
-      importeExento: double.tryParse(json["importe_Exento"].toString())!,
-      importeGravado: double.tryParse(json["importe_gravado"].toString())!,
-      isvAplicado: json["isv_aplicado"],
-      orden: json["orden"],
-    );
+        uuidPedido: json["uuid_pedido"],
+        idRestaurante: json["id_restaurante"],
+        descuento: double.tryParse(json["descuento"].toString())!,
+        impuestos: double.tryParse(json["impuestos"].toString())!,
+        subtotal: double.tryParse(json["subtotal"].toString())!,
+        total: double.tryParse(json["total"].toString())!,
+        notaAdicional: json["nota_adicional"],
+        importeExonerado:
+            double.tryParse(json["importe_Exonerado"].toString())!,
+        importeExento: double.tryParse(json["importe_Exento"].toString())!,
+        importeGravado: double.tryParse(json["importe_gravado"].toString())!,
+        isvAplicado: json["isv_aplicado"],
+        orden: json["orden"],
+        idCliente: json["id_cliente"]);
   }
 
   Map<String, dynamic> toJson() {
@@ -46,6 +48,7 @@ class PedidoModel extends Pedido {
       "importe_gravado": importeGravado,
       "isv_aplicado": isvAplicado,
       "orden": orden,
+      "id_cliente": idCliente,
     };
   }
 
@@ -62,6 +65,7 @@ class PedidoModel extends Pedido {
     double? importeGravado,
     String? isvAplicado,
     String? orden,
+    int? idCliente,
   }) {
     return PedidoModel(
       uuidPedido: uuidPedido ?? this.uuidPedido,
@@ -76,6 +80,7 @@ class PedidoModel extends Pedido {
       importeGravado: importeGravado ?? this.importeGravado,
       isvAplicado: isvAplicado ?? this.isvAplicado,
       orden: orden ?? this.orden,
+      idCliente: idCliente ?? this.idCliente,
     );
   }
 }

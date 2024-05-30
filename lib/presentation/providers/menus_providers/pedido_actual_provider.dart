@@ -4,7 +4,7 @@ import 'package:random_string/random_string.dart';
 import 'package:ez_order_ezr/data/pedido_model.dart';
 part 'pedido_actual_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class PedidoActual extends _$PedidoActual {
   @override
   PedidoModel build() {
@@ -22,6 +22,7 @@ class PedidoActual extends _$PedidoActual {
       importeGravado: 0.0,
       isvAplicado: '15%',
       orden: randomNumeric(15),
+      idCliente: 1,
     );
   }
 
@@ -34,6 +35,7 @@ class PedidoActual extends _$PedidoActual {
     required double importeExonerado,
     required double importeExento,
     required double importeGravado,
+    required int idCliente,
   }) {
     state = state.copyWith(
       subtotal: subtotl,
@@ -43,6 +45,7 @@ class PedidoActual extends _$PedidoActual {
       importeExento: importeExento,
       importeGravado: importeGravado,
       total: total,
+      idCliente: idCliente,
     );
   }
 }

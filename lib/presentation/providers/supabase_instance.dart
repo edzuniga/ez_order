@@ -1,12 +1,11 @@
 import 'dart:io';
-import 'package:ez_order_ezr/data/cliente_modelo.dart';
-import 'package:ez_order_ezr/presentation/providers/menus_providers/cliente_actual_provider.dart';
-import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:path/path.dart' as p;
-import 'package:ez_order_ezr/data/menu_item_model.dart';
 import 'package:random_string/random_string.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:ez_order_ezr/data/menu_item_model.dart';
+import 'package:ez_order_ezr/data/cliente_modelo.dart';
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 part 'supabase_instance.g.dart';
 
 @Riverpod(keepAlive: true)
@@ -142,7 +141,16 @@ class SupabaseManagement extends _$SupabaseManagement {
       }
 
       List<ClienteModelo> listadoClientesModelo = [];
-      listadoClientesModelo.add(ref.read(clientePedidoActualProvider));
+      ClienteModelo usuarioDefault = ClienteModelo(
+        idCliente: 1,
+        rtnCliente: '',
+        nombreCliente: 'Consumidor final',
+        correoCliente: '',
+        descuentoCliente: 0.0,
+        idRestaurante: currentIdRestaurante,
+        exonerado: false,
+      );
+      listadoClientesModelo.add(usuarioDefault);
       for (var element in resMap) {
         listadoClientesModelo.add(ClienteModelo.fromJson(element));
       }
