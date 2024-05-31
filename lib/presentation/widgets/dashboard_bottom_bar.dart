@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
@@ -51,7 +50,7 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
         BottomNavigationBarItem(
             icon: Icon(Icons.shopping_bag_outlined), label: 'Pedidos'),
         BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.kitchenSet), label: 'Agregar Pedido'),
+            icon: Icon(Icons.shopping_bag_outlined), label: 'Agregar Pedido'),
         BottomNavigationBarItem(
             icon: Icon(Icons.playlist_add_check_outlined), label: 'Reportes'),
         BottomNavigationBarItem(

@@ -114,4 +114,10 @@ class PedidoActual extends _$PedidoActual {
       idMetodoPago: metPagoInt,
     );
   }
+
+  void asignarNotaAdicional(String? nota) {
+    state = state.copyWith(
+      notaAdicional: nota,
+    );
+  }
 }

@@ -50,21 +50,24 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
           const Spacer(),
           selectedPageIndex == 1
               ? Container(
-                  width: 200,
+                  width: 180,
                   height: 40,
                   decoration: BoxDecoration(
-                    border: Border.all(
-                      width: 0.5,
-                    ),
+                    color: AppColors.kGeneralPrimaryOrange,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   alignment: Alignment.center,
                   child: Text(
-                    '# Orden Actual: $numOrdenActual',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    '# Ticket: $numOrdenActual',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
                   ),
                 )
               : const SizedBox(),
+          const Spacer(),
           const Gap(10),
           IconButton(
             onPressed: () {

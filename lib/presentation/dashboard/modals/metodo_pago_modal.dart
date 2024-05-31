@@ -2,7 +2,6 @@ import 'package:ez_order_ezr/data/pedido_model.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/metodo_pago_actual.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/pedido_actual_provider.dart';
-import 'package:ez_order_ezr/presentation/providers/menus_providers/pedido_detalles_provider.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:ez_order_ezr/utils/metodo_pago_enum.dart';
 import 'package:flutter/cupertino.dart';

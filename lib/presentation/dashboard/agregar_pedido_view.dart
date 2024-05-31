@@ -37,6 +37,8 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
   late SupabaseStreamBuilder _stream;
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _pedidoListController = ScrollController();
+  final TextEditingController _notaAdicionalPedidoController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -89,12 +91,66 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Menú',
+                      'Productos',
                       style: GoogleFonts.roboto(
                         color: AppColors.kTextPrimaryBlack,
                         fontSize: 18.0,
                         letterSpacing: 0.0,
                         fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 350,
+                      height: 48,
+                      child: TextFormField(
+                        controller: _searchController,
+                        autofillHints: const [AutofillHints.email],
+                        decoration: InputDecoration(
+                          suffixIcon: IconButton(
+                              onPressed: () {}, icon: const Icon(Icons.search)),
+                          hintText: 'Búsqueda por nombre...',
+                          hintStyle: GoogleFonts.inter(
+                            color: AppColors.kTextSecondaryGray,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: Colors.white,
+                              width: 2.0,
+                            ),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: AppColors.kGeneralPrimaryOrange,
+                              width: 2.0,
+                            ),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: AppColors.kGeneralErrorColor,
+                              width: 2.0,
+                            ),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: AppColors.kGeneralErrorColor,
+                              width: 2.0,
+                            ),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          filled: true,
+                          fillColor: AppColors.kInputLiteGray,
+                        ),
+                        style: GoogleFonts.inter(),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Campo no puede estar vacío';
+                          }
+
+                          return null;
+                        },
                       ),
                     ),
                     ElevatedButton(
@@ -108,7 +164,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                         ),
                       ),
                       child: Text(
-                        'Agregar producto',
+                        'Agregar',
                         style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 14.0,
@@ -122,60 +178,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                   thickness: 1.0,
                   color: Color(0xFFE0E3E7),
                 ),
-                const Gap(5),
-                Center(
-                  child: TextFormField(
-                    controller: _searchController,
-                    autofillHints: const [AutofillHints.email],
-                    decoration: InputDecoration(
-                      suffixIcon: IconButton(
-                          onPressed: () {}, icon: const Icon(Icons.search)),
-                      hintText:
-                          'Búsqueda por nombre, correlativo o descripción...',
-                      hintStyle: GoogleFonts.inter(
-                        color: AppColors.kTextSecondaryGray,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: Colors.white,
-                          width: 2.0,
-                        ),
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: AppColors.kGeneralPrimaryOrange,
-                          width: 2.0,
-                        ),
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: AppColors.kGeneralErrorColor,
-                          width: 2.0,
-                        ),
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: AppColors.kGeneralErrorColor,
-                          width: 2.0,
-                        ),
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      filled: true,
-                      fillColor: AppColors.kInputLiteGray,
-                    ),
-                    style: GoogleFonts.inter(),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Campo no puede estar vacío';
-                      }
 
-                      return null;
-                    },
-                  ),
-                ),
                 const Gap(5),
                 Expanded(
                   child: StreamBuilder(
@@ -325,10 +328,11 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                               const Gap(5),
                                               Container(
                                                 padding:
-                                                    const EdgeInsets.all(4),
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 8),
                                                 decoration: BoxDecoration(
-                                                  color:
-                                                      const Color(0xFFE0E3E7),
+                                                  color: AppColors
+                                                      .kGeneralPrimaryOrange,
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           8.0),
@@ -337,29 +341,28 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                                 child: Text(
                                                   itemMenu.numMenu,
                                                   style: const TextStyle(
-                                                      color: AppColors
-                                                          .kTextSecondaryGray),
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
                                                 ),
                                               ),
                                             ],
                                           ),
                                           const Gap(5),
                                           //Descripción del producto
-                                          Text(
+                                          /*Text(
                                             'Descripción del producto:',
                                             style: GoogleFonts.inter(
                                               fontWeight: FontWeight.w500,
                                               fontSize: 12,
                                             ),
-                                          ),
-                                          Expanded(
-                                            child: AutoSizeText(
-                                              itemMenu.descripcion,
-                                              style: GoogleFonts.inter(
-                                                fontSize: 12,
-                                                color: AppColors
-                                                    .kTextSecondaryGray,
-                                              ),
+                                          ), */
+                                          AutoSizeText(
+                                            itemMenu.descripcion,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12,
+                                              color:
+                                                  AppColors.kTextSecondaryGray,
                                             ),
                                           ),
                                           //Otra información relevante del producto
@@ -371,13 +374,17 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                                   .kGeneralPrimaryOrange,
                                             ),
                                           ),
+                                          const Spacer(),
+                                          //Precio de VENTA
                                           Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.end,
                                             children: [
                                               Container(
-                                                  padding:
-                                                      const EdgeInsets.all(5.0),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 5.0,
+                                                      horizontal: 12),
                                                   decoration: BoxDecoration(
                                                     borderRadius:
                                                         BorderRadius.circular(
@@ -500,31 +507,72 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                       ),
                       const Gap(10),
                       Expanded(
-                        child: DropdownSearch<ClienteModelo>(
-                          asyncItems: (filter) async {
-                            return await _getClientesForDropdown(filter);
-                          },
-                          popupProps: const PopupProps.menu(
-                            showSearchBox: true,
+                        child: SizedBox(
+                          height: 48,
+                          child: DropdownSearch<ClienteModelo>(
+                            asyncItems: (filter) async {
+                              return await _getClientesForDropdown(filter);
+                            },
+                            dropdownDecoratorProps: DropDownDecoratorProps(
+                              dropdownSearchDecoration: InputDecoration(
+                                hintText: 'Búsqueda por nombre...',
+                                hintStyle: GoogleFonts.inter(
+                                  color: AppColors.kTextSecondaryGray,
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.white,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: AppColors.kGeneralPrimaryOrange,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: AppColors.kGeneralErrorColor,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                focusedErrorBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: AppColors.kGeneralErrorColor,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                filled: true,
+                                fillColor: AppColors.kInputLiteGray,
+                              ),
+                            ),
+                            popupProps: const PopupProps.menu(
+                              showSearchBox: true,
+                            ),
+                            itemAsString: (ClienteModelo c) =>
+                                c.clienteAsString(),
+                            onChanged: (ClienteModelo? data) {
+                              //Asignar el cliente selecto al provider
+                              if (data != null) {
+                                ref
+                                    .read(clientePedidoActualProvider.notifier)
+                                    .actualizarInfoCliente(
+                                      rtnCliente: data.rtnCliente ?? '',
+                                      nombreCliente: data.nombreCliente,
+                                      correoCliente: data.correoCliente ?? '',
+                                      descuentoCliente:
+                                          data.descuentoCliente ?? 0.0,
+                                      exonerado: data.exonerado,
+                                    );
+                              }
+                            },
+                            selectedItem: clienteActual,
                           ),
-                          itemAsString: (ClienteModelo c) =>
-                              c.clienteAsString(),
-                          onChanged: (ClienteModelo? data) {
-                            //Asignar el cliente selecto al provider
-                            if (data != null) {
-                              ref
-                                  .read(clientePedidoActualProvider.notifier)
-                                  .actualizarInfoCliente(
-                                    rtnCliente: data.rtnCliente ?? '',
-                                    nombreCliente: data.nombreCliente,
-                                    correoCliente: data.correoCliente ?? '',
-                                    descuentoCliente:
-                                        data.descuentoCliente ?? 0.0,
-                                    exonerado: data.exonerado,
-                                  );
-                            }
-                          },
-                          selectedItem: clienteActual,
                         ),
                       ),
                       //Text(clienteActual.nombreCliente),
@@ -534,9 +582,12 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                             onPressed: () async {
                               await _showAgregarClienteModal();
                             },
+                            style: IconButton.styleFrom(
+                              backgroundColor: AppColors.kTextPrimaryBlack,
+                            ),
                             icon: const Icon(
-                              Icons.add_box_rounded,
-                              color: Colors.blueGrey,
+                              Icons.add,
+                              color: Colors.white,
                             )),
                       ),
                     ],
@@ -561,7 +612,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  ClipRRect(
+                                  /* ClipRRect(
                                     clipBehavior: Clip.hardEdge,
                                     borderRadius: BorderRadius.circular(8),
                                     child: SizedBox(
@@ -573,7 +624,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                       ),
                                     ),
                                   ),
-                                  const Gap(5),
+                                  const Gap(5),*/
                                   Expanded(
                                     child: Column(
                                       mainAxisAlignment: MainAxisAlignment.end,
@@ -593,9 +644,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                             Text('Precio sin ISV:',
                                                 style: GoogleFonts.inter(
                                                     fontSize: 10)),
-                                            Text(
-                                                itemPedido.precioSinIsv
-                                                    .toString(),
+                                            Text('L ${itemPedido.precioSinIsv}',
                                                 style: GoogleFonts.inter(
                                                     fontSize: 10)),
                                           ],
@@ -713,6 +762,26 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                           ),
                         );
                       },
+                    ),
+                  ),
+                  //Área de NOTA ADICIONAL del pedido
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextField(
+                      controller: _notaAdicionalPedidoController,
+                      decoration: InputDecoration(
+                        hintText: 'Nota adicional de la orden...',
+                        border: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                              color: Color(0xFFE0E3E7), width: 0.5),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      maxLines: 2,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.kTextPrimaryBlack,
+                      ),
                     ),
                   ),
                   const Divider(
@@ -883,6 +952,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                       ),
                     ],
                   ),
+                  //Botón para enviar orden
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -927,6 +997,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
   void dispose() {
     _searchController.dispose();
     _pedidoListController.dispose();
+    _notaAdicionalPedidoController.dispose();
     super.dispose();
   }
 
@@ -959,6 +1030,10 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
   Future<void> _metodoPagoModal() async {
     final listadoPedido = ref.watch(menuItemPedidoListProvider);
     if (listadoPedido.isNotEmpty) {
+      //Incorporar la nota adicional
+      final pedidoActual = ref.read(pedidoActualProvider.notifier);
+      pedidoActual.asignarNotaAdicional(_notaAdicionalPedidoController.text);
+
       bool? res = await showDialog(
         context: context,
         barrierDismissible: false,
@@ -971,6 +1046,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
       );
 
       if (res != null && res == true) {
+        _notaAdicionalPedidoController.clear();
         setState(() {
           ref
               .read(pedidoDetallesManagementProvider.notifier)
