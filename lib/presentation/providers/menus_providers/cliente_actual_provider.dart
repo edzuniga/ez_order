@@ -23,6 +23,7 @@ class ClientePedidoActual extends _$ClientePedidoActual {
 
   //Actualizar la info del cliente ACTUAL
   void actualizarInfoCliente({
+    required int idCliente,
     required String rtnCliente,
     required String nombreCliente,
     required String correoCliente,
@@ -30,6 +31,7 @@ class ClientePedidoActual extends _$ClientePedidoActual {
     required bool exonerado,
   }) {
     state = state.copyWith(
+      idCliente: idCliente,
       rtnCliente: rtnCliente,
       nombreCliente: nombreCliente,
       correoCliente: correoCliente,

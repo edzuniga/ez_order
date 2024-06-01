@@ -209,4 +209,52 @@ class SupabaseManagement extends _$SupabaseManagement {
       return e.message;
     }
   }
+
+  Future<String> getClienteName(int clienteId) async {
+    try {
+      final res =
+          await state.from('clientes').select().eq('id_cliente', clienteId);
+      String nombreCliente = res.first['nombre_cliente'];
+      return nombreCliente;
+    } on PostgrestException catch (e) {
+      return e.message;
+    }
+  }
+
+  Future<int> countMenuItems() async {
+    try {
+      int userIdRestaurante = int.parse(
+          ref.read(userPublicDataProvider)['id_restaurante'].toString());
+      final res = await state
+          .from('menus')
+          .select()
+          .eq('id_restaurante', userIdRestaurante)
+          .count(CountOption.exact);
+      return res.count;
+    } on PostgrestException catch (e) {
+      throw Exception(
+          'Error al contar los elementos del catálogo: ${e.message}');
+    }
+  }
+
+  Future<int> countPedidosDelDia() async {
+    try {
+      int userIdRestaurante = int.parse(
+          ref.read(userPublicDataProvider)['id_restaurante'].toString());
+      final res = await state
+          .from('pedidos')
+          .select()
+          .eq('id_restaurante', userIdRestaurante)
+          .gte(
+            'created_at',
+            DateTime(
+                DateTime.now().year, DateTime.now().month, DateTime.now().day),
+          )
+          .count(CountOption.exact);
+      return res.count;
+    } on PostgrestException catch (e) {
+      throw Exception(
+          'Error al contar los elementos del catálogo: ${e.message}');
+    }
+  }
 }

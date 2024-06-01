@@ -3,6 +3,8 @@ import 'package:email_validator/email_validator.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/config/routes.dart';
 import 'package:ez_order_ezr/presentation/providers/auth_supabase_manager.dart';
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
+import 'package:ez_order_ezr/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -39,6 +41,10 @@ class _LoginViewState extends ConsumerState<LoginView> {
     int isAuth = await ref.read(authManagerProvider.notifier).chechAuthStatus();
     setState(() => _isCheckingAuthentication = false);
     if (isAuth == 1) {
+      SecureStorage secureStorage = SecureStorage();
+      Map<String, String> userDataMap = await secureStorage.getAllValues();
+      //Guardar los datos en un provider
+      ref.read(userPublicDataProvider.notifier).setUserData(userDataMap);
       if (!mounted) return;
       context.goNamed(Routes.pedidos); //redirect to dashboard home
     }

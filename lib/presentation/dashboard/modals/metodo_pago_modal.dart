@@ -1,15 +1,17 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'package:ez_order_ezr/data/pedido_model.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/metodo_pago_actual.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/pedido_actual_provider.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:ez_order_ezr/utils/metodo_pago_enum.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class MetodoPagoModal extends ConsumerStatefulWidget {
   const MetodoPagoModal({super.key});
@@ -19,7 +21,6 @@ class MetodoPagoModal extends ConsumerStatefulWidget {
 }
 
 class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
-  final TextEditingController _notaPedido = TextEditingController();
   bool _isTryingUpload = false;
 
   @override
@@ -27,11 +28,15 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
     PedidoModel pedidoActualInfo = ref.watch(pedidoActualProvider);
     MetodoDePagoEnum metodoSeleccionado = ref.watch(metodoPagoActualProvider);
     return Container(
-      height: 450,
+      height: 380,
       width: 500,
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: Colors.white,
+        border: Border.all(
+          width: 20,
+          color: const Color(0xFFDFE3E7),
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       child: _isTryingUpload
@@ -74,15 +79,16 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                         children: [
                           Column(
                             children: [
-                              const Icon(
-                                Icons.money,
-                                size: 60,
-                                color: AppColors.kGeneralPrimaryOrange,
-                              ),
+                              SvgPicture.asset('assets/svg/dinero_azul.svg',
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.contain,
+                                  semanticsLabel: 'Efectivo'),
                               const Gap(5),
                               Text(
                                 'Efectivo',
-                                style: GoogleFonts.inter(fontSize: 16),
+                                style: GoogleFonts.inter(
+                                    fontSize: 16, fontWeight: FontWeight.w700),
                               ),
                               const Gap(5),
                               CupertinoRadio(
@@ -96,15 +102,17 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                           const Gap(65),
                           Column(
                             children: [
-                              const Icon(
-                                Icons.credit_card,
-                                size: 60,
-                                color: AppColors.kGeneralPrimaryOrange,
-                              ),
+                              SvgPicture.asset(
+                                  'assets/svg/tarjeta_credito_azul.svg',
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.contain,
+                                  semanticsLabel: 'Efectivo'),
                               const Gap(5),
                               Text(
                                 'Tarjeta',
-                                style: GoogleFonts.inter(fontSize: 16),
+                                style: GoogleFonts.inter(
+                                    fontSize: 16, fontWeight: FontWeight.w700),
                               ),
                               const Gap(5),
                               CupertinoRadio(
@@ -118,15 +126,17 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                           const Gap(65),
                           Column(
                             children: [
-                              const Icon(
-                                Icons.mobile_friendly_rounded,
-                                size: 60,
-                                color: AppColors.kGeneralPrimaryOrange,
-                              ),
+                              SvgPicture.asset(
+                                  'assets/svg/transferencia_azul.svg',
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.contain,
+                                  semanticsLabel: 'Efectivo'),
                               const Gap(5),
                               Text(
                                 'Transferencia',
-                                style: GoogleFonts.inter(fontSize: 16),
+                                style: GoogleFonts.inter(
+                                    fontSize: 16, fontWeight: FontWeight.w700),
                               ),
                               const Gap(5),
                               CupertinoRadio(
@@ -139,56 +149,6 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                           ),
                         ],
                       ),
-                      const Gap(20),
-                      //Nota adicional del pedido
-                      TextFormField(
-                        controller: _notaPedido,
-                        autofillHints: const [AutofillHints.name],
-                        maxLines: 2,
-                        decoration: InputDecoration(
-                          labelText: 'Nota adicional',
-                          labelStyle: GoogleFonts.inter(
-                            color: AppColors.kTextPrimaryBlack,
-                          ),
-                          hintText: 'Ej. Algo sobre la orden actual...',
-                          hintStyle: GoogleFonts.inter(
-                            color: Colors.black26,
-                          ),
-                          alignLabelWithHint: true,
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                              color: Color(0xFFe0e3e7),
-                              width: 2.0,
-                            ),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                              color: AppColors.kGeneralPrimaryOrange,
-                              width: 2.0,
-                            ),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                              color: AppColors.kGeneralErrorColor,
-                              width: 2.0,
-                            ),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                              color: AppColors.kGeneralErrorColor,
-                              width: 2.0,
-                            ),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          filled: true,
-                          fillColor: AppColors.kInputLiteGray,
-                        ),
-                        style: GoogleFonts.inter(),
-                      ),
-
                       const Gap(40),
                       SizedBox(
                         width: 350,

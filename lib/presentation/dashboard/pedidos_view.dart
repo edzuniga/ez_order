@@ -3,7 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/data/pedido_model.dart';
+import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/config/routes.dart';
 import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
@@ -18,11 +22,54 @@ class PedidosView extends ConsumerStatefulWidget {
 }
 
 class _PedidosViewState extends ConsumerState<PedidosView> {
+  late SupabaseClient _supabase;
+  late Stream<List<Map<String, dynamic>>> _stream;
+  late Stream<List<Map<String, dynamic>>> _pedidosStream;
+  int _countPedidos = 0;
+  int _countMenu = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    int userIdRestaurante = int.parse(
+        ref.read(userPublicDataProvider)['id_restaurante'].toString());
+    _supabase = ref.read(supabaseManagementProvider);
+    //Stream general filtrado por el id del restaurante
+    _stream = _supabase
+        .from('pedidos')
+        .stream(primaryKey: ['uuid_pedido'])
+        .eq('id_restaurante', userIdRestaurante)
+        .order('created_at', ascending: true);
+
+    final today = DateTime.now();
+    final startOfDay = DateTime(today.year, today.month, today.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    //Filtración interna del stream general, condicionado por fecha (solo fecha de hoy)
+    _pedidosStream = _stream.map((data) {
+      return data.where((pedido) {
+        final createdAt = DateTime.parse(pedido['created_at']);
+        return createdAt.isAfter(startOfDay) && createdAt.isBefore(endOfDay);
+      }).toList();
+    });
+    countMenuItemsyPedidos();
+  }
+
+  Future<void> countMenuItemsyPedidos() async {
+    _countMenu =
+        await ref.read(supabaseManagementProvider.notifier).countMenuItems();
+    _countPedidos = await ref
+        .read(supabaseManagementProvider.notifier)
+        .countPedidosDelDia();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.max,
       children: [
+        //Área de resumen diario y opciones de soporte
         Expanded(
           child: Container(
             height: double.infinity,
@@ -37,17 +84,17 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     //Containers con estadísticas senciilas del día
-                    const Wrap(
+                    Wrap(
                       spacing: 8.0,
                       runSpacing: 8.0,
                       children: [
                         EstadisticaContainer(
-                          estadistica: '1000',
-                          descripcion: 'Opciones del menú',
+                          estadistica: '$_countMenu',
+                          descripcion: 'Productos en catálogo',
                           icono: Icons.restaurant_outlined,
                         ),
                         EstadisticaContainer(
-                          estadistica: '1000',
+                          estadistica: '$_countPedidos',
                           descripcion: 'Número de pedidos',
                           icono: Icons.shopping_bag_outlined,
                         ),
@@ -171,6 +218,7 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
           ),
         ),
         const Gap(8),
+        //Área de ordenes entregadas del día
         Expanded(
           child: Container(
             padding: const EdgeInsets.all(12),
@@ -178,134 +226,208 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(8.0),
             ),
-            child: ListView.builder(
-              itemCount: 8,
-              itemBuilder: (ctx, index) {
-                return Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(5),
-                      //height: 91.0,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8.0),
-                        border: Border.all(
-                          color: const Color(0xFFE0E3E7),
-                          width: 1.0,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          //Imagen del pedido
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: SizedBox(
-                              width: 100.0,
-                              height: 81.0,
-                              child: Image.asset(
-                                'assets/images/pedidos.jpg',
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          const Gap(5),
-                          //Información del pedido
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.center,
+            child: StreamBuilder(
+              stream: _pedidosStream,
+              builder: (BuildContext context,
+                  AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(),
+                        Text('Cargando datos, por favor espere.'),
+                      ],
+                    ),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Text(
+                        'Ocurrió un error al querer cargar el catálogo de productos!!'),
+                  );
+                }
+
+                if (!snapshot.hasData) {
+                  return const Center(
+                    child: Text('Aún no ha agregado productos!!'),
+                  );
+                } else {
+                  List<Map<String, dynamic>> listadoMap = snapshot.data!;
+                  List<PedidoModel> listadPedidos = [];
+                  for (var element in listadoMap) {
+                    listadPedidos.add(PedidoModel.fromJson(element));
+                  }
+                  return ListView.builder(
+                    physics: const ClampingScrollPhysics(),
+                    itemCount: listadPedidos.length,
+                    itemBuilder: (ctx, index) {
+                      PedidoModel pedido = listadPedidos[index];
+                      return FutureBuilder(
+                        future: _obtenerNombreCliente(pedido.idCliente),
+                        builder: (BuildContext ctx, AsyncSnapshot<String> s) {
+                          if (s.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          if (s.hasError) {
+                            return const Center(
+                              child: Text('Ocurrió un error!!'),
+                            );
+                          }
+
+                          if (!snapshot.hasData) {
+                            return const Center(
+                              child: Text('Sin datos!!'),
+                            );
+                          } else {
+                            String nombreCliente = s.data!;
+                            return Column(
                               children: [
-                                Text(
-                                  '# 000${index + 1}',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                Text(
-                                  'Total: L 280.50',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const Gap(10),
-                                RichText(
-                                  text: TextSpan(
-                                    text: 'Fecha: ',
-                                    style: GoogleFonts.inter(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 8.0,
+                                Container(
+                                  padding: const EdgeInsets.all(5),
+                                  //height: 91.0,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    border: Border.all(
+                                      color: const Color(0xFFE0E3E7),
+                                      width: 1.0,
                                     ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.max,
                                     children: [
-                                      TextSpan(
-                                        text: 'mayo 19, 2024',
-                                        style: GoogleFonts.inter(
-                                          color: Colors.grey,
-                                          fontSize: 8.0,
+                                      //Imagen del pedido
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: SizedBox(
+                                          width: 100.0,
+                                          height: 81.0,
+                                          child: Image.asset(
+                                            'assets/images/pedidos.jpg',
+                                            fit: BoxFit.cover,
+                                          ),
                                         ),
                                       ),
-                                      TextSpan(
-                                        text: '\nHora: ',
-                                        style: GoogleFonts.inter(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 8.0,
+                                      const Gap(5),
+                                      //Información del pedido
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              '# ${pedido.numPedido}',
+                                              style: GoogleFonts.inter(
+                                                fontSize: 14,
+                                                letterSpacing: 0.0,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            Text(
+                                              'Total: L ${pedido.total}',
+                                              style: GoogleFonts.inter(
+                                                fontSize: 12,
+                                                letterSpacing: 0.0,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            const Gap(10),
+                                            RichText(
+                                              text: TextSpan(
+                                                text: 'Orden: ',
+                                                style: GoogleFonts.inter(
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 8.0,
+                                                ),
+                                                children: [
+                                                  TextSpan(
+                                                    text: pedido.orden,
+                                                    style: GoogleFonts.inter(
+                                                      color: Colors.grey,
+                                                      fontSize: 8.0,
+                                                    ),
+                                                  ),
+                                                  TextSpan(
+                                                    text: '\nCliente: ',
+                                                    style: GoogleFonts.inter(
+                                                      color: Colors.black,
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                      fontSize: 8.0,
+                                                    ),
+                                                  ),
+                                                  TextSpan(
+                                                    text: nombreCliente,
+                                                    style: GoogleFonts.inter(
+                                                      color: Colors.grey,
+                                                      fontSize: 8.0,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      TextSpan(
-                                        text: '5:15pm',
-                                        style: GoogleFonts.inter(
-                                          color: Colors.grey,
-                                          fontSize: 8.0,
+                                      //Botón para las acciones del pedido
+                                      Align(
+                                        alignment: Alignment.topRight,
+                                        child: ElevatedButton(
+                                          onPressed: () {},
+                                          style: ElevatedButton.styleFrom(
+                                            tapTargetSize: MaterialTapTargetSize
+                                                .shrinkWrap,
+                                            elevation: 0.0,
+                                            backgroundColor:
+                                                const Color(0xFFFFDFD0),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(4.0),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Opciones',
+                                            style: GoogleFonts.inter(
+                                              color: Colors.black,
+                                              fontSize: 12.0,
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
+                                const Gap(8),
                               ],
-                            ),
-                          ),
-                          //Botón para las acciones del pedido
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                elevation: 0.0,
-                                backgroundColor: const Color(0xFFFFDFD0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4.0),
-                                ),
-                              ),
-                              child: Text(
-                                'Opciones',
-                                style: GoogleFonts.inter(
-                                  color: Colors.black,
-                                  fontSize: 12.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Gap(8),
-                  ],
-                );
+                            );
+                          }
+                        },
+                      );
+                    },
+                  );
+                }
               },
             ),
           ),
         ),
       ],
     );
+  }
+
+  Future<String> _obtenerNombreCliente(int clienteId) async {
+    return await ref
+        .read(supabaseManagementProvider.notifier)
+        .getClienteName(clienteId);
   }
 }

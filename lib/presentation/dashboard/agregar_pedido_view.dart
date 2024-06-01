@@ -200,14 +200,13 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                       if (snapshot.hasError) {
                         return const Center(
                           child: Text(
-                              'Ocurrió un error al querer cargar el menú!!'),
+                              'Ocurrió un error al querer cargar el catálogo de productos!!'),
                         );
                       }
 
                       if (!snapshot.hasData) {
                         return const Center(
-                          child:
-                              Text('Aún no hay pedidos para el día de hoy!!'),
+                          child: Text('Aún no ha agregado productos!!'),
                         );
                       } else {
                         List<Map<String, dynamic>> listadoMap = snapshot.data!;
@@ -562,6 +561,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                 ref
                                     .read(clientePedidoActualProvider.notifier)
                                     .actualizarInfoCliente(
+                                      idCliente: data.idCliente ?? 1,
                                       rtnCliente: data.rtnCliente ?? '',
                                       nombreCliente: data.nombreCliente,
                                       correoCliente: data.correoCliente ?? '',
@@ -659,7 +659,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                               Row(
                                 children: [
                                   Transform.scale(
-                                    scale: 0.8,
+                                    scale: 0.7,
                                     child: IconButton(
                                         onPressed: () {
                                           setState(() {
@@ -682,7 +682,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                   ),
                                   const Spacer(),
                                   Transform.scale(
-                                    scale: 0.8,
+                                    scale: 0.7,
                                     child: IconButton(
                                         onPressed: () {
                                           if (pedidoDetallesList
@@ -730,7 +730,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                       : '0'),
                                   const Gap(8),
                                   Transform.scale(
-                                    scale: 0.8,
+                                    scale: 0.7,
                                     child: IconButton(
                                         onPressed: () {
                                           ref
@@ -753,11 +753,9 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                   ),
                                 ],
                               ),
-                              const Gap(1),
                               const Divider(
                                 color: Color(0xFFE0E3E7),
                               ),
-                              const Gap(3),
                             ],
                           ),
                         );
