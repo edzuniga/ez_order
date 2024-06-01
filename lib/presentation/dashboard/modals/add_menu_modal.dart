@@ -129,6 +129,7 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                         const Gap(12),
                         Column(
                           children: [
+                            //Nombre y correlativo
                             Row(
                               children: [
                                 //Nombre del producto
@@ -252,6 +253,7 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                               ],
                             ),
                             const Gap(12),
+                            //Descripción y precios
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -639,6 +641,7 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                               ],
                             ),
                             const Gap(25),
+                            //Botones
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [

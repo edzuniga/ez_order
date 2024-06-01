@@ -7,7 +7,7 @@ part of 'supabase_instance.dart';
 // **************************************************************************
 
 String _$supabaseManagementHash() =>
-    r'3b2e3b6021041e94dfd27473227f2d31a4a5d265';
+    r'd6b6159f91f6fa7aa2102fc4311eae76510b245b';
 
 /// See also [SupabaseManagement].
 @ProviderFor(SupabaseManagement)

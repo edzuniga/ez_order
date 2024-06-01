@@ -27,6 +27,7 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
   late Stream<List<Map<String, dynamic>>> _pedidosStream;
   int _countPedidos = 0;
   int _countMenu = 0;
+  late List<GlobalKey> _buttonKeys;
 
   @override
   void initState() {
@@ -255,15 +256,17 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                   );
                 } else {
                   List<Map<String, dynamic>> listadoMap = snapshot.data!;
-                  List<PedidoModel> listadPedidos = [];
+                  List<PedidoModel> listadoPedidos = [];
                   for (var element in listadoMap) {
-                    listadPedidos.add(PedidoModel.fromJson(element));
+                    listadoPedidos.add(PedidoModel.fromJson(element));
                   }
+                  _buttonKeys = List.generate(
+                      listadoPedidos.length, (index) => GlobalKey());
                   return ListView.builder(
                     physics: const ClampingScrollPhysics(),
-                    itemCount: listadPedidos.length,
+                    itemCount: listadoPedidos.length,
                     itemBuilder: (ctx, index) {
-                      PedidoModel pedido = listadPedidos[index];
+                      PedidoModel pedido = listadoPedidos[index];
                       return FutureBuilder(
                         future: _obtenerNombreCliente(pedido.idCliente),
                         builder: (BuildContext ctx, AsyncSnapshot<String> s) {
@@ -382,7 +385,71 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                                       Align(
                                         alignment: Alignment.topRight,
                                         child: ElevatedButton(
-                                          onPressed: () {},
+                                          key: _buttonKeys[index],
+                                          onPressed: () {
+                                            final RenderBox button =
+                                                _buttonKeys[index]
+                                                        .currentContext!
+                                                        .findRenderObject()
+                                                    as RenderBox;
+                                            final RenderBox overlay =
+                                                Overlay.of(context)
+                                                        .context
+                                                        .findRenderObject()
+                                                    as RenderBox;
+                                            final RelativeRect position =
+                                                RelativeRect.fromRect(
+                                              Rect.fromPoints(
+                                                button.localToGlobal(
+                                                    Offset.zero,
+                                                    ancestor: overlay),
+                                                button.localToGlobal(
+                                                    button.size.bottomRight(
+                                                        Offset.zero),
+                                                    ancestor: overlay),
+                                              ),
+                                              Offset.zero & overlay.size,
+                                            );
+
+                                            showMenu(
+                                              context: context,
+                                              position:
+                                                  position, // Posición del menú
+                                              items: <PopupMenuEntry<int>>[
+                                                const PopupMenuItem(
+                                                    value: 1,
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceEvenly,
+                                                      children: [
+                                                        Icon(Icons.edit),
+                                                        Gap(5),
+                                                        Text('Editar'),
+                                                      ],
+                                                    )),
+                                                const PopupMenuDivider(),
+                                                const PopupMenuItem(
+                                                    value: 2,
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceEvenly,
+                                                      children: [
+                                                        Icon(Icons
+                                                            .delete_forever),
+                                                        Gap(5),
+                                                        Text('Borrar'),
+                                                      ],
+                                                    )),
+                                              ],
+                                            ).then((value) {
+                                              // Manejar la selección
+                                              if (value != null) {
+                                                // Acción en base al valor seleccionado
+                                              }
+                                            });
+                                          },
                                           style: ElevatedButton.styleFrom(
                                             tapTargetSize: MaterialTapTargetSize
                                                 .shrinkWrap,

@@ -7,7 +7,7 @@ part of 'num_pedido_actual.dart';
 // **************************************************************************
 
 String _$numeroPedidoActualHash() =>
-    r'57a60e2aedd1a440850aa946a565527414578c0d';
+    r'dc97da84e40d3bbebcdc535f3ccd9951ca386730';
 
 /// See also [NumeroPedidoActual].
 @ProviderFor(NumeroPedidoActual)

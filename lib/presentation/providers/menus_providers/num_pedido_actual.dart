@@ -11,4 +11,8 @@ class NumeroPedidoActual extends _$NumeroPedidoActual {
   void increment() => state++;
   void decrement() => state--;
   void resetNumeroPedidoActual() => state = 1;
+
+  void setCustomNumeroPedido(int newValue) {
+    state = newValue;
+  }
 }

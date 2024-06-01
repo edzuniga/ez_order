@@ -1,8 +1,4 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:ez_order_ezr/presentation/config/routes.dart';
-import 'package:ez_order_ezr/presentation/providers/auth_supabase_manager.dart';
-import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
-import 'package:ez_order_ezr/presentation/providers/menus_providers/num_pedido_actual.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +6,11 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:ez_order_ezr/presentation/dashboard/modals/ticket_number_modal.dart';
+import 'package:ez_order_ezr/presentation/config/routes.dart';
+import 'package:ez_order_ezr/presentation/providers/auth_supabase_manager.dart';
+import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/num_pedido_actual.dart';
 import 'package:ez_order_ezr/presentation/providers/dashboard_page_title.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 
@@ -49,20 +50,29 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
           ),
           const Spacer(),
           selectedPageIndex == 1
-              ? Container(
-                  width: 180,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: AppColors.kGeneralPrimaryOrange,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '# Ticket: $numOrdenActual',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontSize: 16,
+              ? Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () async {
+                      // print('button pressed');
+                      await _changeTicketNumber();
+                    },
+                    child: Container(
+                      width: 180,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppColors.kGeneralPrimaryOrange,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '# Ticket: $numOrdenActual',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                   ),
                 )
@@ -165,5 +175,18 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
         ),
       );
     }
+  }
+
+  Future<void> _changeTicketNumber() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.white.withOpacity(0),
+      builder: (_) => const Dialog(
+        elevation: 8,
+        backgroundColor: Colors.transparent,
+        child: TicketModal(),
+      ),
+    );
   }
 }
