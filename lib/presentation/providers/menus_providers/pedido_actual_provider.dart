@@ -44,6 +44,7 @@ class PedidoActual extends _$PedidoActual {
       idCliente: 1,
       numPedido: numPedidoActual,
       idMetodoPago: metPagoInt,
+      enPreparacion: true,
     );
   }
 
@@ -59,6 +60,7 @@ class PedidoActual extends _$PedidoActual {
     required int idCliente,
     required int numPedido,
     required int idMetodoPago,
+    required bool enPreparacion,
   }) {
     state = state.copyWith(
       subtotal: subtotl,
@@ -71,6 +73,7 @@ class PedidoActual extends _$PedidoActual {
       idCliente: idCliente,
       numPedido: numPedido,
       idMetodoPago: idMetodoPago,
+      enPreparacion: enPreparacion,
     );
   }
 
@@ -112,6 +115,7 @@ class PedidoActual extends _$PedidoActual {
       idCliente: 1,
       numPedido: numPedidoActual,
       idMetodoPago: metPagoInt,
+      enPreparacion: true,
     );
   }
 

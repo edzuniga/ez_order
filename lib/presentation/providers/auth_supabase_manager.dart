@@ -68,6 +68,9 @@ class AuthManager extends _$AuthManager {
     final supaInstance = getSupabaseInstance();
     try {
       await supaInstance.auth.signOut();
+      //Guardar esta info del usuario en el dispositivo
+      final SecureStorage secureStorage = SecureStorage();
+      await secureStorage.getAllValues();
       state = false;
       return 'success';
     } on AuthException catch (e) {

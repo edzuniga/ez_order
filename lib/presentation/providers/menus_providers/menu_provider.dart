@@ -82,6 +82,7 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
             idCliente: clienteActual.idCliente!,
             numPedido: numPedidoActual,
             idMetodoPago: metPagoInt,
+            enPreparacion: true,
           );
     } else {
       ref.read(pedidoActualProvider.notifier).actualizarInfo(
@@ -95,6 +96,7 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
             idCliente: 1,
             numPedido: numPedidoActual,
             idMetodoPago: metPagoInt,
+            enPreparacion: true,
           );
     }
   }

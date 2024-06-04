@@ -1,12 +1,13 @@
 import 'dart:io';
-import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
-import 'package:ez_order_ezr/presentation/providers/menus_providers/cliente_actual_provider.dart';
-import 'package:ez_order_ezr/presentation/providers/menus_providers/menu_provider.dart';
-import 'package:ez_order_ezr/presentation/providers/menus_providers/metodo_pago_actual.dart';
 import 'package:path/path.dart' as p;
 import 'package:random_string/random_string.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/cliente_actual_provider.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/menu_provider.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/metodo_pago_actual.dart';
 import 'package:ez_order_ezr/data/pedido_model.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/pedido_actual_provider.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/pedido_detalles_provider.dart';
@@ -221,6 +222,22 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  Future<List<PedidoDetalleModel>> getDetallesPedido(String uuIdPedido) async {
+    try {
+      final res = await state
+          .from('pedidos_items')
+          .select()
+          .eq('uuid_pedido', uuIdPedido);
+      List<PedidoDetalleModel> listadoProvi = [];
+      for (var element in res) {
+        listadoProvi.add(PedidoDetalleModel.fromJson(element));
+      }
+      return listadoProvi;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<int> countMenuItems() async {
     try {
       int userIdRestaurante = int.parse(
@@ -255,6 +272,30 @@ class SupabaseManagement extends _$SupabaseManagement {
     } on PostgrestException catch (e) {
       throw Exception(
           'Error al contar los elementos del catálogo: ${e.message}');
+    }
+  }
+
+  Future<String> getNombreMenuItem(int idMenu) async {
+    try {
+      final res = await state
+          .from('menus')
+          .select('nombre_item')
+          .eq('id_menu', idMenu)
+          .single();
+      return res['nombre_item'];
+    } on PostgrestException catch (e) {
+      return e.message;
+    }
+  }
+
+  Future<String> changePedidoStatus(String uuIdPedido) async {
+    try {
+      await state
+          .from('pedidos')
+          .update({'en_preparacion': false}).eq('uuid_pedido', uuIdPedido);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return e.message;
     }
   }
 }

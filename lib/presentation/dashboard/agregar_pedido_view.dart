@@ -1,7 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:ez_order_ezr/data/cliente_modelo.dart';
-import 'package:ez_order_ezr/presentation/dashboard/modals/metodo_pago_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -9,6 +7,8 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/data/cliente_modelo.dart';
+import 'package:ez_order_ezr/presentation/dashboard/modals/metodo_pago_modal.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/cliente_modal.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/descuento_modal.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/update_menu_modal.dart';

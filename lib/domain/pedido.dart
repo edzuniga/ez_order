@@ -15,6 +15,7 @@ abstract class Pedido {
     required this.idCliente,
     required this.numPedido,
     required this.idMetodoPago,
+    required this.enPreparacion,
   });
 
   final String? uuidPedido;
@@ -32,4 +33,5 @@ abstract class Pedido {
   final int idCliente;
   final int numPedido;
   final int idMetodoPago;
+  final bool enPreparacion;
 }

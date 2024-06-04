@@ -17,6 +17,7 @@ class PedidoModel extends Pedido {
     required super.idCliente,
     required super.numPedido,
     required super.idMetodoPago,
+    required super.enPreparacion,
   });
 
   factory PedidoModel.fromJson(Map<String, dynamic> json) {
@@ -36,6 +37,7 @@ class PedidoModel extends Pedido {
       idCliente: json["id_cliente"],
       numPedido: json["num_pedido"],
       idMetodoPago: json["id_metodo_pago"],
+      enPreparacion: json["en_preparacion"],
     );
   }
 
@@ -55,6 +57,7 @@ class PedidoModel extends Pedido {
       "id_cliente": idCliente,
       "num_pedido": numPedido,
       "id_metodo_pago": idMetodoPago,
+      "en_preparacion": enPreparacion,
     };
   }
 
@@ -74,6 +77,7 @@ class PedidoModel extends Pedido {
     int? idCliente,
     int? numPedido,
     int? idMetodoPago,
+    bool? enPreparacion,
   }) {
     return PedidoModel(
       uuidPedido: uuidPedido ?? this.uuidPedido,
@@ -91,6 +95,7 @@ class PedidoModel extends Pedido {
       idCliente: idCliente ?? this.idCliente,
       numPedido: numPedido ?? this.numPedido,
       idMetodoPago: idMetodoPago ?? this.idMetodoPago,
+      enPreparacion: enPreparacion ?? this.enPreparacion,
     );
   }
 }
