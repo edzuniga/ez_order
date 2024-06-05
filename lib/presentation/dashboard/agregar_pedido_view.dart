@@ -7,6 +7,7 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/presentation/dashboard/modals/nota_adicional_modal.dart';
 import 'package:ez_order_ezr/data/cliente_modelo.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/metodo_pago_modal.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/cliente_modal.dart';
@@ -37,8 +38,6 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
   late SupabaseStreamBuilder _stream;
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _pedidoListController = ScrollController();
-  final TextEditingController _notaAdicionalPedidoController =
-      TextEditingController();
 
   @override
   void initState() {
@@ -74,6 +73,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
         ref.watch(pedidoDetallesManagementProvider);
     return Row(
       children: [
+        //Área de menú
         Expanded(
           flex: 2,
           child: Container(
@@ -230,7 +230,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                               crossAxisCount: 3,
                               crossAxisSpacing: 10.0,
                               mainAxisSpacing: 10.0,
-                              childAspectRatio: 0.85,
+                              childAspectRatio: 0.80,
                             ),
                             itemBuilder: (ctx, index) {
                               MenuItemModel itemMenu = listadoMenuItems[index];
@@ -612,19 +612,6 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  /* ClipRRect(
-                                    clipBehavior: Clip.hardEdge,
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: SizedBox(
-                                      width: 80,
-                                      height: 40,
-                                      child: Image.network(
-                                        itemPedido.img!,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                  const Gap(5),*/
                                   Expanded(
                                     child: Column(
                                       mainAxisAlignment: MainAxisAlignment.end,
@@ -762,193 +749,244 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                       },
                     ),
                   ),
-                  //Área de NOTA ADICIONAL del pedido
                   SizedBox(
-                    width: double.infinity,
-                    child: TextField(
-                      controller: _notaAdicionalPedidoController,
-                      decoration: InputDecoration(
-                        hintText: 'Nota adicional de la orden...',
-                        border: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                              color: Color(0xFFE0E3E7), width: 0.5),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      maxLines: 2,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.kTextPrimaryBlack,
-                      ),
-                    ),
-                  ),
-                  const Divider(
-                    color: Colors.black,
-                  ),
-                  //Área de Subtotal
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.circle_outlined,
-                        color: AppColors.kTextSecondaryGray,
-                        size: 8,
-                      ),
-                      const Gap(5),
-                      Text(
-                        'Subtotal:',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        'L ${pedidoActualInfo.subtotal}',
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                    ],
-                  ),
-                  //Área de Exonerado
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.circle_outlined,
-                        color: AppColors.kTextSecondaryGray,
-                        size: 8,
-                      ),
-                      const Gap(5),
-                      Text(
-                        'Importe exonerado:',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        'L ${pedidoActualInfo.importeExonerado}',
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                    ],
-                  ),
-                  //Área de Exento
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.circle_outlined,
-                        color: AppColors.kTextSecondaryGray,
-                        size: 8,
-                      ),
-                      const Gap(5),
-                      Text(
-                        'Importe exento:',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        'L ${pedidoActualInfo.importeExento}',
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                    ],
-                  ),
-                  //Área de Gravado
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.circle_outlined,
-                        color: AppColors.kTextSecondaryGray,
-                        size: 8,
-                      ),
-                      const Gap(5),
-                      Text(
-                        'Importe gravado:',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        'L ${pedidoActualInfo.importeGravado}',
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                    ],
-                  ),
-                  //Área de descuento
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.circle_outlined,
-                        color: AppColors.kTextSecondaryGray,
-                        size: 8,
-                      ),
-                      const Gap(5),
-                      Text(
-                        'Descuento:',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                        ),
-                      ),
-                      Transform.scale(
-                        scale: 0.5,
-                        child: Padding(
-                          padding: EdgeInsets.zero,
-                          child: IconButton(
-                            onPressed: () async {
-                              await _addDescuentoModal();
-                            },
-                            constraints: const BoxConstraints(),
-                            padding: EdgeInsets.zero,
-                            style: IconButton.styleFrom(
-                              backgroundColor: Colors.blueGrey,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    height: 100,
+                    child: ListView(
+                      children: [
+                        //Área de NOTA ADICIONAL del pedido
+                        InkWell(
+                          onTap: () async {
+                            _addNotaAdicional();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: AppColors.kInputLiteGray,
+                              borderRadius: BorderRadius.circular(5),
                             ),
-                            icon: const Icon(
-                              Icons.add,
-                              color: Colors.white,
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Nota adicional',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.kTextPrimaryBlack,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.add_circle,
+                                  color: Colors.black,
+                                  size: 16,
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        'L ${pedidoActualInfo.descuento}',
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                    ],
-                  ),
-                  //Área de ISV
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.circle_outlined,
-                        color: AppColors.kTextSecondaryGray,
-                        size: 8,
-                      ),
-                      const Gap(5),
-                      Text(
-                        'ISV (15%):',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
+                        const Gap(4),
+                        //Detalles de factura (subtotal, impuesto, importe..., etc..)
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.kInputLiteGray,
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: ExpansionTile(
+                            dense: true,
+                            title: const Text(
+                              'Detalles de facturación',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.black,
+                              ),
+                            ),
+                            trailing:
+                                const Icon(Icons.arrow_drop_down_outlined),
+                            children: [
+                              //Área de Subtotal
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  const Gap(15),
+                                  const Icon(
+                                    Icons.circle_outlined,
+                                    color: AppColors.kTextSecondaryGray,
+                                    size: 8,
+                                  ),
+                                  const Gap(5),
+                                  Text(
+                                    'Subtotal:',
+                                    style: GoogleFonts.inter(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    'L ${pedidoActualInfo.subtotal}',
+                                    style: const TextStyle(fontSize: 10),
+                                  ),
+                                  const Gap(15),
+                                ],
+                              ),
+                              //Área de Exonerado
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  const Gap(15),
+                                  const Icon(
+                                    Icons.circle_outlined,
+                                    color: AppColors.kTextSecondaryGray,
+                                    size: 8,
+                                  ),
+                                  const Gap(5),
+                                  Text(
+                                    'Importe exonerado:',
+                                    style: GoogleFonts.inter(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    'L ${pedidoActualInfo.importeExonerado}',
+                                    style: const TextStyle(fontSize: 10),
+                                  ),
+                                  const Gap(15),
+                                ],
+                              ),
+                              //Área de Exento
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  const Gap(15),
+                                  const Icon(
+                                    Icons.circle_outlined,
+                                    color: AppColors.kTextSecondaryGray,
+                                    size: 8,
+                                  ),
+                                  const Gap(5),
+                                  Text(
+                                    'Importe exento:',
+                                    style: GoogleFonts.inter(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    'L ${pedidoActualInfo.importeExento}',
+                                    style: const TextStyle(fontSize: 10),
+                                  ),
+                                  const Gap(15),
+                                ],
+                              ),
+                              //Área de Gravado
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  const Gap(15),
+                                  const Icon(
+                                    Icons.circle_outlined,
+                                    color: AppColors.kTextSecondaryGray,
+                                    size: 8,
+                                  ),
+                                  const Gap(5),
+                                  Text(
+                                    'Importe gravado:',
+                                    style: GoogleFonts.inter(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    'L ${pedidoActualInfo.importeGravado}',
+                                    style: const TextStyle(fontSize: 10),
+                                  ),
+                                  const Gap(15),
+                                ],
+                              ),
+                              //Área de descuento
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  const Gap(15),
+                                  const Icon(
+                                    Icons.circle_outlined,
+                                    color: AppColors.kTextSecondaryGray,
+                                    size: 8,
+                                  ),
+                                  const Gap(5),
+                                  Text(
+                                    'Descuento:',
+                                    style: GoogleFonts.inter(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                  Transform.scale(
+                                    scale: 0.5,
+                                    child: Padding(
+                                      padding: EdgeInsets.zero,
+                                      child: IconButton(
+                                        onPressed: () async {
+                                          await _addDescuentoModal();
+                                        },
+                                        constraints: const BoxConstraints(),
+                                        padding: EdgeInsets.zero,
+                                        style: IconButton.styleFrom(
+                                          backgroundColor: Colors.blueGrey,
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                        ),
+                                        icon: const Icon(
+                                          Icons.add,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    'L ${pedidoActualInfo.descuento}',
+                                    style: const TextStyle(fontSize: 10),
+                                  ),
+                                  const Gap(15),
+                                ],
+                              ),
+                              //Área de ISV
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  const Gap(15),
+                                  const Icon(
+                                    Icons.circle_outlined,
+                                    color: AppColors.kTextSecondaryGray,
+                                    size: 8,
+                                  ),
+                                  const Gap(5),
+                                  Text(
+                                    'ISV (15%):',
+                                    style: GoogleFonts.inter(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    'L ${pedidoActualInfo.impuestos}',
+                                    style: const TextStyle(fontSize: 10),
+                                  ),
+                                  const Gap(15),
+                                ],
+                              ),
+                              const Gap(5),
+                            ],
+                          ),
                         ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        'L ${pedidoActualInfo.impuestos}',
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   //Botón para enviar orden
                   SizedBox(
@@ -995,7 +1033,6 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
   void dispose() {
     _searchController.dispose();
     _pedidoListController.dispose();
-    _notaAdicionalPedidoController.dispose();
     super.dispose();
   }
 
@@ -1008,6 +1045,19 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
         elevation: 8,
         backgroundColor: Colors.transparent,
         child: AgregarMenuModal(),
+      ),
+    );
+  }
+
+  Future<void> _addNotaAdicional() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.white.withOpacity(0),
+      builder: (_) => const Dialog(
+        elevation: 8,
+        backgroundColor: Colors.transparent,
+        child: NotaAdicionalModal(),
       ),
     );
   }
@@ -1028,10 +1078,6 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
   Future<void> _metodoPagoModal() async {
     final listadoPedido = ref.watch(menuItemPedidoListProvider);
     if (listadoPedido.isNotEmpty) {
-      //Incorporar la nota adicional
-      final pedidoActual = ref.read(pedidoActualProvider.notifier);
-      pedidoActual.asignarNotaAdicional(_notaAdicionalPedidoController.text);
-
       bool? res = await showDialog(
         context: context,
         barrierDismissible: false,
@@ -1044,7 +1090,6 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
       );
 
       if (res != null && res == true) {
-        _notaAdicionalPedidoController.clear();
         setState(() {
           ref
               .read(pedidoDetallesManagementProvider.notifier)

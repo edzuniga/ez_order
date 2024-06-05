@@ -1,7 +1,9 @@
-import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
-import 'package:ez_order_ezr/utils/secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
+import 'package:ez_order_ezr/utils/secure_storage.dart';
 part 'auth_supabase_manager.g.dart';
 
 @Riverpod(keepAlive: true)
@@ -45,7 +47,7 @@ class AuthManager extends _$AuthManager {
       //Obtener los datos de la tabla pública de usuarios
       final userData = await supaInstance
           .from('usuarios_info')
-          .select('email, nombre, rol, id_restaurante')
+          .select('email, nombre, rol, id_restaurante, uuid_usuario')
           .eq('uuid_usuario', userUuid)
           .single();
 
@@ -55,6 +57,11 @@ class AuthManager extends _$AuthManager {
       await secureStorage.setUserNombre(userData['nombre']);
       await secureStorage.setUserRol(userData['rol']);
       await secureStorage.setUserIdRestaurante(userData['id_restaurante']);
+      await secureStorage.setUserUuIdUser(userData['uuid_usuario']);
+
+      Map<String, String> userDataMap = await secureStorage.getAllValues();
+      //Guardar los datos en un provider
+      ref.read(userPublicDataProvider.notifier).setUserData(userDataMap);
 
       state = true;
       return 'success';

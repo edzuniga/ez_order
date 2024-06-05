@@ -56,7 +56,7 @@ class ClienteModelo extends Cliente {
     );
   }
 
-  ///this method will prevent the override of toString
+  //this method will prevent the override of toString
   String clienteAsString() {
     return nombreCliente;
   }

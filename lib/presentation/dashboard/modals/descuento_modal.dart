@@ -20,6 +20,12 @@ class _DeleteMenuItemModalState extends ConsumerState<DescuentoModal> {
   final TextEditingController _descuentoController = TextEditingController();
 
   @override
+  void dispose() {
+    _descuentoController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       width: 350,

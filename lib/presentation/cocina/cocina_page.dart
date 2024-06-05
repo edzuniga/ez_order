@@ -75,26 +75,6 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
                 //Custom Appbar para la cocina
                 const CocinaAppBar(),
                 const Gap(8),
-                //Título para las de cocina
-                Container(
-                  height: 46,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    'Pedidos por entregar',
-                    style: GoogleFonts.roboto(
-                      color: AppColors.kTextPrimaryBlack,
-                      fontSize: 18.0,
-                      letterSpacing: 0.0,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const Gap(8),
                 //listado de pedidos pendientes
                 Expanded(
                   child: Container(
@@ -228,13 +208,17 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
                                                             FontWeight.w700,
                                                       ),
                                                     ),
-                                                    Text(
-                                                      textoDetallePedido,
-                                                      style: GoogleFonts.inter(
-                                                        fontSize: 12,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FontWeight.w500,
+                                                    SizedBox(
+                                                      width: double.infinity,
+                                                      child: Text(
+                                                        textoDetallePedido,
+                                                        style:
+                                                            GoogleFonts.inter(
+                                                          fontSize: 12,
+                                                          letterSpacing: 0.0,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
                                                       ),
                                                     ),
                                                   ],
@@ -243,6 +227,8 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
                                               Expanded(
                                                 child: Container(
                                                   height: 80,
+                                                  padding:
+                                                      const EdgeInsets.all(10),
                                                   decoration: BoxDecoration(
                                                       border: Border.all(
                                                         color: Colors.black26,
@@ -250,11 +236,25 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               8)),
-                                                  child: Text(pedido
-                                                              .notaAdicional !=
-                                                          null
-                                                      ? '${pedido.notaAdicional}'
-                                                      : 'sin nota adicional'),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      const Text(
+                                                        'Nota adicional',
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 12,
+                                                        ),
+                                                      ),
+                                                      Text(pedido.notaAdicional !=
+                                                              null
+                                                          ? '${pedido.notaAdicional}'
+                                                          : 'sin nota adicional'),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
                                               const Gap(15),

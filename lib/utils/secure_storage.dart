@@ -6,6 +6,7 @@ class SecureStorage {
   final String _keyNombre = 'nombre';
   final String _keyRol = 'rol';
   final String _keyIdrestaurante = 'id_restaurante';
+  final String _keyUuIdUser = 'uuid_usuario';
 
   Future setUserEmail(String email) async {
     await storage.write(key: _keyEmail, value: email);
@@ -24,6 +25,10 @@ class SecureStorage {
         key: _keyIdrestaurante, value: idRestaurante.toString());
   }
 
+  Future setUserUuIdUser(String uuidUser) async {
+    await storage.write(key: _keyUuIdUser, value: uuidUser);
+  }
+
   Future<String?> getEmail() async {
     return await storage.read(key: _keyEmail);
   }
@@ -38,6 +43,10 @@ class SecureStorage {
 
   Future<String?> getIdRestaurante() async {
     return await storage.read(key: _keyIdrestaurante);
+  }
+
+  Future<String?> getUserUuid() async {
+    return await storage.read(key: _keyUuIdUser);
   }
 
   Future<Map<String, String>> getAllValues() async {

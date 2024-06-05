@@ -45,6 +45,7 @@ class PedidoActual extends _$PedidoActual {
       numPedido: numPedidoActual,
       idMetodoPago: metPagoInt,
       enPreparacion: true,
+      createdAt: DateTime.now(),
     );
   }
 
@@ -61,6 +62,7 @@ class PedidoActual extends _$PedidoActual {
     required int numPedido,
     required int idMetodoPago,
     required bool enPreparacion,
+    required DateTime createdAt,
   }) {
     state = state.copyWith(
       subtotal: subtotl,
@@ -74,6 +76,7 @@ class PedidoActual extends _$PedidoActual {
       numPedido: numPedido,
       idMetodoPago: idMetodoPago,
       enPreparacion: enPreparacion,
+      createdAt: createdAt,
     );
   }
 
@@ -116,6 +119,7 @@ class PedidoActual extends _$PedidoActual {
       numPedido: numPedidoActual,
       idMetodoPago: metPagoInt,
       enPreparacion: true,
+      createdAt: DateTime.now(),
     );
   }
 

@@ -40,6 +40,16 @@ class _CocinaAppBarState extends ConsumerState<CocinaAppBar> {
             ),
           ),
           const Spacer(),
+          Text(
+            'Pedidos por entregar',
+            style: GoogleFonts.roboto(
+              color: AppColors.kTextPrimaryBlack,
+              fontSize: 18.0,
+              letterSpacing: 0.0,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const Spacer(),
           IconButton(
             onPressed: () async {
               _tryingLogout ? null : await _tryLogout();

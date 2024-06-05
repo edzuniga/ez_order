@@ -18,6 +18,7 @@ class PedidoModel extends Pedido {
     required super.numPedido,
     required super.idMetodoPago,
     required super.enPreparacion,
+    required super.createdAt,
   });
 
   factory PedidoModel.fromJson(Map<String, dynamic> json) {
@@ -38,6 +39,7 @@ class PedidoModel extends Pedido {
       numPedido: json["num_pedido"],
       idMetodoPago: json["id_metodo_pago"],
       enPreparacion: json["en_preparacion"],
+      createdAt: DateTime.parse(json["created_at"]),
     );
   }
 
@@ -58,6 +60,7 @@ class PedidoModel extends Pedido {
       "num_pedido": numPedido,
       "id_metodo_pago": idMetodoPago,
       "en_preparacion": enPreparacion,
+      "created_at": createdAt.toIso8601String(),
     };
   }
 
@@ -78,6 +81,7 @@ class PedidoModel extends Pedido {
     int? numPedido,
     int? idMetodoPago,
     bool? enPreparacion,
+    DateTime? createdAt,
   }) {
     return PedidoModel(
       uuidPedido: uuidPedido ?? this.uuidPedido,
@@ -96,6 +100,7 @@ class PedidoModel extends Pedido {
       numPedido: numPedido ?? this.numPedido,
       idMetodoPago: idMetodoPago ?? this.idMetodoPago,
       enPreparacion: enPreparacion ?? this.enPreparacion,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }

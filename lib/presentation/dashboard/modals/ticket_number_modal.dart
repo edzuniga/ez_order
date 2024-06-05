@@ -1,11 +1,12 @@
-import 'package:ez_order_ezr/presentation/config/app_colors.dart';
-import 'package:ez_order_ezr/presentation/providers/menus_providers/num_pedido_actual.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import 'package:ez_order_ezr/presentation/config/app_colors.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/num_pedido_actual.dart';
 
 class TicketModal extends ConsumerStatefulWidget {
   const TicketModal({super.key});
@@ -16,6 +17,13 @@ class TicketModal extends ConsumerStatefulWidget {
 
 class _TicketModalState extends ConsumerState<TicketModal> {
   final TextEditingController _numeroTicketController = TextEditingController();
+
+  @override
+  void dispose() {
+    _numeroTicketController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(

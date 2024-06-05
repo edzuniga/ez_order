@@ -1,27 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'supabase_instance.dart';
+part of 'duenos_restaurantes_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$supabaseManagementHash() =>
-    r'85470317d1b8fc0a4c8313f55fa5248f1bf2dea9';
+String _$duenosResManagerHash() => r'2c70f0fe7a5296e568d5a0f60c00a7bc4332fb99';
 
-/// See also [SupabaseManagement].
-@ProviderFor(SupabaseManagement)
-final supabaseManagementProvider =
-    NotifierProvider<SupabaseManagement, SupabaseClient>.internal(
-  SupabaseManagement.new,
-  name: r'supabaseManagementProvider',
+/// See also [DuenosResManager].
+@ProviderFor(DuenosResManager)
+final duenosResManagerProvider =
+    NotifierProvider<DuenosResManager, List<RestauranteModelo>>.internal(
+  DuenosResManager.new,
+  name: r'duenosResManagerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$supabaseManagementHash,
+      : _$duenosResManagerHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$SupabaseManagement = Notifier<SupabaseClient>;
+typedef _$DuenosResManager = Notifier<List<RestauranteModelo>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

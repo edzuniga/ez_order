@@ -27,6 +27,14 @@ class _DeleteMenuItemModalState extends ConsumerState<ClienteModal> {
   bool _isTryingUpload = false;
 
   @override
+  void dispose() {
+    _rtnController.dispose();
+    _nombreController.dispose();
+    _correoController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       width: 350,

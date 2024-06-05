@@ -1,3 +1,4 @@
+import 'package:ez_order_ezr/presentation/dashboard/modals/borrar_pedido_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -13,6 +14,7 @@ import 'package:ez_order_ezr/presentation/config/routes.dart';
 import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
 import 'package:ez_order_ezr/presentation/widgets/pedidos_widgets/estadistica_minimalista_widget.dart';
 import 'package:ez_order_ezr/presentation/widgets/pedidos_widgets/estadistica_sencilla_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PedidosView extends ConsumerStatefulWidget {
   const PedidosView({super.key});
@@ -207,19 +209,29 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                     ),
                     const Gap(10),
                     //Containers para ayuda y soporte
-                    const Row(
+                    Row(
                       children: [
                         Expanded(
-                          child: EstadisticaContainerMinimalista(
-                            descripcion: 'Ayuda',
-                            icono: Icons.help_outline_rounded,
+                          child: InkWell(
+                            onTap: () async {
+                              await _launchUrlWeb();
+                            },
+                            child: const EstadisticaContainerMinimalista(
+                              descripcion: 'Ayuda',
+                              icono: Icons.help_outline_rounded,
+                            ),
                           ),
                         ),
-                        Gap(10),
+                        const Gap(10),
                         Expanded(
-                          child: EstadisticaContainerMinimalista(
-                            descripcion: 'Soporte',
-                            icono: Icons.record_voice_over_outlined,
+                          child: InkWell(
+                            onTap: () async {
+                              await _launchURL();
+                            },
+                            child: const EstadisticaContainerMinimalista(
+                              descripcion: 'Soporte',
+                              icono: Icons.record_voice_over_outlined,
+                            ),
                           ),
                         ),
                       ],
@@ -243,305 +255,368 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  child: StreamBuilder(
-                    stream: _pedidosStreamPorEntregar,
-                    builder: (BuildContext context,
-                        AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircularProgressIndicator(),
-                              Text('Cargando datos, por favor espere.'),
-                            ],
+                  child: Column(
+                    children: [
+                      const Center(
+                        child: Text(
+                          'EN PREPARACIÓN',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
                           ),
-                        );
-                      }
+                        ),
+                      ),
+                      Expanded(
+                        child: StreamBuilder(
+                          stream: _pedidosStreamPorEntregar,
+                          builder: (BuildContext context,
+                              AsyncSnapshot<List<Map<String, dynamic>>>
+                                  snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    CircularProgressIndicator(),
+                                    Text('Cargando datos, por favor espere.'),
+                                  ],
+                                ),
+                              );
+                            }
 
-                      if (snapshot.hasError) {
-                        return const Center(
-                          child: Text(
-                              'Ocurrió un error al querer cargar los datos!!'),
-                        );
-                      }
+                            if (snapshot.hasError) {
+                              return const Center(
+                                child: Text(
+                                    'Ocurrió un error al querer cargar los datos!!'),
+                              );
+                            }
 
-                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(
-                          child: Text('Aún no hay pedidos!!'),
-                        );
-                      } else {
-                        List<Map<String, dynamic>> listadoMap = snapshot.data!;
-                        List<PedidoModel> listadoPedidos = [];
-                        for (var element in listadoMap) {
-                          listadoPedidos.add(PedidoModel.fromJson(element));
-                        }
-                        _buttonKeys = List.generate(
-                            listadoPedidos.length, (index) => GlobalKey());
-                        return ListView.builder(
-                          physics: const ClampingScrollPhysics(),
-                          itemCount: listadoPedidos.length,
-                          itemBuilder: (ctx, index) {
-                            PedidoModel pedido = listadoPedidos[index];
-                            return FutureBuilder(
-                              future: _obtenerNombreCliente(pedido.idCliente),
-                              builder:
-                                  (BuildContext ctx, AsyncSnapshot<String> s) {
-                                if (s.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
+                            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                              return const Center(
+                                child: Text('Aún no hay pedidos!!'),
+                              );
+                            } else {
+                              List<Map<String, dynamic>> listadoMap =
+                                  snapshot.data!;
+                              List<PedidoModel> listadoPedidos = [];
+                              for (var element in listadoMap) {
+                                listadoPedidos
+                                    .add(PedidoModel.fromJson(element));
+                              }
+                              _buttonKeys = List.generate(listadoPedidos.length,
+                                  (index) => GlobalKey());
+                              return ListView.builder(
+                                physics: const ClampingScrollPhysics(),
+                                itemCount: listadoPedidos.length,
+                                itemBuilder: (ctx, index) {
+                                  PedidoModel pedido = listadoPedidos[index];
+                                  return FutureBuilder(
+                                    future:
+                                        _obtenerNombreCliente(pedido.idCliente),
+                                    builder: (BuildContext ctx,
+                                        AsyncSnapshot<String> s) {
+                                      if (s.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      }
 
-                                if (s.hasError) {
-                                  return const Center(
-                                    child: Text('Ocurrió un error!!'),
-                                  );
-                                }
+                                      if (s.hasError) {
+                                        return const Center(
+                                          child: Text('Ocurrió un error!!'),
+                                        );
+                                      }
 
-                                if (!s.hasData) {
-                                  return const Center(
-                                    child: Text('Sin datos!!'),
-                                  );
-                                } else {
-                                  String nombreCliente = s.data!;
-                                  return Column(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(5),
-                                        //height: 91.0,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                          border: Border.all(
-                                            color: const Color(0xFFE0E3E7),
-                                            width: 1.0,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
+                                      if (!s.hasData) {
+                                        return const Center(
+                                          child: Text('Sin datos!!'),
+                                        );
+                                      } else {
+                                        String nombreCliente = s.data!;
+                                        return Column(
                                           children: [
-                                            //Imagen del pedido
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              child: SizedBox(
-                                                width: 100.0,
-                                                height: 81.0,
-                                                child: Image.asset(
-                                                  'assets/images/pedidos.jpg',
-                                                  fit: BoxFit.cover,
+                                            Container(
+                                              padding: const EdgeInsets.all(5),
+                                              //height: 91.0,
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                                border: Border.all(
+                                                  color:
+                                                      const Color(0xFFE0E3E7),
+                                                  width: 1.0,
                                                 ),
                                               ),
-                                            ),
-                                            const Gap(5),
-                                            //Información del pedido
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
+                                              child: Row(
                                                 mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
                                                 children: [
-                                                  Text(
-                                                    '# ${pedido.numPedido}',
-                                                    style: GoogleFonts.inter(
-                                                      fontSize: 14,
-                                                      letterSpacing: 0.0,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    'Total: L ${pedido.total}',
-                                                    style: GoogleFonts.inter(
-                                                      fontSize: 12,
-                                                      letterSpacing: 0.0,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                    ),
-                                                  ),
-                                                  const Gap(10),
-                                                  RichText(
-                                                    text: TextSpan(
-                                                      text: 'Orden: ',
-                                                      style: GoogleFonts.inter(
-                                                        color: Colors.black,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                        fontSize: 8.0,
+                                                  //Imagen del pedido
+                                                  ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    child: SizedBox(
+                                                      width: 100.0,
+                                                      height: 81.0,
+                                                      child: Image.asset(
+                                                        'assets/images/pedidos.jpg',
+                                                        fit: BoxFit.cover,
                                                       ),
+                                                    ),
+                                                  ),
+                                                  const Gap(5),
+                                                  //Información del pedido
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisSize:
+                                                          MainAxisSize.max,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
                                                       children: [
-                                                        TextSpan(
-                                                          text: pedido.orden,
+                                                        Text(
+                                                          '# ${pedido.numPedido}',
                                                           style:
                                                               GoogleFonts.inter(
-                                                            color: Colors.grey,
-                                                            fontSize: 8.0,
-                                                          ),
-                                                        ),
-                                                        TextSpan(
-                                                          text: '\nCliente: ',
-                                                          style:
-                                                              GoogleFonts.inter(
-                                                            color: Colors.black,
+                                                            fontSize: 14,
+                                                            letterSpacing: 0.0,
                                                             fontWeight:
                                                                 FontWeight.w700,
-                                                            fontSize: 8.0,
                                                           ),
                                                         ),
-                                                        TextSpan(
-                                                          text: nombreCliente,
+                                                        Text(
+                                                          'Total: L ${pedido.total}',
                                                           style:
                                                               GoogleFonts.inter(
-                                                            color: Colors.grey,
-                                                            fontSize: 8.0,
+                                                            fontSize: 12,
+                                                            letterSpacing: 0.0,
+                                                            fontWeight:
+                                                                FontWeight.w500,
                                                           ),
                                                         ),
+                                                        const Gap(10),
+                                                        RichText(
+                                                          text: TextSpan(
+                                                            text: 'Orden: ',
+                                                            style: GoogleFonts
+                                                                .inter(
+                                                              color:
+                                                                  Colors.black,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700,
+                                                              fontSize: 8.0,
+                                                            ),
+                                                            children: [
+                                                              TextSpan(
+                                                                text: pedido
+                                                                    .orden,
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .inter(
+                                                                  color: Colors
+                                                                      .grey,
+                                                                  fontSize: 8.0,
+                                                                ),
+                                                              ),
+                                                              TextSpan(
+                                                                text:
+                                                                    '\nCliente: ',
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .inter(
+                                                                  color: Colors
+                                                                      .black,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w700,
+                                                                  fontSize: 8.0,
+                                                                ),
+                                                              ),
+                                                              TextSpan(
+                                                                text:
+                                                                    nombreCliente,
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .inter(
+                                                                  color: Colors
+                                                                      .grey,
+                                                                  fontSize: 8.0,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Icon(Icons.circle,
+                                                                size: 10,
+                                                                color: (pedido
+                                                                        .enPreparacion)
+                                                                    ? AppColors
+                                                                        .kGeneralPrimaryOrange
+                                                                    : Colors
+                                                                        .green),
+                                                            const Gap(8),
+                                                            const Text(
+                                                              'En preparación',
+                                                              style: TextStyle(
+                                                                fontSize: 10,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        )
                                                       ],
                                                     ),
                                                   ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      Icon(Icons.circle,
-                                                          size: 10,
-                                                          color: (pedido
-                                                                  .enPreparacion)
-                                                              ? AppColors
-                                                                  .kGeneralPrimaryOrange
-                                                              : Colors.green),
-                                                      const Gap(8),
-                                                      const Text(
-                                                        'En preparación',
-                                                        style: TextStyle(
-                                                          fontSize: 10,
+                                                  //Botón para las acciones del pedido
+                                                  Align(
+                                                    alignment:
+                                                        Alignment.topRight,
+                                                    child: ElevatedButton(
+                                                      key: _buttonKeys[index],
+                                                      onPressed: () {
+                                                        //-----obtener la posición del botón
+                                                        final RenderBox button =
+                                                            _buttonKeys[index]
+                                                                    .currentContext!
+                                                                    .findRenderObject()
+                                                                as RenderBox;
+                                                        final RenderBox
+                                                            overlay =
+                                                            Overlay.of(context)
+                                                                    .context
+                                                                    .findRenderObject()
+                                                                as RenderBox;
+                                                        final RelativeRect
+                                                            position =
+                                                            RelativeRect
+                                                                .fromRect(
+                                                          Rect.fromPoints(
+                                                            button.localToGlobal(
+                                                                Offset.zero,
+                                                                ancestor:
+                                                                    overlay),
+                                                            button.localToGlobal(
+                                                                button.size
+                                                                    .bottomRight(
+                                                                        Offset
+                                                                            .zero),
+                                                                ancestor:
+                                                                    overlay),
+                                                          ),
+                                                          Offset.zero &
+                                                              overlay.size,
+                                                        );
+                                                        //-----obtener la posición del botón
+
+                                                        //Mostrar el PopupMenu
+                                                        showMenu(
+                                                          context: context,
+                                                          position:
+                                                              position, // Posición del menú
+                                                          items: <PopupMenuEntry<
+                                                              int>>[
+                                                            PopupMenuItem(
+                                                              value: 1,
+                                                              onTap: () {},
+                                                              child: const Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceEvenly,
+                                                                children: [
+                                                                  Icon(Icons
+                                                                      .edit),
+                                                                  Gap(5),
+                                                                  Text(
+                                                                      'Editar'),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            const PopupMenuDivider(),
+                                                            PopupMenuItem(
+                                                              value: 2,
+                                                              onTap: () async {
+                                                                await _tryBorrarPedido(
+                                                                    pedido
+                                                                        .uuidPedido!);
+                                                              },
+                                                              child: const Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceEvenly,
+                                                                children: [
+                                                                  Icon(Icons
+                                                                      .delete_forever),
+                                                                  Gap(5),
+                                                                  Text(
+                                                                      'Cancelar'),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ).then((value) {
+                                                          // Manejar la selección
+                                                          if (value != null) {
+                                                            // Acción en base al valor seleccionado
+                                                          }
+                                                        });
+                                                      },
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        tapTargetSize:
+                                                            MaterialTapTargetSize
+                                                                .shrinkWrap,
+                                                        elevation: 0.0,
+                                                        backgroundColor:
+                                                            const Color(
+                                                                0xFFFFDFD0),
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      4.0),
                                                         ),
                                                       ),
-                                                    ],
-                                                  )
+                                                      child: Text(
+                                                        'Opciones',
+                                                        style:
+                                                            GoogleFonts.inter(
+                                                          color: Colors.black,
+                                                          fontSize: 12.0,
+                                                          letterSpacing: 0.0,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                             ),
-                                            //Botón para las acciones del pedido
-                                            Align(
-                                              alignment: Alignment.topRight,
-                                              child: ElevatedButton(
-                                                key: _buttonKeys[index],
-                                                onPressed: () {
-                                                  //-----obtener la posición del botón
-                                                  final RenderBox button =
-                                                      _buttonKeys[index]
-                                                              .currentContext!
-                                                              .findRenderObject()
-                                                          as RenderBox;
-                                                  final RenderBox overlay =
-                                                      Overlay.of(context)
-                                                              .context
-                                                              .findRenderObject()
-                                                          as RenderBox;
-                                                  final RelativeRect position =
-                                                      RelativeRect.fromRect(
-                                                    Rect.fromPoints(
-                                                      button.localToGlobal(
-                                                          Offset.zero,
-                                                          ancestor: overlay),
-                                                      button.localToGlobal(
-                                                          button.size
-                                                              .bottomRight(
-                                                                  Offset.zero),
-                                                          ancestor: overlay),
-                                                    ),
-                                                    Offset.zero & overlay.size,
-                                                  );
-                                                  //-----obtener la posición del botón
-
-                                                  //Mostrar el PopupMenu
-                                                  showMenu(
-                                                    context: context,
-                                                    position:
-                                                        position, // Posición del menú
-                                                    items: <PopupMenuEntry<
-                                                        int>>[
-                                                      PopupMenuItem(
-                                                        value: 1,
-                                                        onTap: () {},
-                                                        child: const Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceEvenly,
-                                                          children: [
-                                                            Icon(Icons.edit),
-                                                            Gap(5),
-                                                            Text('Editar'),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      const PopupMenuDivider(),
-                                                      PopupMenuItem(
-                                                        value: 2,
-                                                        onTap: () {},
-                                                        child: const Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceEvenly,
-                                                          children: [
-                                                            Icon(Icons
-                                                                .delete_forever),
-                                                            Gap(5),
-                                                            Text('Cancelar'),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ).then((value) {
-                                                    // Manejar la selección
-                                                    if (value != null) {
-                                                      // Acción en base al valor seleccionado
-                                                    }
-                                                  });
-                                                },
-                                                style: ElevatedButton.styleFrom(
-                                                  tapTargetSize:
-                                                      MaterialTapTargetSize
-                                                          .shrinkWrap,
-                                                  elevation: 0.0,
-                                                  backgroundColor:
-                                                      const Color(0xFFFFDFD0),
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            4.0),
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  'Opciones',
-                                                  style: GoogleFonts.inter(
-                                                    color: Colors.black,
-                                                    fontSize: 12.0,
-                                                    letterSpacing: 0.0,
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
+                                            const Gap(8),
                                           ],
-                                        ),
-                                      ),
-                                      const Gap(8),
-                                    ],
+                                        );
+                                      }
+                                    },
                                   );
-                                }
-                              },
-                            );
+                                },
+                              );
+                            }
                           },
-                        );
-                      }
-                    },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -554,202 +629,245 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  child: StreamBuilder(
-                    stream: _pedidosStreamEntregados,
-                    builder: (BuildContext context,
-                        AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircularProgressIndicator(),
-                              Text('Cargando datos, por favor espere.'),
-                            ],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Center(
+                        child: Text(
+                          'ENTREGADOS',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
                           ),
-                        );
-                      }
+                        ),
+                      ),
+                      Expanded(
+                        child: StreamBuilder(
+                          stream: _pedidosStreamEntregados,
+                          builder: (BuildContext context,
+                              AsyncSnapshot<List<Map<String, dynamic>>>
+                                  snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    CircularProgressIndicator(),
+                                    Text('Cargando datos, por favor espere.'),
+                                  ],
+                                ),
+                              );
+                            }
 
-                      if (snapshot.hasError) {
-                        return const Center(
-                          child: Text(
-                              'Ocurrió un error al querer cargar los datos!!'),
-                        );
-                      }
+                            if (snapshot.hasError) {
+                              return const Center(
+                                child: Text(
+                                    'Ocurrió un error al querer cargar los datos!!'),
+                              );
+                            }
 
-                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(
-                          child: Text('Aún no hay pedidos!!'),
-                        );
-                      } else {
-                        List<Map<String, dynamic>> listadoMap = snapshot.data!;
-                        List<PedidoModel> listadoPedidos = [];
-                        for (var element in listadoMap) {
-                          listadoPedidos.add(PedidoModel.fromJson(element));
-                        }
+                            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                              return const Center(
+                                child: Text('Aún no hay pedidos!!'),
+                              );
+                            } else {
+                              List<Map<String, dynamic>> listadoMap =
+                                  snapshot.data!;
+                              List<PedidoModel> listadoPedidos = [];
+                              for (var element in listadoMap) {
+                                listadoPedidos
+                                    .add(PedidoModel.fromJson(element));
+                              }
 
-                        return ListView.builder(
-                          physics: const ClampingScrollPhysics(),
-                          itemCount: listadoPedidos.length,
-                          itemBuilder: (ctx, index) {
-                            PedidoModel pedido = listadoPedidos[index];
-                            return FutureBuilder(
-                              future: _obtenerNombreCliente(pedido.idCliente),
-                              builder:
-                                  (BuildContext ctx, AsyncSnapshot<String> s) {
-                                if (s.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
+                              return ListView.builder(
+                                physics: const ClampingScrollPhysics(),
+                                itemCount: listadoPedidos.length,
+                                itemBuilder: (ctx, index) {
+                                  PedidoModel pedido = listadoPedidos[index];
+                                  return FutureBuilder(
+                                    future:
+                                        _obtenerNombreCliente(pedido.idCliente),
+                                    builder: (BuildContext ctx,
+                                        AsyncSnapshot<String> s) {
+                                      if (s.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      }
 
-                                if (s.hasError) {
-                                  return const Center(
-                                    child: Text('Ocurrió un error!!'),
-                                  );
-                                }
+                                      if (s.hasError) {
+                                        return const Center(
+                                          child: Text('Ocurrió un error!!'),
+                                        );
+                                      }
 
-                                if (!s.hasData) {
-                                  return const Center(
-                                    child: Text('Sin datos!!'),
-                                  );
-                                } else {
-                                  String nombreCliente = s.data!;
-                                  return Column(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(5),
-                                        //height: 91.0,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                          border: Border.all(
-                                            color: const Color(0xFFE0E3E7),
-                                            width: 1.0,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
+                                      if (!s.hasData) {
+                                        return const Center(
+                                          child: Text('Sin datos!!'),
+                                        );
+                                      } else {
+                                        String nombreCliente = s.data!;
+                                        return Column(
                                           children: [
-                                            //Imagen del pedido
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              child: SizedBox(
-                                                width: 100.0,
-                                                height: 81.0,
-                                                child: Image.asset(
-                                                  'assets/images/pedidos.jpg',
-                                                  fit: BoxFit.cover,
+                                            Container(
+                                              padding: const EdgeInsets.all(5),
+                                              //height: 91.0,
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                                border: Border.all(
+                                                  color:
+                                                      const Color(0xFFE0E3E7),
+                                                  width: 1.0,
                                                 ),
                                               ),
-                                            ),
-                                            const Gap(5),
-                                            //Información del pedido
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
+                                              child: Row(
                                                 mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
                                                 children: [
-                                                  Text(
-                                                    '# ${pedido.numPedido}',
-                                                    style: GoogleFonts.inter(
-                                                      fontSize: 14,
-                                                      letterSpacing: 0.0,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    'Total: L ${pedido.total}',
-                                                    style: GoogleFonts.inter(
-                                                      fontSize: 12,
-                                                      letterSpacing: 0.0,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                    ),
-                                                  ),
-                                                  const Gap(10),
-                                                  RichText(
-                                                    text: TextSpan(
-                                                      text: 'Orden: ',
-                                                      style: GoogleFonts.inter(
-                                                        color: Colors.black,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                        fontSize: 8.0,
+                                                  //Imagen del pedido
+                                                  ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    child: SizedBox(
+                                                      width: 100.0,
+                                                      height: 81.0,
+                                                      child: Image.asset(
+                                                        'assets/images/pedidos.jpg',
+                                                        fit: BoxFit.cover,
                                                       ),
+                                                    ),
+                                                  ),
+                                                  const Gap(5),
+                                                  //Información del pedido
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisSize:
+                                                          MainAxisSize.max,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
                                                       children: [
-                                                        TextSpan(
-                                                          text: pedido.orden,
+                                                        Text(
+                                                          '# ${pedido.numPedido}',
                                                           style:
                                                               GoogleFonts.inter(
-                                                            color: Colors.grey,
-                                                            fontSize: 8.0,
-                                                          ),
-                                                        ),
-                                                        TextSpan(
-                                                          text: '\nCliente: ',
-                                                          style:
-                                                              GoogleFonts.inter(
-                                                            color: Colors.black,
+                                                            fontSize: 14,
+                                                            letterSpacing: 0.0,
                                                             fontWeight:
                                                                 FontWeight.w700,
-                                                            fontSize: 8.0,
                                                           ),
                                                         ),
-                                                        TextSpan(
-                                                          text: nombreCliente,
+                                                        Text(
+                                                          'Total: L ${pedido.total}',
                                                           style:
                                                               GoogleFonts.inter(
-                                                            color: Colors.grey,
-                                                            fontSize: 8.0,
+                                                            fontSize: 12,
+                                                            letterSpacing: 0.0,
+                                                            fontWeight:
+                                                                FontWeight.w500,
                                                           ),
                                                         ),
+                                                        const Gap(10),
+                                                        RichText(
+                                                          text: TextSpan(
+                                                            text: 'Orden: ',
+                                                            style: GoogleFonts
+                                                                .inter(
+                                                              color:
+                                                                  Colors.black,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700,
+                                                              fontSize: 8.0,
+                                                            ),
+                                                            children: [
+                                                              TextSpan(
+                                                                text: pedido
+                                                                    .orden,
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .inter(
+                                                                  color: Colors
+                                                                      .grey,
+                                                                  fontSize: 8.0,
+                                                                ),
+                                                              ),
+                                                              TextSpan(
+                                                                text:
+                                                                    '\nCliente: ',
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .inter(
+                                                                  color: Colors
+                                                                      .black,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w700,
+                                                                  fontSize: 8.0,
+                                                                ),
+                                                              ),
+                                                              TextSpan(
+                                                                text:
+                                                                    nombreCliente,
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .inter(
+                                                                  color: Colors
+                                                                      .grey,
+                                                                  fontSize: 8.0,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Icon(Icons.circle,
+                                                                size: 10,
+                                                                color: (pedido
+                                                                        .enPreparacion)
+                                                                    ? AppColors
+                                                                        .kGeneralPrimaryOrange
+                                                                    : Colors
+                                                                        .green),
+                                                            const Gap(8),
+                                                            const Text(
+                                                              'Entregado',
+                                                              style: TextStyle(
+                                                                fontSize: 10,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        )
                                                       ],
                                                     ),
                                                   ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      Icon(Icons.circle,
-                                                          size: 10,
-                                                          color: (pedido
-                                                                  .enPreparacion)
-                                                              ? AppColors
-                                                                  .kGeneralPrimaryOrange
-                                                              : Colors.green),
-                                                      const Gap(8),
-                                                      const Text(
-                                                        'Entregado',
-                                                        style: TextStyle(
-                                                          fontSize: 10,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  )
                                                 ],
                                               ),
                                             ),
+                                            const Gap(8),
                                           ],
-                                        ),
-                                      ),
-                                      const Gap(8),
-                                    ],
+                                        );
+                                      }
+                                    },
                                   );
-                                }
-                              },
-                            );
+                                },
+                              );
+                            }
                           },
-                        );
-                      }
-                    },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -764,5 +882,43 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
     return await ref
         .read(supabaseManagementProvider.notifier)
         .getClienteName(clienteId);
+  }
+
+  Future<void> _launchURL() async {
+    const phoneNumber = '50433905572';
+    const message = 'Necesito ayuda con mi app';
+    final url =
+        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}';
+    final Uri parsedUrl = Uri.parse(url);
+
+    if (await canLaunchUrl(parsedUrl)) {
+      await launchUrl(parsedUrl);
+    } else {
+      throw 'No se pudo abrir $url';
+    }
+  }
+
+  Future<void> _launchUrlWeb() async {
+    const url = 'https://uphn.net';
+    final Uri parsedUrl = Uri.parse(url);
+
+    if (await canLaunchUrl(parsedUrl)) {
+      await launchUrl(parsedUrl);
+    } else {
+      throw 'No se pudo abrir $url';
+    }
+  }
+
+  Future<void> _tryBorrarPedido(String uuIdPedido) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.white.withOpacity(0),
+      builder: (_) => Dialog(
+        elevation: 8,
+        backgroundColor: Colors.transparent,
+        child: BorrarPedidoModal(uuIdPedido: uuIdPedido),
+      ),
+    );
   }
 }

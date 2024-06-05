@@ -6,7 +6,7 @@ part of 'auth_supabase_manager.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$authManagerHash() => r'4bf9855c7cfd815d52979a01fb6d516a87d8ba3e';
+String _$authManagerHash() => r'534a4df85f3c7075d9a8fb6994d7bb57b4c0ae1d';
 
 /// See also [AuthManager].
 @ProviderFor(AuthManager)

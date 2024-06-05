@@ -56,7 +56,8 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
       double subTotal = double.parse(sumaPrecios.toStringAsFixed(2));
       double impuestos = double.parse((sumaPrecios * 0.15).toStringAsFixed(2));
       double descuentoActual = ref.read(descuentoPedidoActualProvider);
-      double total = subTotal + impuestos - descuentoActual;
+      double total = double.parse(
+          (subTotal + impuestos - descuentoActual).toStringAsFixed(2));
       double importeExonerado = 0.00;
       double importeExento = 0.00;
       double importeGravado = 0.00;
@@ -83,6 +84,7 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
             numPedido: numPedidoActual,
             idMetodoPago: metPagoInt,
             enPreparacion: true,
+            createdAt: DateTime.now(),
           );
     } else {
       ref.read(pedidoActualProvider.notifier).actualizarInfo(
@@ -97,6 +99,7 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
             numPedido: numPedidoActual,
             idMetodoPago: metPagoInt,
             enPreparacion: true,
+            createdAt: DateTime.now(),
           );
     }
   }

@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:ez_order_ezr/data/restaurante_modelo.dart';
+import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/duenos_restaurantes_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:random_string/random_string.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -255,6 +257,9 @@ class SupabaseManagement extends _$SupabaseManagement {
   }
 
   Future<int> countPedidosDelDia() async {
+    final today = DateTime.now();
+    final startOfDay = DateTime(today.year, today.month, today.day);
+
     try {
       int userIdRestaurante = int.parse(
           ref.read(userPublicDataProvider)['id_restaurante'].toString());
@@ -264,8 +269,7 @@ class SupabaseManagement extends _$SupabaseManagement {
           .eq('id_restaurante', userIdRestaurante)
           .gte(
             'created_at',
-            DateTime(
-                DateTime.now().year, DateTime.now().month, DateTime.now().day),
+            startOfDay,
           )
           .count(CountOption.exact);
       return res.count;
@@ -293,6 +297,41 @@ class SupabaseManagement extends _$SupabaseManagement {
       await state
           .from('pedidos')
           .update({'en_preparacion': false}).eq('uuid_pedido', uuIdPedido);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return e.message;
+    }
+  }
+
+  Future<String> borrarPedido(String uuIdPedido) async {
+    try {
+      //Primero borrar los detalles
+      await state.from('pedidos_items').delete().eq('uuid_pedido', uuIdPedido);
+      await state.from('pedidos').delete().eq('uuid_pedido', uuIdPedido);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return e.message;
+    }
+  }
+
+  Future<String> obtenerIdRestaurantesPorDueno(String uuIdDueno) async {
+    try {
+      List<Map<String, dynamic>> res = await state
+          .from('dueno_restaurantes')
+          .select()
+          .eq('uuid_dueno', uuIdDueno);
+
+      final duenosRes = ref.read(duenosResManagerProvider.notifier);
+      duenosRes.resetLlistRestaurantes(); //Limpiar lista inicialmente
+      for (Map<String, dynamic> element in res) {
+        //Obtener sus datos de Supa para luego agregarlos al provider de restaurantes
+        Map<String, dynamic> singleRes = await state
+            .from('restaurantes')
+            .select()
+            .eq('id_restaurante', element['id_restaurante'])
+            .single();
+        duenosRes.addRestaurante(RestauranteModelo.fromJson(singleRes));
+      }
       return 'success';
     } on PostgrestException catch (e) {
       return e.message;
