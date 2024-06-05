@@ -1,4 +1,6 @@
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:ez_order_ezr/data/reporte_modelo.dart';
+import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/reportes_valores_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -38,7 +40,9 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
 
   @override
   Widget build(BuildContext context) {
-    final restauranteActual = ref.watch(restauranteSeleccionadoProvider);
+    RestauranteModelo restauranteActual =
+        ref.watch(restauranteSeleccionadoProvider);
+    ReporteModelo valoresReporte = ref.watch(valoresReportesProvider);
     return Center(
       child: Container(
         padding: const EdgeInsets.all(15),
@@ -97,12 +101,15 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                   ),
                 ),
                 itemAsString: (RestauranteModelo r) => r.restauranteAsString(),
-                onChanged: (RestauranteModelo? data) {
+                onChanged: (RestauranteModelo? data) async {
                   if (data != null) {
                     //Asignar el restaurante selecto al provider
                     ref
                         .read(restauranteSeleccionadoProvider.notifier)
                         .setRestauranteSeleccionado(data);
+
+                    //Hacer los respectivos cálculos con el restaurante seleccionado
+                    await _hacerCalculosReportes(data.idRestaurante!);
                   }
                 },
                 selectedItem: restauranteActual,
@@ -110,22 +117,22 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
             ),
             const Gap(15),
             //Containers con estadísticas senciilas del día
-            const Wrap(
+            Wrap(
               spacing: 8.0,
               runSpacing: 8.0,
               children: [
                 EstadisticaContainer(
-                  estadistica: '1000',
+                  estadistica: '${valoresReporte.cantMenu}',
                   descripcion: 'Productos en catálogo',
                   icono: Icons.restaurant_outlined,
                 ),
                 EstadisticaContainer(
-                  estadistica: '1000',
+                  estadistica: '${valoresReporte.cantPedidosDiarios}',
                   descripcion: 'Pedidos en este día',
                   icono: Icons.shopping_bag_outlined,
                 ),
                 EstadisticaContainer(
-                  estadistica: 'L 10,000',
+                  estadistica: 'L ${valoresReporte.ingresosDiarios}',
                   descripcion: 'Ingreso del día de hoy',
                   icono: Icons.money,
                 ),
@@ -135,5 +142,11 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
         ),
       ),
     );
+  }
+
+  Future<void> _hacerCalculosReportes(int idRestaurantes) async {
+    await ref
+        .read(valoresReportesProvider.notifier)
+        .hacerCalculosReporte(idRestaurantes);
   }
 }
