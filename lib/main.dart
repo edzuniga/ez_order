@@ -1,11 +1,13 @@
-import 'package:ez_order_ezr/presentation/config/app_colors.dart';
-import 'package:ez_order_ezr/presentation/providers/router_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_strategy/url_strategy.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+import 'package:ez_order_ezr/presentation/config/app_colors.dart';
+import 'package:ez_order_ezr/presentation/providers/router_config.dart';
 
 Future<void> main() async {
   //ensure flutter
@@ -36,6 +38,12 @@ class MyApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('es')],
       title: 'EZOrder',
       theme: ThemeData(
         dialogBackgroundColor: Colors.transparent,

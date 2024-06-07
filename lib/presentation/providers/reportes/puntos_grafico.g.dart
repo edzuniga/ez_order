@@ -1,27 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'supabase_instance.dart';
+part of 'puntos_grafico.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$supabaseManagementHash() =>
-    r'3862a1f8c14da574662f49a4351bc6a6b6186489';
+String _$puntosGraficoHash() => r'91b23976f4230d9b49e9c2f59caf298aaa43ad7f';
 
-/// See also [SupabaseManagement].
-@ProviderFor(SupabaseManagement)
-final supabaseManagementProvider =
-    NotifierProvider<SupabaseManagement, SupabaseClient>.internal(
-  SupabaseManagement.new,
-  name: r'supabaseManagementProvider',
+/// See also [PuntosGrafico].
+@ProviderFor(PuntosGrafico)
+final puntosGraficoProvider =
+    NotifierProvider<PuntosGrafico, List<FlSpot>>.internal(
+  PuntosGrafico.new,
+  name: r'puntosGraficoProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$supabaseManagementHash,
+      : _$puntosGraficoHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$SupabaseManagement = Notifier<SupabaseClient>;
+typedef _$PuntosGrafico = Notifier<List<FlSpot>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

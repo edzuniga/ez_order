@@ -337,4 +337,21 @@ class SupabaseManagement extends _$SupabaseManagement {
       return e.message;
     }
   }
+
+  Future<List<double>> obtenerIngresosTotalesEntreFechas(
+      DateTime initialDate, DateTime finalDate, int idRestaurante) async {
+    final res = await state
+        .from('pedidos')
+        .select('created_at, total, id_restaurante')
+        .gte('created_at', initialDate.toIso8601String())
+        .lte('created_at', finalDate.toIso8601String())
+        .eq('id_restaurante', idRestaurante)
+        .order('created_at', ascending: true);
+
+    //TODO:este query me devuelve todos los pedidos del restaurante entre dos fechas
+    //Ocupo ahora transformas estos datos a dos listados (uno de fechas y otro de
+    //valores sumados de total por cada fecha)
+
+    return [];
+  }
 }

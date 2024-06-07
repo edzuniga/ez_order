@@ -1,27 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'supabase_instance.dart';
+part of 'datos_grafico_comparativo_ingresos.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$supabaseManagementHash() =>
-    r'3862a1f8c14da574662f49a4351bc6a6b6186489';
+String _$datosGraficoIngresosHash() =>
+    r'77ebea3f8064f10454857d9e1a7b80a60e5698c7';
 
-/// See also [SupabaseManagement].
-@ProviderFor(SupabaseManagement)
-final supabaseManagementProvider =
-    NotifierProvider<SupabaseManagement, SupabaseClient>.internal(
-  SupabaseManagement.new,
-  name: r'supabaseManagementProvider',
+/// See also [DatosGraficoIngresos].
+@ProviderFor(DatosGraficoIngresos)
+final datosGraficoIngresosProvider =
+    NotifierProvider<DatosGraficoIngresos, DatosGraficoModelo>.internal(
+  DatosGraficoIngresos.new,
+  name: r'datosGraficoIngresosProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$supabaseManagementHash,
+      : _$datosGraficoIngresosHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$SupabaseManagement = Notifier<SupabaseClient>;
+typedef _$DatosGraficoIngresos = Notifier<DatosGraficoModelo>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
