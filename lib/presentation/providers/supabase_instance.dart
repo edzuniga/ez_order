@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:random_string/random_string.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -340,7 +341,7 @@ class SupabaseManagement extends _$SupabaseManagement {
 
   Future<List<double>> obtenerIngresosTotalesEntreFechas(
       DateTime initialDate, DateTime finalDate, int idRestaurante) async {
-    final res = await state
+    List<Map<String, dynamic>> res = await state
         .from('pedidos')
         .select('created_at, total, id_restaurante')
         .gte('created_at', initialDate.toIso8601String())
@@ -348,10 +349,35 @@ class SupabaseManagement extends _$SupabaseManagement {
         .eq('id_restaurante', idRestaurante)
         .order('created_at', ascending: true);
 
-    //TODO:este query me devuelve todos los pedidos del restaurante entre dos fechas
-    //Ocupo ahora transformas estos datos a dos listados (uno de fechas y otro de
-    //valores sumados de total por cada fecha)
+    Map<String, double> dailyTotals = {};
 
-    return [];
+    // Generate a list of dates within the range
+    List<DateTime> dateRange = [];
+    for (DateTime date = initialDate;
+        date.isBefore(finalDate) || date.isAtSameMomentAs(finalDate);
+        date = date.add(const Duration(days: 1))) {
+      dateRange.add(date);
+    }
+
+    // Initialize the dailyTotals map with 0.0 for each date in the range
+    for (var date in dateRange) {
+      String dateString = DateFormat('yyyy-MM-dd').format(date);
+      dailyTotals[dateString] = 0.0;
+    }
+
+    // Sum the totals for each date
+    for (Map<String, dynamic> entry in res) {
+      String date =
+          DateFormat('yyyy-MM-dd').format(DateTime.parse(entry['created_at']));
+      double total = entry['total'].toDouble();
+
+      if (dailyTotals.containsKey(date)) {
+        dailyTotals[date] = dailyTotals[date]! + total;
+      }
+    }
+
+    List<double> dailyTotalsList = dailyTotals.values.toList();
+
+    return dailyTotalsList;
   }
 }

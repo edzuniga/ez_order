@@ -1,6 +1,6 @@
-import 'package:ez_order_ezr/data/datos_grafico_modelo.dart';
-import 'package:ez_order_ezr/presentation/providers/reportes/puntos_grafico.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:ez_order_ezr/data/datos_grafico_modelo.dart';
 part 'datos_grafico_comparativo_ingresos.g.dart';
 
 @Riverpod(keepAlive: true)
@@ -14,6 +14,7 @@ class DatosGraficoIngresos extends _$DatosGraficoIngresos {
       yValues: [],
       maxX: 0,
       maxY: 0,
+      puntos: [],
     );
   }
 
@@ -23,6 +24,7 @@ class DatosGraficoIngresos extends _$DatosGraficoIngresos {
   }) {
     List<int> xValues = [];
     List<String> xLabels = [];
+    List<FlSpot> listadoPuntos = [];
 
     //Lógica para obtener los datos del gráfico
     for (int i = 0; i < xDates.length; i++) {
@@ -33,6 +35,11 @@ class DatosGraficoIngresos extends _$DatosGraficoIngresos {
     double maxValue =
         yValues.isEmpty ? 0 : yValues.reduce((a, b) => a > b ? a : b);
 
+    //Crear los puntos para el gráfico
+    for (int i = 0; i < xValues.length; i++) {
+      listadoPuntos.add(FlSpot(xValues[i].toDouble(), yValues[i]));
+    }
+
     //Guardar el nuevo estado
     state = state.copyWith(
       xDates: xDates,
@@ -41,11 +48,8 @@ class DatosGraficoIngresos extends _$DatosGraficoIngresos {
       yValues: yValues,
       maxX: xDates.length - 1,
       maxY: maxValue,
+      puntos: listadoPuntos,
     );
-
-    ref
-        .read(puntosGraficoProvider.notifier)
-        .setPuntosGraficos(xValues, yValues);
   }
 
   void resetState() {
@@ -56,6 +60,7 @@ class DatosGraficoIngresos extends _$DatosGraficoIngresos {
       yValues: [],
       maxX: 0,
       maxY: 0,
+      puntos: [],
     );
   }
 }

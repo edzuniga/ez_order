@@ -1,4 +1,5 @@
 import 'package:ez_order_ezr/domain/datos_grafico.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class DatosGraficoModelo extends DatosGrafico {
   DatosGraficoModelo({
@@ -8,6 +9,7 @@ class DatosGraficoModelo extends DatosGrafico {
     required super.yValues,
     required super.maxX,
     required super.maxY,
+    required super.puntos,
   });
 
   DatosGraficoModelo copyWith({
@@ -17,6 +19,7 @@ class DatosGraficoModelo extends DatosGrafico {
     List<double>? yValues,
     double? maxX,
     double? maxY,
+    List<FlSpot>? puntos,
   }) {
     return DatosGraficoModelo(
       xDates: xDates ?? this.xDates,
@@ -25,6 +28,7 @@ class DatosGraficoModelo extends DatosGrafico {
       yValues: yValues ?? this.yValues,
       maxX: maxX ?? this.maxX,
       maxY: maxY ?? this.maxY,
+      puntos: puntos ?? this.puntos,
     );
   }
 }

@@ -1,9 +1,4 @@
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:ez_order_ezr/data/datos_grafico_modelo.dart';
-import 'package:ez_order_ezr/presentation/providers/reportes/datos_grafico_comparativo_ingresos.dart';
-import 'package:ez_order_ezr/presentation/providers/reportes/puntos_grafico.dart';
-import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
-import 'package:ez_order_ezr/utils/obtener_fechas_rango.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +7,10 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import 'package:ez_order_ezr/data/datos_grafico_modelo.dart';
+import 'package:ez_order_ezr/presentation/providers/reportes/datos_grafico_comparativo_ingresos.dart';
+import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
+import 'package:ez_order_ezr/utils/obtener_fechas_rango.dart';
 import 'package:ez_order_ezr/data/reporte_modelo.dart';
 import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/reportes_valores_provider.dart';
 import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/restaurante_seleccionado_provider.dart';
@@ -184,7 +183,6 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                 //Containers con estadísticas senciilas del día
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 10),
-                  color: Colors.blue[50],
                   width: double.infinity,
                   alignment: Alignment.center,
                   child: Wrap(
@@ -264,14 +262,6 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                               _fechaInicial = selectedRange.start.toString();
                               _fechaFinal = selectedRange.end.toString();
                             });
-
-                            //PRUEBAS TODO:
-                            ref
-                                .read(supabaseManagementProvider.notifier)
-                                .obtenerIngresosTotalesEntreFechas(
-                                    _initialDate!,
-                                    _finalDate!,
-                                    restauranteActual.idRestaurante!);
                           }
                         });
                       },
@@ -356,78 +346,107 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                 const SizedBox(width: 500, child: Divider()),
                 //ÁREA PARA GRÁFICOS Y OTRAS ESTADÍSTICAS DEL REPORTE FILTRADO
                 _isShowingReport
-                    ? SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Container(
-                          height: 400,
-                          width: screenSize.width * 0.95,
-                          padding: const EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            color: AppColors.kInputLiteGray,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: LineChart(
-                            LineChartData(
-                              lineTouchData: LineTouchData(
-                                handleBuiltInTouches: true,
-                                touchTooltipData: LineTouchTooltipData(
-                                  getTooltipColor: (touchedSpot) =>
-                                      Colors.blueGrey.withOpacity(0.8),
+                    ? Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              height: 400,
+                              padding: const EdgeInsets.all(15),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.black12,
+                                  width: 0.5,
                                 ),
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              gridData: const FlGridData(show: false),
-                              titlesData: FlTitlesData(
-                                bottomTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                      showTitles: true,
-                                      reservedSize: 32,
-                                      interval: 1,
-                                      getTitlesWidget: bottomTitleWidgets),
-                                ),
-                                rightTitles: const AxisTitles(
-                                  sideTitles: SideTitles(showTitles: false),
-                                ),
-                                topTitles: const AxisTitles(
-                                  sideTitles: SideTitles(showTitles: false),
-                                ),
-                                leftTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                    getTitlesWidget: leftTitleWidgets,
-                                    showTitles: true,
-                                    interval: 1,
-                                    reservedSize: 40,
+                              child: LineChart(
+                                LineChartData(
+                                  lineTouchData: LineTouchData(
+                                    handleBuiltInTouches: true,
+                                    touchTooltipData: LineTouchTooltipData(
+                                      getTooltipColor: (touchedSpot) =>
+                                          Colors.white,
+                                    ),
                                   ),
+                                  gridData: const FlGridData(show: false),
+                                  titlesData: FlTitlesData(
+                                    bottomTitles: AxisTitles(
+                                      axisNameWidget: const Text(
+                                        'Ingresos totales diarios',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      sideTitles: SideTitles(
+                                          showTitles: true,
+                                          reservedSize: 32,
+                                          interval: 1,
+                                          getTitlesWidget: bottomTitleWidgets),
+                                    ),
+                                    rightTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                    topTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                    leftTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                        getTitlesWidget: leftTitleWidgets,
+                                        showTitles: true,
+                                        interval: 1,
+                                        reservedSize: 60,
+                                      ),
+                                    ),
+                                  ),
+                                  borderData: FlBorderData(
+                                    show: true,
+                                    border: const Border(
+                                      bottom: BorderSide(
+                                          color: Colors.black12, width: 1),
+                                      left:
+                                          BorderSide(color: Colors.transparent),
+                                      right:
+                                          BorderSide(color: Colors.transparent),
+                                      top:
+                                          BorderSide(color: Colors.transparent),
+                                    ),
+                                  ),
+                                  lineBarsData: [
+                                    LineChartBarData(
+                                      color: AppColors.kGeneralPrimaryOrange,
+                                      barWidth: 1,
+                                      isStrokeCapRound: true,
+                                      dotData: const FlDotData(show: true),
+                                      belowBarData: BarAreaData(
+                                          show: true,
+                                          color: AppColors.kGeneralOrangeBg
+                                              .withOpacity(0.3)),
+                                      spots: datosGrafico.puntos,
+                                    ),
+                                  ],
+                                  minX: 0,
+                                  minY: 0,
+                                  maxX: datosGrafico.maxX,
+                                  maxY: datosGrafico.maxY,
                                 ),
+                                duration: const Duration(milliseconds: 250),
                               ),
-                              borderData: FlBorderData(
-                                show: true,
-                                border: const Border(
-                                  bottom:
-                                      BorderSide(color: Colors.black, width: 1),
-                                  left: BorderSide(color: Colors.transparent),
-                                  right: BorderSide(color: Colors.transparent),
-                                  top: BorderSide(color: Colors.transparent),
-                                ),
-                              ),
-                              lineBarsData: [
-                                LineChartBarData(
-                                  color: AppColors.kGeneralPrimaryOrange,
-                                  barWidth: 2,
-                                  isStrokeCapRound: true,
-                                  dotData: const FlDotData(show: false),
-                                  belowBarData: BarAreaData(
-                                      show: true, color: Colors.black12),
-                                  spots: ref.read(puntosGraficoProvider),
-                                ),
-                              ],
-                              minX: 0,
-                              minY: 0,
-                              maxX: datosGrafico.maxX,
-                              maxY: datosGrafico.maxY,
                             ),
-                            duration: const Duration(milliseconds: 250),
                           ),
-                        ),
+                          const Gap(5),
+                          Container(
+                            width: screenSize.width * 0.35,
+                            height: 400,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                width: 0.5,
+                                color: Colors.black12,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ],
                       )
                     : const SizedBox(),
               ],
@@ -491,12 +510,40 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
   }
 
   Widget leftTitleWidgets(double value, TitleMeta meta) {
+    //Provider con los datos del gráfico
+    DatosGraficoModelo datosGrafico = ref.read(datosGraficoIngresosProvider);
     const style = TextStyle(
       fontWeight: FontWeight.bold,
       fontSize: 14,
     );
-    String text;
-    text = value.toString();
+
+    String text = '';
+    //Valor inicial
+    if (value.toInt() == 0) {
+      text = '0';
+    }
+    //Valor 1/4
+    if (value.toInt() == (datosGrafico.maxY / 4).toInt()) {
+      text = '${(datosGrafico.maxY * 0.25).toInt()}';
+    }
+    //Valor 1/2
+    if (value.toInt() == (datosGrafico.maxY / 2).toInt()) {
+      text = '${(datosGrafico.maxY / 2).toInt()}';
+    }
+    //Valor 3/4
+    if (value.toInt() == (datosGrafico.maxY * .75).toInt()) {
+      text = '${(datosGrafico.maxY * .75).toInt()}';
+    }
+    //Valor máximo
+    if (value.toInt() == datosGrafico.maxY.toInt()) {
+      text = '${datosGrafico.maxY.toInt()}';
+    }
+
+    if (text.isEmpty) {
+      return Container();
+    }
+
+    text = value.toInt().toString();
     return Text(text, style: style, textAlign: TextAlign.center);
   }
 

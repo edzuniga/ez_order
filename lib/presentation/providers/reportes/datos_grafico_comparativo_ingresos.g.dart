@@ -7,7 +7,7 @@ part of 'datos_grafico_comparativo_ingresos.dart';
 // **************************************************************************
 
 String _$datosGraficoIngresosHash() =>
-    r'77ebea3f8064f10454857d9e1a7b80a60e5698c7';
+    r'82be2e92a17d0e724c4029b20e91511bf04a15a5';
 
 /// See also [DatosGraficoIngresos].
 @ProviderFor(DatosGraficoIngresos)

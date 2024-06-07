@@ -1,3 +1,5 @@
+import 'package:fl_chart/fl_chart.dart';
+
 abstract class DatosGrafico {
   DatosGrafico({
     required this.xDates,
@@ -6,6 +8,7 @@ abstract class DatosGrafico {
     required this.yValues,
     required this.maxX,
     required this.maxY,
+    required this.puntos,
   });
 
   final List<DateTime> xDates;
@@ -14,4 +17,5 @@ abstract class DatosGrafico {
   final List<double> yValues;
   final double maxX;
   final double maxY;
+  final List<FlSpot> puntos;
 }
