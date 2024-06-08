@@ -7,6 +7,9 @@ abstract class Reporte {
     required this.totalEfectivo,
     required this.totalTarjeta,
     required this.totalTransferencia,
+    required this.cantEfectivo,
+    required this.cantTarjeta,
+    required this.cantTransferencia,
   });
   final int cantMenu;
   final int cantPedidosDiarios;
@@ -15,4 +18,7 @@ abstract class Reporte {
   final double totalEfectivo;
   final double totalTarjeta;
   final double totalTransferencia;
+  final int cantEfectivo;
+  final int cantTarjeta;
+  final int cantTransferencia;
 }

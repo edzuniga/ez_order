@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:ez_order_ezr/presentation/providers/reportes/table_rows.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:random_string/random_string.dart';
@@ -348,6 +349,9 @@ class SupabaseManagement extends _$SupabaseManagement {
         .lte('created_at', finalDate.toIso8601String())
         .eq('id_restaurante', idRestaurante)
         .order('created_at', ascending: true);
+
+    //EXTRA - utilizar el mismo query para generar los rows de la TABLA
+    ref.read(pedidosTableRowsProvider.notifier).addDataRows(res);
 
     Map<String, double> dailyTotals = {};
 

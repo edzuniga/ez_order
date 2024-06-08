@@ -13,6 +13,7 @@ import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/num_pedido_actual.dart';
 import 'package:ez_order_ezr/presentation/providers/dashboard_page_title.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
+import 'package:intl/intl.dart';
 
 class CustomAppBar extends ConsumerStatefulWidget {
   const CustomAppBar({
@@ -29,9 +30,12 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.of(context).size;
     final selectedPageTitle = ref.watch(dashboardPageTitleProvider);
     final selectedPageIndex = ref.watch(dashboardPageIndexProvider);
     final numOrdenActual = ref.watch(numeroPedidoActualProvider);
+    DateTime hoy = DateTime.now();
+    String hoyFormateado = DateFormat.yMMMd('es').format(hoy);
     return Container(
       width: double.infinity,
       height: 60,
@@ -49,6 +53,7 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
             ),
           ),
           const Spacer(),
+          //Mostrar Botón de TICKET para Pantalla de Agregar Pedido
           selectedPageIndex == 1
               ? Material(
                   color: Colors.transparent,
@@ -76,6 +81,29 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
                     ),
                   ),
                 )
+              : const SizedBox(),
+          //Mostrar La fecha formateada para Pantalla de Reportes View
+          selectedPageIndex == 2
+              ? screenSize.width >= 700
+                  ? Container(
+                      height: 40,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                      ),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFCE8E0),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Estadísticas del día de hoy: $hoyFormateado',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+                    )
+                  : const SizedBox()
               : const SizedBox(),
           const Spacer(),
           const Gap(10),

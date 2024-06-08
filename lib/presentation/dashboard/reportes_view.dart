@@ -1,11 +1,12 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:ez_order_ezr/presentation/providers/reportes/table_rows.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 
 import 'package:ez_order_ezr/data/datos_grafico_modelo.dart';
 import 'package:ez_order_ezr/presentation/providers/reportes/datos_grafico_comparativo_ingresos.dart';
@@ -33,14 +34,12 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
   DateTime? _initialDate;
   DateTime? _finalDate;
   DateTime hoy = DateTime.now();
-  late String hoyFormateado;
   bool _isShowingReport = false;
+  bool _isUpdatingDatosDiarios = false;
 
   @override
   void initState() {
     super.initState();
-
-    hoyFormateado = DateFormat.yMMMd('es').format(hoy);
     //Poblar dropdown de restaurantes
     _obtenerRestaurantes();
   }
@@ -60,11 +59,10 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
   Widget build(BuildContext context) {
     //Provider de datos del gráfico ingresos
     DatosGraficoModelo datosGrafico = ref.watch(datosGraficoIngresosProvider);
-    //Get screen size
-    Size screenSize = MediaQuery.of(context).size;
     RestauranteModelo restauranteActual =
         ref.watch(restauranteSeleccionadoProvider);
     ReporteModelo valoresReporte = ref.watch(valoresReportesProvider);
+    List<DataRow> rowsTable = ref.watch(pedidosTableRowsProvider);
     return Center(
       child: Container(
         padding: const EdgeInsets.all(15),
@@ -79,107 +77,126 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
             key: _reporteFormKey,
             child: Column(
               children: [
-                Text(
-                  'Restaurante:',
-                  style: GoogleFonts.inter(
-                    color: AppColors.kTextPrimaryBlack,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
                 //Selector de restaurantes del DUEÑO
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 48,
-                      width: 350,
-                      child: DropdownSearch<RestauranteModelo>(
-                        asyncItems: (filter) async {
-                          return await _obtenerRestaurantes();
-                        },
-                        dropdownDecoratorProps: DropDownDecoratorProps(
-                          dropdownSearchDecoration: InputDecoration(
-                            hintText: 'Seleccione restaurante',
-                            hintStyle: GoogleFonts.inter(
-                              color: AppColors.kTextSecondaryGray,
+                SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      SizedBox(
+                        height: 48,
+                        width: 350,
+                        child: DropdownSearch<RestauranteModelo>(
+                          asyncItems: (filter) async {
+                            return await _obtenerRestaurantes();
+                          },
+                          dropdownDecoratorProps: DropDownDecoratorProps(
+                            dropdownSearchDecoration: InputDecoration(
+                              hintText: 'Seleccione restaurante',
+                              hintStyle: GoogleFonts.inter(
+                                color: AppColors.kTextSecondaryGray,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: Colors.white,
+                                  width: 2.0,
+                                ),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: AppColors.kGeneralPrimaryOrange,
+                                  width: 2.0,
+                                ),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: AppColors.kGeneralErrorColor,
+                                  width: 2.0,
+                                ),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              focusedErrorBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: AppColors.kGeneralErrorColor,
+                                  width: 2.0,
+                                ),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              filled: true,
+                              fillColor: AppColors.kInputLiteGray,
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
+                          ),
+                          itemAsString: (RestauranteModelo r) =>
+                              r.restauranteAsString(),
+                          onChanged: (RestauranteModelo? data) async {
+                            if (data != null) {
+                              //Asignar el restaurante selecto al provider
+                              ref
+                                  .read(
+                                      restauranteSeleccionadoProvider.notifier)
+                                  .setRestauranteSeleccionado(data);
+                              await _hacerCalculosReportesDiarios();
+                            }
+                          },
+                          selectedItem: restauranteActual,
+                        ),
+                      ),
+                      const Gap(15),
+                      ElevatedButton.icon(
+                        onPressed: _isUpdatingDatosDiarios
+                            ? null
+                            : () async {
+                                if (restauranteActual.nombreRestaurante !=
+                                    'No ha seleccionado...') {
+                                  await _hacerCalculosReportesDiarios();
+                                } else {
+                                  Fluttertoast.cancel();
+                                  Fluttertoast.showToast(
+                                    msg: 'Debe seleccionar restaurante!!',
+                                    toastLength: Toast.LENGTH_LONG,
+                                    gravity: ToastGravity.CENTER,
+                                    timeInSecForIosWeb: 5,
+                                    backgroundColor: Colors.red,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0,
+                                    webPosition: 'center',
+                                    webBgColor: 'red',
+                                  );
+                                }
+                              },
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            )),
+                        icon: _isUpdatingDatosDiarios
+                            ? SpinPerfect(
+                                infinite: true,
+                                child: const Icon(
+                                  Icons.refresh,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.refresh,
                                 color: Colors.white,
-                                width: 2.0,
                               ),
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                color: AppColors.kGeneralPrimaryOrange,
-                                width: 2.0,
-                              ),
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                color: AppColors.kGeneralErrorColor,
-                                width: 2.0,
-                              ),
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            focusedErrorBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                color: AppColors.kGeneralErrorColor,
-                                width: 2.0,
-                              ),
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            filled: true,
-                            fillColor: AppColors.kInputLiteGray,
+                        label: Text(
+                          'Actualizar datos diarios',
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
                           ),
                         ),
-                        itemAsString: (RestauranteModelo r) =>
-                            r.restauranteAsString(),
-                        onChanged: (RestauranteModelo? data) async {
-                          if (data != null) {
-                            //Asignar el restaurante selecto al provider
-                            ref
-                                .read(restauranteSeleccionadoProvider.notifier)
-                                .setRestauranteSeleccionado(data);
-                            await _hacerCalculosReportesDiarios();
-                          }
-                        },
-                        selectedItem: restauranteActual,
                       ),
-                    ),
-                    const Gap(15),
-                    IconButton(
-                        onPressed: () async {
-                          if (restauranteActual.nombreRestaurante !=
-                              'No ha seleccionado...') {
-                            await _hacerCalculosReportesDiarios();
-                          } else {
-                            Fluttertoast.cancel();
-                            Fluttertoast.showToast(
-                              msg: 'Debe seleccionar restaurante!!',
-                              toastLength: Toast.LENGTH_LONG,
-                              gravity: ToastGravity.CENTER,
-                              timeInSecForIosWeb: 5,
-                              backgroundColor: Colors.red,
-                              textColor: Colors.white,
-                              fontSize: 16.0,
-                              webPosition: 'center',
-                              webBgColor: 'red',
-                            );
-                          }
-                        },
-                        tooltip: 'Refrescar datos',
-                        icon: const Icon(
-                          Icons.refresh,
-                          color: AppColors.kGeneralPrimaryOrange,
-                        ))
-                  ],
+                    ],
+                  ),
                 ),
-                const Gap(10),
-                Text('Estadísticas del día de hoy: $hoyFormateado'),
-                const SizedBox(width: 500, child: Divider()),
+                //const Gap(5),
                 //Containers con estadísticas senciilas del día
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 10),
@@ -213,242 +230,368 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                         estadistica: '${valoresReporte.totalEfectivo}',
                         descripcion: 'Ingreso en efectivo (hoy)',
                         icono: Icons.money,
+                        includesRibbon: true,
+                        cantidad: '${valoresReporte.cantEfectivo}',
                       ),
                       EstadisticaContainer(
                         estadistica: '${valoresReporte.totalTarjeta}',
                         descripcion: 'Ingreso por tarjeta (hoy)',
                         icono: Icons.credit_card,
+                        includesRibbon: true,
+                        cantidad: '${valoresReporte.cantTarjeta}',
                       ),
                       EstadisticaContainer(
                         estadistica: '${valoresReporte.totalTransferencia}',
                         descripcion: 'Ingreso por transferencias',
                         icono: Icons.system_security_update_good_outlined,
+                        includesRibbon: true,
+                        cantidad: '${valoresReporte.cantTransferencia}',
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 500, child: Divider()),
-                //Inputs de fechas
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 130,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.black12,
-                          width: 0.5,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(_fechaInicial != null
-                          ? _fechaInicial!.substring(0, 10)
-                          : 'Fecha inicial'),
-                    ),
-                    const Gap(5),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        await showDateRangePicker(
-                          context: context,
-                          firstDate: DateTime(2024, 1, 1),
-                          lastDate: DateTime.now(),
-                        ).then((selectedRange) {
-                          if (selectedRange != null) {
-                            setState(() {
-                              _initialDate = selectedRange.start;
-                              _finalDate = selectedRange.end;
-                              _fechaInicial = selectedRange.start.toString();
-                              _fechaFinal = selectedRange.end.toString();
-                            });
-                          }
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      label: const Text(
-                        'Elegir fechas',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      icon: const Icon(
-                        Icons.calendar_month,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const Gap(5),
-                    Container(
-                      width: 130,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.black12,
-                          width: 0.5,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(_fechaFinal != null
-                          ? _fechaFinal!.substring(0, 10)
-                          : 'Fecha final'),
-                    ),
-                  ],
-                ),
-                const Gap(10),
-                //Botón de generar reporte
+                //Inputs de fechas y botón de Generar Reporte
                 SizedBox(
-                  width: 250,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      if (_fechaInicial != null &&
-                          _fechaFinal != null &&
-                          restauranteActual.nombreRestaurante !=
-                              'No ha seleccionado...') {
-                        //Hacer los respectivos cálculos con el restaurante seleccionado
-                        await _hacerCalculosGenerales();
-                      } else {
-                        Fluttertoast.cancel();
-                        Fluttertoast.showToast(
-                          msg:
-                              'Debe seleccionar restaurante y rango de fechas!!',
-                          toastLength: Toast.LENGTH_LONG,
-                          gravity: ToastGravity.CENTER,
-                          timeInSecForIosWeb: 5,
-                          backgroundColor: Colors.red,
-                          textColor: Colors.white,
-                          fontSize: 16.0,
-                          webPosition: 'center',
-                          webBgColor: 'red',
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.kGeneralPrimaryOrange,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text(
-                      'Generar reporte',
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-                const Gap(25),
-                const SizedBox(width: 500, child: Divider()),
-                //ÁREA PARA GRÁFICOS Y OTRAS ESTADÍSTICAS DEL REPORTE FILTRADO
-                _isShowingReport
-                    ? Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 400,
-                              padding: const EdgeInsets.all(15),
+                  width: double.infinity,
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    alignment: WrapAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: 480,
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            Container(
+                              width: 130,
+                              height: 38,
                               decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.black12,
-                                  width: 0.5,
-                                ),
+                                color: const Color(0xFFfce8e0),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: LineChart(
-                                LineChartData(
-                                  lineTouchData: LineTouchData(
-                                    handleBuiltInTouches: true,
-                                    touchTooltipData: LineTouchTooltipData(
-                                      getTooltipColor: (touchedSpot) =>
-                                          Colors.white,
-                                    ),
-                                  ),
-                                  gridData: const FlGridData(show: false),
-                                  titlesData: FlTitlesData(
-                                    bottomTitles: AxisTitles(
-                                      axisNameWidget: const Text(
-                                        'Ingresos totales diarios',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      sideTitles: SideTitles(
-                                          showTitles: true,
-                                          reservedSize: 32,
-                                          interval: 1,
-                                          getTitlesWidget: bottomTitleWidgets),
-                                    ),
-                                    rightTitles: const AxisTitles(
-                                      sideTitles: SideTitles(showTitles: false),
-                                    ),
-                                    topTitles: const AxisTitles(
-                                      sideTitles: SideTitles(showTitles: false),
-                                    ),
-                                    leftTitles: AxisTitles(
-                                      sideTitles: SideTitles(
-                                        getTitlesWidget: leftTitleWidgets,
-                                        showTitles: true,
-                                        interval: 1,
-                                        reservedSize: 60,
-                                      ),
-                                    ),
-                                  ),
-                                  borderData: FlBorderData(
-                                    show: true,
-                                    border: const Border(
-                                      bottom: BorderSide(
-                                          color: Colors.black12, width: 1),
-                                      left:
-                                          BorderSide(color: Colors.transparent),
-                                      right:
-                                          BorderSide(color: Colors.transparent),
-                                      top:
-                                          BorderSide(color: Colors.transparent),
-                                    ),
-                                  ),
-                                  lineBarsData: [
-                                    LineChartBarData(
-                                      color: AppColors.kGeneralPrimaryOrange,
-                                      barWidth: 1,
-                                      isStrokeCapRound: true,
-                                      dotData: const FlDotData(show: true),
-                                      belowBarData: BarAreaData(
-                                          show: true,
-                                          color: AppColors.kGeneralOrangeBg
-                                              .withOpacity(0.3)),
-                                      spots: datosGrafico.puntos,
-                                    ),
-                                  ],
-                                  minX: 0,
-                                  minY: 0,
-                                  maxX: datosGrafico.maxX,
-                                  maxY: datosGrafico.maxY,
+                              alignment: Alignment.center,
+                              child: Text(
+                                _fechaInicial != null
+                                    ? _fechaInicial!.substring(0, 10)
+                                    : 'Fecha inicial',
+                                style: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
                                 ),
-                                duration: const Duration(milliseconds: 250),
                               ),
                             ),
-                          ),
-                          const Gap(5),
-                          Container(
-                            width: screenSize.width * 0.35,
-                            height: 400,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                width: 0.5,
-                                color: Colors.black12,
+                            const Gap(5),
+                            Container(
+                              width: 130,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFfce8e0),
+                                borderRadius: BorderRadius.circular(8),
                               ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                _fechaFinal != null
+                                    ? _fechaFinal!.substring(0, 10)
+                                    : 'Fecha final',
+                                style: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                            const Gap(5),
+                            SizedBox(
+                              height: 38,
+                              child: ElevatedButton.icon(
+                                onPressed: () async {
+                                  await showDateRangePicker(
+                                    context: context,
+                                    firstDate: DateTime(2024, 1, 1),
+                                    lastDate: DateTime.now(),
+                                  ).then((selectedRange) {
+                                    if (selectedRange != null) {
+                                      setState(() {
+                                        _initialDate = selectedRange.start;
+                                        _finalDate = selectedRange.end;
+                                        _fechaInicial =
+                                            selectedRange.start.toString();
+                                        _fechaFinal =
+                                            selectedRange.end.toString();
+                                      });
+                                    }
+                                  });
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.teal,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                label: const Text(
+                                  'Elegir fechas',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                icon: const Icon(
+                                  Icons.calendar_month,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      //Botón de generar reporte
+                      SizedBox(
+                        width: 250,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            if (_fechaInicial != null &&
+                                _fechaFinal != null &&
+                                restauranteActual.nombreRestaurante !=
+                                    'No ha seleccionado...') {
+                              //Hacer los respectivos cálculos con el restaurante seleccionado
+                              await _hacerCalculosGenerales();
+                            } else {
+                              Fluttertoast.cancel();
+                              Fluttertoast.showToast(
+                                msg:
+                                    'Debe seleccionar restaurante y rango de fechas!!',
+                                toastLength: Toast.LENGTH_LONG,
+                                gravity: ToastGravity.CENTER,
+                                timeInSecForIosWeb: 5,
+                                backgroundColor: Colors.red,
+                                textColor: Colors.white,
+                                fontSize: 16.0,
+                                webPosition: 'center',
+                                webBgColor: 'red',
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.kGeneralPrimaryOrange,
+                            shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                        ],
-                      )
-                    : const SizedBox(),
+                          child: Text(
+                            'Generar reporte',
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Gap(10),
+                //ÁREA PARA GRÁFICOS Y OTRAS ESTADÍSTICAS DEL REPORTE FILTRADO
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    Container(
+                      width: 450,
+                      height: 400,
+                      padding: const EdgeInsets.all(15),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.black12,
+                          width: 0.5,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: _isShowingReport
+                          ? LineChart(
+                              LineChartData(
+                                lineTouchData: LineTouchData(
+                                  handleBuiltInTouches: true,
+                                  touchTooltipData: LineTouchTooltipData(
+                                    getTooltipColor: (touchedSpot) =>
+                                        Colors.white,
+                                  ),
+                                ),
+                                gridData: const FlGridData(show: false),
+                                titlesData: FlTitlesData(
+                                  bottomTitles: AxisTitles(
+                                    axisNameWidget: const Text(
+                                      'Ingresos totales diarios',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    sideTitles: SideTitles(
+                                        showTitles: true,
+                                        reservedSize: 32,
+                                        interval: 1,
+                                        getTitlesWidget: bottomTitleWidgets),
+                                  ),
+                                  rightTitles: const AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false),
+                                  ),
+                                  topTitles: const AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false),
+                                  ),
+                                  leftTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                      getTitlesWidget: leftTitleWidgets,
+                                      showTitles: true,
+                                      interval: 1,
+                                      reservedSize: 60,
+                                    ),
+                                  ),
+                                ),
+                                borderData: FlBorderData(
+                                  show: true,
+                                  border: const Border(
+                                    bottom: BorderSide(
+                                        color: Colors.black12, width: 1),
+                                    left: BorderSide(color: Colors.transparent),
+                                    right:
+                                        BorderSide(color: Colors.transparent),
+                                    top: BorderSide(color: Colors.transparent),
+                                  ),
+                                ),
+                                lineBarsData: [
+                                  LineChartBarData(
+                                    color: AppColors.kGeneralPrimaryOrange,
+                                    barWidth: 1,
+                                    isStrokeCapRound: true,
+                                    dotData: const FlDotData(show: true),
+                                    belowBarData: BarAreaData(
+                                        show: true,
+                                        color: AppColors.kGeneralOrangeBg
+                                            .withOpacity(0.3)),
+                                    spots: datosGrafico.puntos,
+                                  ),
+                                ],
+                                minX: 0,
+                                minY: 0,
+                                maxX: datosGrafico.maxX,
+                                maxY: datosGrafico.maxY,
+                              ),
+                              duration: const Duration(milliseconds: 250),
+                            )
+                          : Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.error_outline,
+                                    color: Colors.black87,
+                                    size: 30,
+                                  ),
+                                  const Gap(10),
+                                  Text(
+                                    'Haga click en Generar reporte\npara mostrar datos!!',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.inter(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                    ),
+                    const Gap(5),
+                    Container(
+                      width: 450,
+                      height: 400,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          width: 0.5,
+                          color: Colors.black12,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: _isShowingReport
+                          ? SingleChildScrollView(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: FittedBox(
+                                      child: DataTable(
+                                        columns: const <DataColumn>[
+                                          DataColumn(
+                                            label: Expanded(
+                                              child: Text(
+                                                '# orden',
+                                                style: TextStyle(
+                                                    fontStyle:
+                                                        FontStyle.italic),
+                                              ),
+                                            ),
+                                          ),
+                                          DataColumn(
+                                            label: Expanded(
+                                              child: Text(
+                                                'Detalle pedido',
+                                              ),
+                                            ),
+                                          ),
+                                          DataColumn(
+                                            label: Expanded(
+                                              child: Text(
+                                                'Total (L)',
+                                              ),
+                                            ),
+                                          ),
+                                          DataColumn(
+                                            label: Expanded(
+                                              child: Text(
+                                                'Fecha',
+                                              ),
+                                            ),
+                                          ),
+                                          DataColumn(
+                                            label: Expanded(
+                                              child: Text(
+                                                'Método de pago',
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                        rows: rowsTable,
+                                        headingTextStyle: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.error_outline,
+                                    color: Colors.black87,
+                                    size: 30,
+                                  ),
+                                  const Gap(10),
+                                  Text(
+                                    'Haga click en Generar reporte\npara mostrar datos!!',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.inter(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -458,10 +601,12 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
   }
 
   Future<void> _hacerCalculosReportesDiarios() async {
+    setState(() => _isUpdatingDatosDiarios = true);
     int idRes = ref.read(restauranteSeleccionadoProvider).idRestaurante!;
     await ref
         .read(valoresReportesProvider.notifier)
         .hacerCalculosReporte(idRes);
+    setState(() => _isUpdatingDatosDiarios = false);
   }
 
   Future<void> _hacerCalculosGenerales() async {

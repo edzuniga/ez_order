@@ -16,6 +16,9 @@ class ValoresReportes extends _$ValoresReportes {
       totalEfectivo: 0.0,
       totalTarjeta: 0.0,
       totalTransferencia: 0.0,
+      cantEfectivo: 0,
+      cantTarjeta: 0,
+      cantTransferencia: 0,
     );
   }
 
@@ -32,6 +35,9 @@ class ValoresReportes extends _$ValoresReportes {
       totalEfectivo: 0.0,
       totalTarjeta: 0.0,
       totalTransferencia: 0.0,
+      cantEfectivo: 0,
+      cantTarjeta: 0,
+      cantTransferencia: 0,
     );
   }
 
@@ -61,6 +67,10 @@ class ValoresReportes extends _$ValoresReportes {
       double totalEfectivo = 0.0;
       double totalTarjeta = 0.0;
       double totalTransferencia = 0.0;
+      int cantEfectivo = 0;
+      int cantTarjeta = 0;
+      int cantTransferencia = 0;
+
       List<Map<String, dynamic>> ingresosHoyRes = await supa
           .from('pedidos')
           .select()
@@ -75,14 +85,17 @@ class ValoresReportes extends _$ValoresReportes {
           //Sumar los totales en efectivo
           if (map['id_metodo_pago'] == 1) {
             totalEfectivo += map['total'];
+            cantEfectivo++;
           }
           //Sumar los totales en tarjeta
           if (map['id_metodo_pago'] == 2) {
             totalTarjeta += map['total'];
+            cantTarjeta++;
           }
           //Sumar los totales en transferencia
           if (map['id_metodo_pago'] == 3) {
             totalTransferencia += map['total'];
+            cantTransferencia++;
           }
         }
       }
@@ -101,6 +114,9 @@ class ValoresReportes extends _$ValoresReportes {
         totalEfectivo: totalEfectivo,
         totalTarjeta: totalTarjeta,
         totalTransferencia: totalTransferencia,
+        cantEfectivo: cantEfectivo,
+        cantTarjeta: cantTarjeta,
+        cantTransferencia: cantTransferencia,
       );
     } catch (e) {
       rethrow;

@@ -1,27 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'supabase_instance.dart';
+part of 'table_rows.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$supabaseManagementHash() =>
-    r'f9a3195dd1548883b0deaa948236abe63ad9525d';
+String _$pedidosTableRowsHash() => r'18789afbe1f5fb2b89ba6dd28889a24c25b29534';
 
-/// See also [SupabaseManagement].
-@ProviderFor(SupabaseManagement)
-final supabaseManagementProvider =
-    NotifierProvider<SupabaseManagement, SupabaseClient>.internal(
-  SupabaseManagement.new,
-  name: r'supabaseManagementProvider',
+/// See also [PedidosTableRows].
+@ProviderFor(PedidosTableRows)
+final pedidosTableRowsProvider =
+    NotifierProvider<PedidosTableRows, List<DataRow>>.internal(
+  PedidosTableRows.new,
+  name: r'pedidosTableRowsProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$supabaseManagementHash,
+      : _$pedidosTableRowsHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$SupabaseManagement = Notifier<SupabaseClient>;
+typedef _$PedidosTableRows = Notifier<List<DataRow>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

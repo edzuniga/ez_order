@@ -5,7 +5,7 @@ List<DateTime> obtenerFechasEntre(DateTime fechaInicial, DateTime fechaFinal) {
   while (fechaActual.isBefore(fechaFinal) ||
       fechaActual.isAtSameMomentAs(fechaFinal)) {
     fechas.add(fechaActual);
-    fechaActual = fechaActual.add(Duration(days: 1));
+    fechaActual = fechaActual.add(const Duration(days: 1));
   }
   return fechas;
 }

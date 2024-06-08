@@ -9,6 +9,9 @@ class ReporteModelo extends Reporte {
     required super.totalEfectivo,
     required super.totalTarjeta,
     required super.totalTransferencia,
+    required super.cantEfectivo,
+    required super.cantTarjeta,
+    required super.cantTransferencia,
   });
 
   ReporteModelo copyWith({
@@ -19,6 +22,9 @@ class ReporteModelo extends Reporte {
     double? totalEfectivo,
     double? totalTarjeta,
     double? totalTransferencia,
+    int? cantEfectivo,
+    int? cantTarjeta,
+    int? cantTransferencia,
   }) {
     return ReporteModelo(
       cantMenu: cantMenu ?? this.cantMenu,
@@ -28,6 +34,9 @@ class ReporteModelo extends Reporte {
       totalEfectivo: totalEfectivo ?? this.totalEfectivo,
       totalTarjeta: totalTarjeta ?? this.totalTarjeta,
       totalTransferencia: totalTransferencia ?? this.totalTransferencia,
+      cantEfectivo: cantEfectivo ?? this.cantEfectivo,
+      cantTarjeta: cantTarjeta ?? this.cantTarjeta,
+      cantTransferencia: cantTransferencia ?? this.cantTransferencia,
     );
   }
 }
