@@ -48,10 +48,10 @@ class PedidoModel extends Pedido {
           : 0.0,
       isvAplicado: json["isv_aplicado"],
       orden: json["orden"].toString(),
-      idCliente: json["id_cliente"],
-      numPedido: json["num_pedido"],
-      idMetodoPago: json["id_metodo_pago"],
-      enPreparacion: json["en_preparacion"],
+      idCliente: json["id_cliente"] ?? 0,
+      numPedido: json["num_pedido"] ?? 0,
+      idMetodoPago: json["id_metodo_pago"] ?? 0,
+      enPreparacion: json["en_preparacion"] ?? false,
       createdAt: DateTime.parse(json["created_at"]),
     );
   }

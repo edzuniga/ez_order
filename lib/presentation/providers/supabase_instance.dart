@@ -342,16 +342,26 @@ class SupabaseManagement extends _$SupabaseManagement {
 
   Future<List<double>> obtenerIngresosTotalesEntreFechas(
       DateTime initialDate, DateTime finalDate, int idRestaurante) async {
+    // Ajusta finalDate para que sea el final del día
+    DateTime adjustedFinalDate = DateTime(
+      finalDate.year,
+      finalDate.month,
+      finalDate.day,
+      23,
+      59,
+      59,
+    );
+
     List<Map<String, dynamic>> res = await state
         .from('pedidos')
-        .select('created_at, total, id_restaurante')
+        .select()
         .gte('created_at', initialDate.toIso8601String())
-        .lte('created_at', finalDate.toIso8601String())
+        .lte('created_at', adjustedFinalDate.toIso8601String())
         .eq('id_restaurante', idRestaurante)
         .order('created_at', ascending: true);
 
     //EXTRA - utilizar el mismo query para generar los rows de la TABLA
-    ref.read(pedidosTableRowsProvider.notifier).addDataRows(res);
+    await ref.read(pedidosTableRowsProvider.notifier).addDataRows(res);
 
     Map<String, double> dailyTotals = {};
 

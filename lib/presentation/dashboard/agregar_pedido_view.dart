@@ -180,6 +180,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                 ),
 
                 const Gap(5),
+                //ÁREA DE MENÚ DINÁMICO
                 Expanded(
                   child: StreamBuilder(
                     stream: _stream,
@@ -349,13 +350,6 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                           ),
                                           const Gap(5),
                                           //Descripción del producto
-                                          /*Text(
-                                            'Descripción del producto:',
-                                            style: GoogleFonts.inter(
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 12,
-                                            ),
-                                          ), */
                                           AutoSizeText(
                                             itemMenu.descripcion,
                                             style: GoogleFonts.inter(

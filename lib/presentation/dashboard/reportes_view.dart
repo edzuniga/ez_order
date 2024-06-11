@@ -1,13 +1,18 @@
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:ez_order_ezr/presentation/providers/reportes/table_rows.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:share_plus/share_plus.dart';
 
+import 'package:ez_order_ezr/presentation/providers/reportes/table_rows.dart';
 import 'package:ez_order_ezr/data/datos_grafico_modelo.dart';
 import 'package:ez_order_ezr/presentation/providers/reportes/datos_grafico_comparativo_ingresos.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
@@ -36,6 +41,7 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
   DateTime hoy = DateTime.now();
   bool _isShowingReport = false;
   bool _isUpdatingDatosDiarios = false;
+  bool _isRetrievingGraphData = false;
 
   @override
   void initState() {
@@ -408,77 +414,86 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: _isShowingReport
-                          ? LineChart(
-                              LineChartData(
-                                lineTouchData: LineTouchData(
-                                  handleBuiltInTouches: true,
-                                  touchTooltipData: LineTouchTooltipData(
-                                    getTooltipColor: (touchedSpot) =>
-                                        Colors.white,
-                                  ),
-                                ),
-                                gridData: const FlGridData(show: false),
-                                titlesData: FlTitlesData(
-                                  bottomTitles: AxisTitles(
-                                    axisNameWidget: const Text(
-                                      'Ingresos totales diarios',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
+                          ? _isRetrievingGraphData
+                              ? const Center(
+                                  child: CircularProgressIndicator(),
+                                )
+                              : LineChart(
+                                  LineChartData(
+                                    lineTouchData: LineTouchData(
+                                      handleBuiltInTouches: true,
+                                      touchTooltipData: LineTouchTooltipData(
+                                        getTooltipColor: (touchedSpot) =>
+                                            Colors.white,
                                       ),
                                     ),
-                                    sideTitles: SideTitles(
-                                        showTitles: true,
-                                        reservedSize: 32,
-                                        interval: 1,
-                                        getTitlesWidget: bottomTitleWidgets),
-                                  ),
-                                  rightTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                  topTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                  leftTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      getTitlesWidget: leftTitleWidgets,
-                                      showTitles: true,
-                                      interval: 1,
-                                      reservedSize: 60,
+                                    gridData: const FlGridData(show: false),
+                                    titlesData: FlTitlesData(
+                                      bottomTitles: AxisTitles(
+                                        axisNameWidget: const Text(
+                                          'Ingresos totales diarios',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        sideTitles: SideTitles(
+                                            showTitles: true,
+                                            reservedSize: 32,
+                                            interval: 1,
+                                            getTitlesWidget:
+                                                bottomTitleWidgets),
+                                      ),
+                                      rightTitles: const AxisTitles(
+                                        sideTitles:
+                                            SideTitles(showTitles: false),
+                                      ),
+                                      topTitles: const AxisTitles(
+                                        sideTitles:
+                                            SideTitles(showTitles: false),
+                                      ),
+                                      leftTitles: AxisTitles(
+                                        sideTitles: SideTitles(
+                                          getTitlesWidget: leftTitleWidgets,
+                                          showTitles: true,
+                                          interval: 1,
+                                          reservedSize: 60,
+                                        ),
+                                      ),
                                     ),
+                                    borderData: FlBorderData(
+                                      show: true,
+                                      border: const Border(
+                                        bottom: BorderSide(
+                                            color: Colors.black12, width: 1),
+                                        left: BorderSide(
+                                            color: Colors.transparent),
+                                        right: BorderSide(
+                                            color: Colors.transparent),
+                                        top: BorderSide(
+                                            color: Colors.transparent),
+                                      ),
+                                    ),
+                                    lineBarsData: [
+                                      LineChartBarData(
+                                        color: AppColors.kGeneralPrimaryOrange,
+                                        barWidth: 1,
+                                        isStrokeCapRound: true,
+                                        dotData: const FlDotData(show: true),
+                                        belowBarData: BarAreaData(
+                                            show: true,
+                                            color: AppColors.kGeneralOrangeBg
+                                                .withOpacity(0.3)),
+                                        spots: datosGrafico.puntos,
+                                      ),
+                                    ],
+                                    minX: 0,
+                                    minY: 0,
+                                    maxX: datosGrafico.maxX,
+                                    maxY: datosGrafico.maxY,
                                   ),
-                                ),
-                                borderData: FlBorderData(
-                                  show: true,
-                                  border: const Border(
-                                    bottom: BorderSide(
-                                        color: Colors.black12, width: 1),
-                                    left: BorderSide(color: Colors.transparent),
-                                    right:
-                                        BorderSide(color: Colors.transparent),
-                                    top: BorderSide(color: Colors.transparent),
-                                  ),
-                                ),
-                                lineBarsData: [
-                                  LineChartBarData(
-                                    color: AppColors.kGeneralPrimaryOrange,
-                                    barWidth: 1,
-                                    isStrokeCapRound: true,
-                                    dotData: const FlDotData(show: true),
-                                    belowBarData: BarAreaData(
-                                        show: true,
-                                        color: AppColors.kGeneralOrangeBg
-                                            .withOpacity(0.3)),
-                                    spots: datosGrafico.puntos,
-                                  ),
-                                ],
-                                minX: 0,
-                                minY: 0,
-                                maxX: datosGrafico.maxX,
-                                maxY: datosGrafico.maxY,
-                              ),
-                              duration: const Duration(milliseconds: 250),
-                            )
+                                  duration: const Duration(milliseconds: 250),
+                                )
                           : Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -503,7 +518,7 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                     ),
                     const Gap(5),
                     Container(
-                      width: 450,
+                      width: 650,
                       height: 400,
                       decoration: BoxDecoration(
                         border: Border.all(
@@ -513,61 +528,66 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: _isShowingReport
-                          ? SingleChildScrollView(
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: FittedBox(
-                                      child: DataTable(
-                                        columns: const <DataColumn>[
-                                          DataColumn(
-                                            label: Expanded(
-                                              child: Text(
-                                                '# orden',
-                                                style: TextStyle(
-                                                    fontStyle:
-                                                        FontStyle.italic),
+                          ? _isRetrievingGraphData
+                              ? const Center(
+                                  child: CircularProgressIndicator(),
+                                )
+                              : SingleChildScrollView(
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: FittedBox(
+                                          child: DataTable(
+                                            dataRowMaxHeight: double.infinity,
+                                            columns: const <DataColumn>[
+                                              DataColumn(
+                                                label: Expanded(
+                                                  child: Text(
+                                                    '# orden',
+                                                    style: TextStyle(
+                                                        fontStyle:
+                                                            FontStyle.italic),
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                          DataColumn(
-                                            label: Expanded(
-                                              child: Text(
-                                                'Detalle pedido',
+                                              DataColumn(
+                                                label: Expanded(
+                                                  child: Text(
+                                                    'Detalle pedido',
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                          DataColumn(
-                                            label: Expanded(
-                                              child: Text(
-                                                'Total (L)',
+                                              DataColumn(
+                                                label: Expanded(
+                                                  child: Text(
+                                                    'Total (L)',
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                          DataColumn(
-                                            label: Expanded(
-                                              child: Text(
-                                                'Fecha',
+                                              DataColumn(
+                                                label: Expanded(
+                                                  child: Text(
+                                                    'Fecha',
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                          DataColumn(
-                                            label: Expanded(
-                                              child: Text(
-                                                'Método de pago',
+                                              DataColumn(
+                                                label: Expanded(
+                                                  child: Text(
+                                                    'Método de pago',
+                                                  ),
+                                                ),
                                               ),
-                                            ),
+                                            ],
+                                            rows: rowsTable,
+                                            headingTextStyle: const TextStyle(
+                                                fontWeight: FontWeight.bold),
                                           ),
-                                        ],
-                                        rows: rowsTable,
-                                        headingTextStyle: const TextStyle(
-                                            fontWeight: FontWeight.bold),
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            )
+                                )
                           : Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -610,6 +630,10 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
   }
 
   Future<void> _hacerCalculosGenerales() async {
+    setState(() {
+      _isShowingReport = true;
+      _isRetrievingGraphData = true;
+    });
     RestauranteModelo restauranteActual =
         ref.watch(restauranteSeleccionadoProvider);
 
@@ -625,8 +649,7 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
     ref
         .read(datosGraficoIngresosProvider.notifier)
         .setValoresDatosGrafico(xDates: fechasSeleccionadas, yValues: valoresY);
-
-    setState(() => _isShowingReport = true);
+    setState(() => _isRetrievingGraphData = false);
   }
 
   //Funciones para el gráfico principal --------------------------------------
@@ -693,4 +716,37 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
   }
 
 //Funciones para el gráfico principal --------------------------------------
+
+//--------------------------Función para crear un pdf
+  Future<void> exportDataTableToPDF(
+      List<DataRow> rows, List<DataColumn> columns) async {
+    final pdf = pw.Document();
+
+    final tableHeaders = columns.map((col) => col.label.toString()).toList();
+    final tableData = rows.map((row) {
+      return row.cells.map((cell) => cell.child.toString()).toList();
+    }).toList();
+
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.TableHelper.fromTextArray(
+            headers: tableHeaders,
+            data: tableData,
+          );
+        },
+      ),
+    );
+
+    // Guardar el archivo PDF en el directorio temporal
+    final output = await getTemporaryDirectory();
+
+    final file = File("${output.path}/tabla${DateTime.now()}.pdf");
+    await file.writeAsBytes(await pdf.save());
+
+    // Compartir el archivo PDF usando XFile
+    final xFile = XFile(file.path);
+    await Share.shareXFiles([xFile], text: 'Aquí está tu tabla en PDF');
+  }
+//--------------------------Función para crear un pdf
 }
