@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pdf/pdf.dart';
+//import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
@@ -533,55 +533,85 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                                   child: CircularProgressIndicator(),
                                 )
                               : SingleChildScrollView(
-                                  child: Row(
+                                  child: Column(
                                     children: [
-                                      Expanded(
-                                        child: FittedBox(
-                                          child: DataTable(
-                                            dataRowMaxHeight: double.infinity,
-                                            columns: const <DataColumn>[
-                                              DataColumn(
-                                                label: Expanded(
-                                                  child: Text(
-                                                    '# orden',
-                                                    style: TextStyle(
-                                                        fontStyle:
-                                                            FontStyle.italic),
+                                      //Tabla generada
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: FittedBox(
+                                              child: DataTable(
+                                                dataRowMaxHeight:
+                                                    double.infinity,
+                                                columns: const <DataColumn>[
+                                                  DataColumn(
+                                                    label: Expanded(
+                                                      child: Text(
+                                                        '# orden',
+                                                        style: TextStyle(
+                                                            fontStyle: FontStyle
+                                                                .italic),
+                                                      ),
+                                                    ),
                                                   ),
-                                                ),
-                                              ),
-                                              DataColumn(
-                                                label: Expanded(
-                                                  child: Text(
-                                                    'Detalle pedido',
+                                                  DataColumn(
+                                                    label: Expanded(
+                                                      child: Text(
+                                                        'Detalle pedido',
+                                                      ),
+                                                    ),
                                                   ),
-                                                ),
-                                              ),
-                                              DataColumn(
-                                                label: Expanded(
-                                                  child: Text(
-                                                    'Total (L)',
+                                                  DataColumn(
+                                                    label: Expanded(
+                                                      child: Text(
+                                                        'Total (L)',
+                                                      ),
+                                                    ),
                                                   ),
-                                                ),
-                                              ),
-                                              DataColumn(
-                                                label: Expanded(
-                                                  child: Text(
-                                                    'Fecha',
+                                                  DataColumn(
+                                                    label: Expanded(
+                                                      child: Text(
+                                                        'Fecha',
+                                                      ),
+                                                    ),
                                                   ),
-                                                ),
-                                              ),
-                                              DataColumn(
-                                                label: Expanded(
-                                                  child: Text(
-                                                    'Método de pago',
+                                                  DataColumn(
+                                                    label: Expanded(
+                                                      child: Text(
+                                                        'Método de pago',
+                                                      ),
+                                                    ),
                                                   ),
-                                                ),
+                                                ],
+                                                rows: rowsTable,
+                                                headingTextStyle:
+                                                    const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold),
                                               ),
-                                            ],
-                                            rows: rowsTable,
-                                            headingTextStyle: const TextStyle(
-                                                fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const Gap(15),
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          /* await _exportDataTableToPDF(
+
+                                          ); */
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.black,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Descargar tabla',
+                                          style: GoogleFonts.inter(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
                                           ),
                                         ),
                                       ),
@@ -630,6 +660,7 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
   }
 
   Future<void> _hacerCalculosGenerales() async {
+    ref.read(pedidosTableRowsProvider.notifier).clearTableRows();
     setState(() {
       _isShowingReport = true;
       _isRetrievingGraphData = true;
@@ -718,7 +749,7 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
 //Funciones para el gráfico principal --------------------------------------
 
 //--------------------------Función para crear un pdf
-  Future<void> exportDataTableToPDF(
+  Future<void> _exportDataTableToPDF(
       List<DataRow> rows, List<DataColumn> columns) async {
     final pdf = pw.Document();
 

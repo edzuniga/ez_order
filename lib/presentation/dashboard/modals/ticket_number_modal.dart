@@ -17,6 +17,7 @@ class TicketModal extends ConsumerStatefulWidget {
 
 class _TicketModalState extends ConsumerState<TicketModal> {
   final TextEditingController _numeroTicketController = TextEditingController();
+  final GlobalKey<FormState> _ticketFormKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -27,7 +28,7 @@ class _TicketModalState extends ConsumerState<TicketModal> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 235,
+      height: 250,
       width: 350,
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -39,119 +40,128 @@ class _TicketModalState extends ConsumerState<TicketModal> {
         color: Colors.white,
       ),
       child: SingleChildScrollView(
-        child: Column(
-          children: [
-            //Título
-            const Text(
-              'Asignar # de ticket manualmente',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            const Gap(25),
-            //Nuevo ticket (Input)
-            SizedBox(
-              width: 250,
-              child: TextField(
-                controller: _numeroTicketController,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
-                autofillHints: const [AutofillHints.name],
-                decoration: InputDecoration(
-                  labelText: 'Nuevo número de ticket',
-                  labelStyle: GoogleFonts.inter(
-                    color: AppColors.kTextPrimaryBlack,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(
-                      color: Color(0xFFe0e3e7),
-                      width: 2.0,
-                    ),
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(
-                      color: AppColors.kGeneralPrimaryOrange,
-                      width: 2.0,
-                    ),
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(
-                      color: AppColors.kGeneralErrorColor,
-                      width: 2.0,
-                    ),
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(
-                      color: AppColors.kGeneralErrorColor,
-                      width: 2.0,
-                    ),
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  filled: true,
-                  fillColor: AppColors.kInputLiteGray,
+        child: Form(
+          key: _ticketFormKey,
+          child: Column(
+            children: [
+              //Título
+              const Text(
+                'Asignar # de ticket manualmente',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
-                style: GoogleFonts.inter(),
               ),
-            ),
-            const Gap(35),
-            //Botones
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    context.pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+              const Gap(25),
+              //Nuevo ticket (Input)
+              SizedBox(
+                width: 250,
+                child: TextFormField(
+                  controller: _numeroTicketController,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  autofillHints: const [AutofillHints.name],
+                  decoration: InputDecoration(
+                    labelText: 'Nuevo número de ticket',
+                    labelStyle: GoogleFonts.inter(
+                      color: AppColors.kTextPrimaryBlack,
                     ),
-                  ),
-                  child: Text(
-                    'Cancelar',
-                    style: GoogleFonts.inter(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: Color(0xFFe0e3e7),
+                        width: 2.0,
+                      ),
+                      borderRadius: BorderRadius.circular(12.0),
                     ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: AppColors.kGeneralPrimaryOrange,
+                        width: 2.0,
+                      ),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: AppColors.kGeneralErrorColor,
+                        width: 2.0,
+                      ),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: AppColors.kGeneralErrorColor,
+                        width: 2.0,
+                      ),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    filled: true,
+                    fillColor: AppColors.kInputLiteGray,
                   ),
-                ),
-                const Gap(8),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_numeroTicketController.text.isNotEmpty) {
-                      //Change current ticket number
-                      int newValue = int.parse(_numeroTicketController.text);
-                      ref
-                          .read(numeroPedidoActualProvider.notifier)
-                          .setCustomNumeroPedido(newValue);
-                      context.pop();
+                  style: GoogleFonts.inter(),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) {
+                      return 'Campo requerido';
                     }
+                    return null;
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.kGeneralPrimaryOrange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    'Nuevo # de Ticket',
-                    style: GoogleFonts.inter(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
                 ),
-              ],
-            ),
-          ],
+              ),
+              const Gap(35),
+              //Botones
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      context.pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      'Cancelar',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const Gap(8),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_ticketFormKey.currentState!.validate()) {
+                        //Change current ticket number
+                        int newValue = int.parse(_numeroTicketController.text);
+                        ref
+                            .read(numeroPedidoActualProvider.notifier)
+                            .setCustomNumeroPedido(newValue);
+                        context.pop();
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.kGeneralPrimaryOrange,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      'Nuevo # de Ticket',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

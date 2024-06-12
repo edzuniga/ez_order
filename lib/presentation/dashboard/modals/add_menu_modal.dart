@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'package:dropdown_search/dropdown_search.dart';
+import 'package:ez_order_ezr/data/categoria_modelo.dart';
+import 'package:ez_order_ezr/presentation/providers/categorias/categoria_seleccionada.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -36,6 +39,14 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
   bool _isTryingUpload = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(categoriaActualProvider.notifier).resetCategoriaSeleccionada();
+    });
+  }
+
+  @override
   void dispose() {
     _nombreController.dispose();
     _precioSinIsvController.dispose();
@@ -44,6 +55,12 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
     _correlativoController.dispose();
     _informacionAdicionalController.dispose();
     super.dispose();
+  }
+
+  Future<List<CategoriaModelo>> _getCategoriasForDropdown() async {
+    return await ref
+        .read(supabaseManagementProvider.notifier)
+        .obtenerCategorias();
   }
 
   Widget imagenDisplay = Image.asset(
@@ -55,6 +72,7 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
 
   @override
   Widget build(BuildContext context) {
+    CategoriaModelo categoriaSeleccionada = ref.watch(categoriaActualProvider);
     return _isTryingUpload
         ? Container(
             height: 200,
@@ -539,6 +557,96 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                               style: GoogleFonts.inter(),
                             ),
                             const Gap(12),
+                            //DROPDOWN DE CATEGORÍAS
+                            Row(
+                              children: [
+                                Text(
+                                  'Categoría:',
+                                  style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                const Gap(10),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 48,
+                                    child: DropdownSearch<CategoriaModelo>(
+                                      asyncItems: (filter) async {
+                                        return await _getCategoriasForDropdown();
+                                      },
+                                      dropdownDecoratorProps:
+                                          DropDownDecoratorProps(
+                                        baseStyle: const TextStyle(
+                                          fontSize: 13,
+                                        ),
+                                        dropdownSearchDecoration:
+                                            InputDecoration(
+                                          hintText: 'Búsqueda por nombre...',
+                                          hintStyle: GoogleFonts.inter(
+                                            color: AppColors.kTextSecondaryGray,
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderSide: const BorderSide(
+                                              color: Colors.white,
+                                              width: 2.0,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: const BorderSide(
+                                              color: AppColors
+                                                  .kGeneralPrimaryOrange,
+                                              width: 2.0,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                          ),
+                                          errorBorder: OutlineInputBorder(
+                                            borderSide: const BorderSide(
+                                              color:
+                                                  AppColors.kGeneralErrorColor,
+                                              width: 2.0,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                          ),
+                                          focusedErrorBorder:
+                                              OutlineInputBorder(
+                                            borderSide: const BorderSide(
+                                              color:
+                                                  AppColors.kGeneralErrorColor,
+                                              width: 2.0,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                          ),
+                                          filled: true,
+                                          fillColor: AppColors.kInputLiteGray,
+                                        ),
+                                      ),
+                                      popupProps: const PopupProps.menu(
+                                        showSearchBox: true,
+                                      ),
+                                      itemAsString: (CategoriaModelo c) =>
+                                          c.categoriaAsString(),
+                                      onChanged: (CategoriaModelo? data) {
+                                        //Asignar el cliente selecto al provider
+                                        if (data != null) {
+                                          ref
+                                              .read(categoriaActualProvider
+                                                  .notifier)
+                                              .setCategoriaActual(data);
+                                        }
+                                      },
+                                      selectedItem: categoriaSeleccionada,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Gap(12),
                             //Sección de Cupertino Switches
                             Row(
                               children: [
@@ -667,7 +775,9 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                                 ElevatedButton(
                                   onPressed: () async {
                                     if (_agregarMenuKey.currentState!
-                                        .validate()) {
+                                            .validate() &&
+                                        categoriaSeleccionada.nombreCategoria !=
+                                            'Seleccione categoría...') {
                                       if (_selectedImage != null) {
                                         final menuItem = MenuItemModel(
                                           numMenu: _correlativoController.text,
@@ -689,6 +799,8 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                                           precioIncluyeIsv:
                                               _precioIncluyeIsvSelected,
                                           vaParaCocina: _vaParaCocinaSelected,
+                                          idCategoria: categoriaSeleccionada
+                                              .idCategoria!,
                                         );
                                         await _tryAddMenu(menuItem);
                                       } else {
@@ -698,7 +810,7 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                                               'Debe proveer de una imagen para el producto',
                                           toastLength: Toast.LENGTH_LONG,
                                           gravity: ToastGravity.CENTER,
-                                          timeInSecForIosWeb: 3,
+                                          timeInSecForIosWeb: 4,
                                           backgroundColor: Colors.red,
                                           textColor: Colors.white,
                                           fontSize: 16.0,
@@ -706,6 +818,20 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                                           webBgColor: 'red',
                                         );
                                       }
+                                    } else {
+                                      Fluttertoast.cancel();
+                                      Fluttertoast.showToast(
+                                        msg:
+                                            'Elija categoría y todos los campos requeridos!!',
+                                        toastLength: Toast.LENGTH_LONG,
+                                        gravity: ToastGravity.CENTER,
+                                        timeInSecForIosWeb: 4,
+                                        backgroundColor: Colors.red,
+                                        textColor: Colors.white,
+                                        fontSize: 16.0,
+                                        webPosition: 'center',
+                                        webBgColor: 'red',
+                                      );
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -745,6 +871,32 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
         .then((message) {
       setState(() => _isTryingUpload = false);
       if (message == 'success') {
+        //Resetear la categoría seleccionada
+        ref.read(categoriaActualProvider.notifier).resetCategoriaSeleccionada();
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          backgroundColor: Colors.green,
+          content: Text(
+            'Producto agregado exitosamente!!',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ));
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          backgroundColor: Colors.green,
+          content: Text(
+            'Agregado exitosamente!!',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ));
         context.pop();
       } else {
         context.pop();

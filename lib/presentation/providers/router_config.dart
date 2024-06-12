@@ -6,6 +6,8 @@ import 'package:ez_order_ezr/presentation/config/routes.dart';
 import 'package:ez_order_ezr/presentation/dashboard/administracion_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/agregar_pedido_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/dashboard_layout.dart';
+import 'package:ez_order_ezr/presentation/dashboard/datos_facturacion_view.dart';
+import 'package:ez_order_ezr/presentation/dashboard/facturacion_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/pedidos_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/reportes_view.dart';
 import 'package:ez_order_ezr/presentation/error_page.dart';
@@ -97,6 +99,32 @@ GoRouter router(Ref ref) {
             path: '/reportes',
             pageBuilder: (context, state) => CustomTransitionPage(
               child: const ReportesView(),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) =>
+                      FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            ),
+          ),
+          GoRoute(
+            name: Routes.facturacion,
+            path: '/facturacion',
+            pageBuilder: (context, state) => CustomTransitionPage(
+              child: const FacturacionView(),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) =>
+                      FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            ),
+          ),
+          GoRoute(
+            name: Routes.datosFactura,
+            path: '/datosFactura',
+            pageBuilder: (context, state) => CustomTransitionPage(
+              child: const DatosFacturacionView(),
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) =>
                       FadeTransition(

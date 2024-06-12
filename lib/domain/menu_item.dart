@@ -11,6 +11,7 @@ abstract class MenuItem {
     required this.idRestaurante,
     required this.precioIncluyeIsv,
     required this.vaParaCocina,
+    required this.idCategoria,
   });
 
   final int? idMenu;
@@ -24,4 +25,5 @@ abstract class MenuItem {
   final int idRestaurante;
   final bool precioIncluyeIsv;
   final bool vaParaCocina;
+  final int idCategoria;
 }

@@ -1,26 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'table_rows.dart';
+part of 'listado_categorias.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$pedidosTableRowsHash() => r'423da2e61c0c4313f3bf4881052eb56dcc0c94d7';
+String _$listadoCategoriasHash() => r'2b86ebb62e97dff48e3a8920ac54b06e44fdb470';
 
-/// See also [PedidosTableRows].
-@ProviderFor(PedidosTableRows)
-final pedidosTableRowsProvider =
-    NotifierProvider<PedidosTableRows, List<DataRow>>.internal(
-  PedidosTableRows.new,
-  name: r'pedidosTableRowsProvider',
+/// See also [ListadoCategorias].
+@ProviderFor(ListadoCategorias)
+final listadoCategoriasProvider =
+    NotifierProvider<ListadoCategorias, List<CategoriaModelo>>.internal(
+  ListadoCategorias.new,
+  name: r'listadoCategoriasProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$pedidosTableRowsHash,
+      : _$listadoCategoriasHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$PedidosTableRows = Notifier<List<DataRow>>;
+typedef _$ListadoCategorias = Notifier<List<CategoriaModelo>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:ez_order_ezr/data/categoria_modelo.dart';
 import 'package:ez_order_ezr/presentation/providers/reportes/table_rows.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
@@ -393,5 +394,61 @@ class SupabaseManagement extends _$SupabaseManagement {
     List<double> dailyTotalsList = dailyTotals.values.toList();
 
     return dailyTotalsList;
+  }
+
+  Future<List<CategoriaModelo>> obtenerCategorias() async {
+    Map<String, String> datosPublicos = ref.read(userPublicDataProvider);
+    int idRes = int.parse(datosPublicos['id_restaurante'].toString());
+    try {
+      List<Map<String, dynamic>> res =
+          await state.from('categorias').select().eq('id_restaurante', idRes);
+
+      List<CategoriaModelo> listado = [];
+      for (var element in res) {
+        listado.add(CategoriaModelo.fromJson(element));
+      }
+      return listado;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error al querer cargar las categorias -> ${e.message}';
+    }
+  }
+
+  Future<CategoriaModelo> obtenerCategoriaPorId(int idCat) async {
+    try {
+      Map<String, dynamic> res = await state
+          .from('categorias')
+          .select()
+          .eq('id_categoria', idCat)
+          .single();
+
+      CategoriaModelo cat = CategoriaModelo.fromJson(res);
+
+      return cat;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error al querer cargar las categorias -> ${e.message}';
+    }
+  }
+
+  Future<String> agregarCategoria(CategoriaModelo cat) async {
+    Map<String, dynamic> mapa = cat.toJson();
+    try {
+      await state.from('categorias').insert(mapa);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return 'Ocurrió un error al querer agregar la categoría -> ${e.message}';
+    }
+  }
+
+  Future<String> actualizarCategoria(CategoriaModelo cat) async {
+    Map<String, dynamic> mapa = cat.toJson();
+    try {
+      await state
+          .from('categorias')
+          .update(mapa)
+          .eq('id_categoria', cat.idCategoria!);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return 'Ocurrió un error al querer agregar la categoría -> ${e.message}';
+    }
   }
 }

@@ -60,4 +60,8 @@ class PedidosTableRows extends _$PedidosTableRows {
       );
     }
   }
+
+  void clearTableRows() {
+    state = [];
+  }
 }

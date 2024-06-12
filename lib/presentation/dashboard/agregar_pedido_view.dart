@@ -7,6 +7,10 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/presentation/dashboard/modals/add_categoria_modal.dart';
+import 'package:ez_order_ezr/presentation/dashboard/modals/update_categoria_modal.dart';
+import 'package:ez_order_ezr/data/categoria_modelo.dart';
+import 'package:ez_order_ezr/presentation/providers/categorias/listado_categorias.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/nota_adicional_modal.dart';
 import 'package:ez_order_ezr/data/cliente_modelo.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/metodo_pago_modal.dart';
@@ -36,8 +40,10 @@ class AgregarPedidoView extends ConsumerStatefulWidget {
 class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
   late SupabaseClient _supabase;
   late SupabaseStreamBuilder _stream;
+  late List<CategoriaModelo> categorias;
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _pedidoListController = ScrollController();
+  int idCat = 0;
 
   @override
   void initState() {
@@ -47,15 +53,26 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
       //ref.read(menuItemPedidoListProvider.notifier).resetMenuItem();
       ref.read(menuItemPedidoListProvider.notifier).hacerCalculosDelPedido();
     });
+    _supabase = ref.read(supabaseManagementProvider);
+    _iniciarStream();
+    _getClientesForDropdown('');
+    setCategoriasButtons();
+  }
+
+  void _iniciarStream() {
     int userIdRestaurante = int.parse(
         ref.read(userPublicDataProvider)['id_restaurante'].toString());
-    _supabase = ref.read(supabaseManagementProvider);
     _stream = _supabase
         .from('menus')
         .stream(primaryKey: ['id_menu'])
         .eq('id_restaurante', userIdRestaurante)
         .order('nombre_item', ascending: true);
-    _getClientesForDropdown('');
+  }
+
+  void _filtrarPorCategoria(int? idCategoria) {
+    setState(() {
+      idCat = idCategoria ?? 0;
+    });
   }
 
   Future<List<ClienteModelo>> _getClientesForDropdown(String filter) async {
@@ -64,13 +81,54 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
         .obtenerClientesPorIdRestaurante('');
   }
 
+  Future<void> setCategoriasButtons() async {
+    List<CategoriaModelo> listadoCats =
+        await ref.read(supabaseManagementProvider.notifier).obtenerCategorias();
+    ref.read(listadoCategoriasProvider.notifier).setCategorias(listadoCats);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final clienteActual = ref.watch(clientePedidoActualProvider);
-    final listadoPedido = ref.watch(menuItemPedidoListProvider);
+    ClienteModelo clienteActual = ref.watch(clientePedidoActualProvider);
+    List<MenuItemModel> listadoPedido = ref.watch(menuItemPedidoListProvider);
     PedidoModel pedidoActualInfo = ref.watch(pedidoActualProvider);
     List<PedidoDetalleModel> pedidoDetallesList =
         ref.watch(pedidoDetallesManagementProvider);
+    List<CategoriaModelo> listadoCategorias =
+        ref.watch(listadoCategoriasProvider);
+
+    //-------generar los botones de categorías
+    List<Widget> listadoBotones = [];
+    for (var element in listadoCategorias) {
+      listadoBotones.add(Row(
+        children: [
+          ElevatedButton(
+              onPressed: () {
+                _filtrarPorCategoria(element.idCategoria);
+              },
+              onLongPress: () {
+                _updateCategoriaModal(element);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: idCat == element.idCategoria
+                    ? AppColors.kGeneralPrimaryOrange
+                    : null,
+              ),
+              child: Text(
+                element.nombreCategoria,
+                style: TextStyle(
+                  color: idCat == element.idCategoria
+                      ? Colors.white
+                      : Colors.black,
+                  fontWeight: FontWeight.w600,
+                ),
+              )),
+          const Gap(10),
+        ],
+      ));
+    }
+    //-------generar los botones de categorías
+
     return Row(
       children: [
         //Área de menú
@@ -84,6 +142,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 //Título y Botón para agregar productos al menú
                 Row(
@@ -97,60 +156,6 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                         fontSize: 18.0,
                         letterSpacing: 0.0,
                         fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 350,
-                      height: 48,
-                      child: TextFormField(
-                        controller: _searchController,
-                        autofillHints: const [AutofillHints.email],
-                        decoration: InputDecoration(
-                          suffixIcon: IconButton(
-                              onPressed: () {}, icon: const Icon(Icons.search)),
-                          hintText: 'Búsqueda por nombre...',
-                          hintStyle: GoogleFonts.inter(
-                            color: AppColors.kTextSecondaryGray,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                              color: Colors.white,
-                              width: 2.0,
-                            ),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                              color: AppColors.kGeneralPrimaryOrange,
-                              width: 2.0,
-                            ),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                              color: AppColors.kGeneralErrorColor,
-                              width: 2.0,
-                            ),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                              color: AppColors.kGeneralErrorColor,
-                              width: 2.0,
-                            ),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          filled: true,
-                          fillColor: AppColors.kInputLiteGray,
-                        ),
-                        style: GoogleFonts.inter(),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Campo no puede estar vacío';
-                          }
-
-                          return null;
-                        },
                       ),
                     ),
                     ElevatedButton(
@@ -178,7 +183,55 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                   thickness: 1.0,
                   color: Color(0xFFE0E3E7),
                 ),
-
+                const Gap(5),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                _filtrarPorCategoria(
+                                    null); //Mostrar todos los productos
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: idCat == 0
+                                    ? AppColors.kGeneralPrimaryOrange
+                                    : null,
+                              ),
+                              child: Text(
+                                'Todo',
+                                style: TextStyle(
+                                  color:
+                                      idCat == 0 ? Colors.white : Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const Gap(10),
+                            ...listadoBotones,
+                          ],
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        _addCategoriaModal();
+                      },
+                      tooltip: 'Agregar categoría',
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.black,
+                      ),
+                      icon: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
                 const Gap(5),
                 //ÁREA DE MENÚ DINÁMICO
                 Expanded(
@@ -212,11 +265,15 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                       } else {
                         List<Map<String, dynamic>> listadoMap = snapshot.data!;
                         List<MenuItemModel> listadoMenuItems = [];
+
                         for (var element in listadoMap) {
-                          //*Filtrar solamente para los activos
+                          //* Filtrar solamente para los activos
                           if (element['activo'] == true) {
-                            listadoMenuItems
-                                .add(MenuItemModel.fromJson(element));
+                            var menuItem = MenuItemModel.fromJson(element);
+                            // Aplicar filtro de categoría si está seleccionado
+                            if (idCat == 0 || menuItem.idCategoria == idCat) {
+                              listadoMenuItems.add(menuItem);
+                            }
                           }
                         }
                         return RefreshIndicator(
@@ -507,6 +564,9 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                               return await _getClientesForDropdown(filter);
                             },
                             dropdownDecoratorProps: DropDownDecoratorProps(
+                              baseStyle: const TextStyle(
+                                fontSize: 13,
+                              ),
                               dropdownSearchDecoration: InputDecoration(
                                 hintText: 'Búsqueda por nombre...',
                                 hintStyle: GoogleFonts.inter(
@@ -1165,6 +1225,34 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
         elevation: 8,
         backgroundColor: Colors.transparent,
         child: ClienteModal(),
+      ),
+    );
+  }
+
+  void _addCategoriaModal() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.white.withOpacity(0),
+      builder: (_) => const Dialog(
+        elevation: 8,
+        backgroundColor: Colors.transparent,
+        child: AddCategoriaModal(),
+      ),
+    );
+  }
+
+  void _updateCategoriaModal(CategoriaModelo cat) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.white.withOpacity(0),
+      builder: (_) => Dialog(
+        elevation: 8,
+        backgroundColor: Colors.transparent,
+        child: UpdateCategoriaModal(
+          catRecibida: cat,
+        ),
       ),
     );
   }

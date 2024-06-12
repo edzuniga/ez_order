@@ -249,8 +249,10 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
                                                           fontSize: 12,
                                                         ),
                                                       ),
-                                                      Text(pedido.notaAdicional !=
-                                                              null
+                                                      Text((pedido.notaAdicional !=
+                                                                  null) &&
+                                                              pedido.notaAdicional !=
+                                                                  'null'
                                                           ? '${pedido.notaAdicional}'
                                                           : 'sin nota adicional'),
                                                     ],
