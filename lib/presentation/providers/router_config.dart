@@ -1,3 +1,8 @@
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:ez_order_ezr/presentation/auth/auth_layout.dart';
 import 'package:ez_order_ezr/presentation/auth/login_view.dart';
 import 'package:ez_order_ezr/presentation/auth/recovery_view.dart';
@@ -6,17 +11,12 @@ import 'package:ez_order_ezr/presentation/config/routes.dart';
 import 'package:ez_order_ezr/presentation/dashboard/administracion_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/agregar_pedido_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/dashboard_layout.dart';
-import 'package:ez_order_ezr/presentation/dashboard/datos_facturacion_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/facturacion_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/pedidos_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/reportes_view.dart';
 import 'package:ez_order_ezr/presentation/error_page.dart';
 import 'package:ez_order_ezr/presentation/providers/auth_supabase_manager.dart';
 import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'router_config.g.dart';
 
 @Riverpod(keepAlive: true)
@@ -112,19 +112,6 @@ GoRouter router(Ref ref) {
             path: '/facturacion',
             pageBuilder: (context, state) => CustomTransitionPage(
               child: const FacturacionView(),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) =>
-                      FadeTransition(
-                opacity: animation,
-                child: child,
-              ),
-            ),
-          ),
-          GoRoute(
-            name: Routes.datosFactura,
-            path: '/datosFactura',
-            pageBuilder: (context, state) => CustomTransitionPage(
-              child: const DatosFacturacionView(),
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) =>
                       FadeTransition(

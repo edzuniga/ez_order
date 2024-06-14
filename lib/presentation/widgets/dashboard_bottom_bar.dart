@@ -22,8 +22,7 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
         i = 1 -> Agregar Pedido
         i = 2 -> Reportes
         i = 3 -> Facturación
-        i = 4 -> DatosFactura
-        i = 5 -> Administración
+        i = 4 -> Administración
         */
         String pageTitle = '';
         switch (index) {
@@ -40,9 +39,6 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
             pageTitle = Routes.facturacion;
             break;
           case 4:
-            pageTitle = Routes.datosFactura;
-            break;
-          case 5:
             pageTitle = Routes.administracion;
             break;
         }
@@ -63,8 +59,6 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
             icon: Icon(Icons.playlist_add_check_outlined), label: 'Reportes'),
         BottomNavigationBarItem(
             icon: Icon(Icons.receipt_long), label: 'Facturación'),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.inventory_outlined), label: 'Datos Factura'),
         BottomNavigationBarItem(
             icon: Icon(Icons.space_dashboard_outlined),
             label: 'Administración'),

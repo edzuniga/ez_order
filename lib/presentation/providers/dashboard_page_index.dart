@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ez_order_ezr/presentation/dashboard/administracion_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/agregar_pedido_view.dart';
-import 'package:ez_order_ezr/presentation/dashboard/datos_facturacion_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/facturacion_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/pedidos_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/reportes_view.dart';
@@ -22,8 +21,7 @@ class DashboardPageIndex extends _$DashboardPageIndex {
   i = 1 -> Agregar Pedido
   i = 2 -> Reportes
   i = 3 -> Facturación
-  i = 4 -> DatosFactura
-  i = 5 -> Administración
+  i = 4 -> Administración
   */
 
   void changePageIndex(int i) {
@@ -49,10 +47,6 @@ class DashboardPageIndex extends _$DashboardPageIndex {
         view = const FacturacionView();
         break;
       case 4:
-        pageTitle = 'Datos Factura';
-        view = const DatosFacturacionView();
-        break;
-      case 5:
         pageTitle = 'Administración';
         view = const AdminView();
         break;

@@ -1,4 +1,3 @@
-import 'package:ez_order_ezr/data/pedido_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -6,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/data/pedido_model.dart';
 import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
@@ -158,7 +158,6 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
                                           detalleMap['nombreMenu'];
                                       return '${detalle.cantidad} $nombreMenu';
                                     }).join(' / ');
-
                                     return Column(
                                       children: [
                                         Container(

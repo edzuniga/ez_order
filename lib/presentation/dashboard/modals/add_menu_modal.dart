@@ -355,9 +355,6 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                                             FilteringTextInputFormatter.allow(
                                                 RegExp(r'^\d+\.?\d{0,2}')),
                                           ],
-                                          autofillHints: const [
-                                            AutofillHints.name
-                                          ],
                                           decoration: InputDecoration(
                                             labelText: 'Precio',
                                             labelStyle: GoogleFonts.inter(
