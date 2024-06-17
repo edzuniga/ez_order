@@ -47,8 +47,9 @@ class MyApp extends ConsumerWidget {
       title: 'EZOrder',
       theme: ThemeData(
         dialogBackgroundColor: Colors.transparent,
-        colorScheme:
-            ColorScheme.fromSeed(seedColor: AppColors.kGeneralPrimaryOrange),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.kGeneralPrimaryOrange,
+        ),
         useMaterial3: true,
       ),
       routerConfig: router,

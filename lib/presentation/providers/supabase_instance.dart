@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:ez_order_ezr/data/factura_modelo.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:random_string/random_string.dart';
@@ -500,6 +501,31 @@ class SupabaseManagement extends _$SupabaseManagement {
       return 'success';
     } on PostgrestException catch (e) {
       return 'Ocurrió un error -> ${e.message}';
+    }
+  }
+
+  Future<List<FacturaModelo>> getFacturasYDetalles() async {
+    Map<String, String> datosPublicos = ref.read(userPublicDataProvider);
+    int idRes = int.parse(datosPublicos['id_restaurante'].toString());
+    DateTime startOfDay =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    try {
+      List<Map<String, dynamic>> res = await state
+          .from('facturas')
+          .select()
+          .eq('id_restaurante', idRes)
+          .gte('fecha_factura', startOfDay.toIso8601String());
+      List<FacturaModelo> listado = [];
+      for (var element in res) {
+        FacturaModelo modelo = FacturaModelo.fromJson(element);
+        //Obtener el nombre del cliente
+        String nombreCliente = await getClienteName(modelo.idCliente!);
+        modelo = modelo.copyWith(nombreCliente: nombreCliente);
+        listado.add(modelo);
+      }
+      return listado;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error -> ${e.message}';
     }
   }
 }
