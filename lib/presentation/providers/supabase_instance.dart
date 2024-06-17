@@ -1,12 +1,14 @@
 import 'dart:io';
-import 'package:ez_order_ezr/data/categoria_modelo.dart';
-import 'package:ez_order_ezr/presentation/providers/reportes/table_rows.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:random_string/random_string.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/data/categoria_modelo.dart';
+import 'package:ez_order_ezr/data/datos_factura_modelo.dart';
+import 'package:ez_order_ezr/presentation/providers/facturacion/datos_factura_provider.dart';
+import 'package:ez_order_ezr/presentation/providers/reportes/table_rows.dart';
 import 'package:ez_order_ezr/data/restaurante_modelo.dart';
 import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/duenos_restaurantes_provider.dart';
 import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
@@ -449,6 +451,55 @@ class SupabaseManagement extends _$SupabaseManagement {
       return 'success';
     } on PostgrestException catch (e) {
       return 'Ocurrió un error al querer agregar la categoría -> ${e.message}';
+    }
+  }
+
+  Future<String> getDatosFactura() async {
+    Map<String, String> datosPublicos = ref.read(userPublicDataProvider);
+    int idRes = int.parse(datosPublicos['id_restaurante'].toString());
+
+    try {
+      final res = await state
+          .from('datos_factura')
+          .select()
+          .eq('id_restaurante', idRes)
+          .count(CountOption.exact);
+
+      if (res.count > 0) {
+        DatosFacturaModelo modelo = DatosFacturaModelo.fromJson(res.data.first);
+        //asignar los datos al provider de datos de facturación
+        ref.read(datosFacturaManagerProvider.notifier).setDatosFactura(modelo);
+        return 'success';
+      } else {
+        return 'vacio';
+      }
+    } on PostgrestException catch (e) {
+      return 'Ocurrió un error al intentar obtener los datos -> ${e.message}';
+    }
+  }
+
+  Future<String> addDatosFactura(DatosFacturaModelo datos) async {
+    Map<String, dynamic> mapa = datos.toJson();
+    try {
+      await state.from('datos_factura').insert(mapa);
+      getDatosFactura();
+      return 'success';
+    } on PostgrestException catch (e) {
+      return 'Ocurrió un error -> ${e.message}';
+    }
+  }
+
+  Future<String> actualizarDatosFactura(DatosFacturaModelo datos) async {
+    Map<String, dynamic> mapa = datos.toJson();
+    try {
+      await state
+          .from('datos_factura')
+          .update(mapa)
+          .eq('id_datos_factura', datos.idDatosFactura);
+      getDatosFactura();
+      return 'success';
+    } on PostgrestException catch (e) {
+      return 'Ocurrió un error -> ${e.message}';
     }
   }
 }
