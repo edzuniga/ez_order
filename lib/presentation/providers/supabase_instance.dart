@@ -204,6 +204,41 @@ class SupabaseManagement extends _$SupabaseManagement {
         await state.from('pedidos_items').insert(detalleMap);
       }
 
+      //*NUEVO - INESRTAR FACTURA
+      final datosFactura = ref.read(datosFacturaManagerProvider);
+      FacturaModelo factura = FacturaModelo(
+        idFactura: 0,
+        idRestaurante: pedido.idRestaurante,
+        uuidPedido: pedidoUuid,
+        rtn: datosFactura.rtn,
+        direccion: datosFactura.direccion,
+        correo: datosFactura.correo,
+        telefono: datosFactura.telefono,
+        cai: datosFactura.cai,
+        numFactura: 0,
+        fechaFactura: pedido.createdAt,
+        idCliente: pedido.idCliente,
+        total: pedido.total,
+      );
+      if (datosFactura.idDatosFactura != 0) {
+        //----revisar si hay datos de factura
+        //Revisar si hay factura para saber qué numFactura asignarle
+        List<Map<String, dynamic>> lastNumFactura = await state
+            .from('facturas')
+            .select('num_factura')
+            .eq('id_restaurante', pedido.idRestaurante)
+            .order('num_factura', ascending: false)
+            .limit(1);
+
+        if (lastNumFactura.first['num_factura'] != null &&
+            lastNumFactura.first['num_factura'] != '') {
+          int ultimoNumeroMasUno =
+              int.parse(lastNumFactura.first['num_factura'].toString()) + 1;
+          factura = factura.copyWith(numFactura: ultimoNumeroMasUno);
+        }
+      }
+      await addFactura(factura);
+
       //Resetear el pedido actual y vacíar los detalles
       ref.read(pedidoActualProvider.notifier).resetearPedidoActual();
       //Resetear Menu Pedido (incluído el listado de detalles)
@@ -514,7 +549,8 @@ class SupabaseManagement extends _$SupabaseManagement {
           .from('facturas')
           .select()
           .eq('id_restaurante', idRes)
-          .gte('fecha_factura', startOfDay.toIso8601String());
+          .gte('fecha_factura', startOfDay.toIso8601String())
+          .order('id_factura', ascending: false);
       List<FacturaModelo> listado = [];
       for (var element in res) {
         FacturaModelo modelo = FacturaModelo.fromJson(element);
@@ -526,6 +562,16 @@ class SupabaseManagement extends _$SupabaseManagement {
       return listado;
     } on PostgrestException catch (e) {
       throw 'Ocurrió un error -> ${e.message}';
+    }
+  }
+
+  Future<String> addFactura(FacturaModelo modelo) async {
+    Map<String, dynamic> mapa = modelo.toJson();
+    try {
+      await state.from('facturas').insert(mapa);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return 'Ocurrió un error -> ${e.message}';
     }
   }
 }

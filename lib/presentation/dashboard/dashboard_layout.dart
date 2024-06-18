@@ -1,4 +1,5 @@
 import 'package:ez_order_ezr/presentation/providers/dashboard_view.dart';
+import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/widgets/dashboard_bottom_bar.dart';
 import 'package:ez_order_ezr/utils/secure_storage.dart';
@@ -24,6 +25,8 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
   }
 
   Future<void> _getUserData() async {
+    //Obtener los datos de facturación y guardarlos en el provider
+    await ref.read(supabaseManagementProvider.notifier).getDatosFactura();
     SecureStorage secureStorage = SecureStorage();
     Map<String, String> userDataMap = await secureStorage.getAllValues();
     //Guardar los datos en un provider

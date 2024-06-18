@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ez_order_ezr/data/factura_modelo.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
+import 'package:intl/intl.dart';
 
 class FacturasDeHoyView extends ConsumerStatefulWidget {
   const FacturasDeHoyView({super.key});
@@ -57,7 +58,12 @@ class _FacturasDeHoyViewState extends ConsumerState<FacturasDeHoyView> {
               physics: const ClampingScrollPhysics(),
               itemCount: listadoFacturas.length,
               itemBuilder: (ctx, index) {
+                FacturaModelo factura = listadoFacturas[index];
                 //Format date
+                String formattedDate =
+                    DateFormat.yMMMEd('es').format(factura.fechaFactura);
+                String formattedTime =
+                    DateFormat('h:mm a').format(factura.fechaFactura);
                 return Column(
                   children: [
                     Container(
@@ -87,7 +93,7 @@ class _FacturasDeHoyViewState extends ConsumerState<FacturasDeHoyView> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  'Factura # ${listadoFacturas[index].numFactura}',
+                                  'Factura # ${factura.numFactura}',
                                   style: GoogleFonts.inter(
                                     fontSize: 14,
                                     letterSpacing: 0.0,
@@ -97,7 +103,7 @@ class _FacturasDeHoyViewState extends ConsumerState<FacturasDeHoyView> {
                                 SizedBox(
                                   width: double.infinity,
                                   child: Text(
-                                    'Fecha y hora: ${listadoFacturas[index].fechaFactura}',
+                                    'Fecha y hora: $formattedDate | $formattedTime',
                                     style: GoogleFonts.inter(
                                       fontSize: 12,
                                       letterSpacing: 0.0,
@@ -114,14 +120,13 @@ class _FacturasDeHoyViewState extends ConsumerState<FacturasDeHoyView> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Cliente: ${listadoFacturas[index].nombreCliente}',
+                                  'Cliente: ${factura.nombreCliente}',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 12,
                                   ),
                                 ),
-                                Text(
-                                    'Total: L. ${listadoFacturas[index].total}'),
+                                Text('Total: L. ${factura.total}'),
                               ],
                             ),
                           ),
