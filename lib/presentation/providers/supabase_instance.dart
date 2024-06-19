@@ -1,11 +1,12 @@
 import 'dart:io';
-import 'package:ez_order_ezr/data/factura_modelo.dart';
+import 'package:ez_order_ezr/presentation/providers/facturacion/pedido_para_view.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:random_string/random_string.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/data/factura_modelo.dart';
 import 'package:ez_order_ezr/data/categoria_modelo.dart';
 import 'package:ez_order_ezr/data/datos_factura_modelo.dart';
 import 'package:ez_order_ezr/presentation/providers/facturacion/datos_factura_provider.dart';
@@ -265,6 +266,23 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  Future<void> getPedidoPorUuid(String uuidRecibido) async {
+    try {
+      Map<String, dynamic> singlePedido = await state
+          .from('pedidos')
+          .select()
+          .eq('uuid_pedido', uuidRecibido)
+          .limit(1)
+          .single();
+      PedidoModel pedido = PedidoModel.fromJson(singlePedido);
+
+      //Alimentar el provider de lectura del pedido que se está viendo
+      ref.read(pedidoParaViewProvider.notifier).setPedidoParaView(pedido);
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error -> ${e.message}';
+    }
+  }
+
   Future<List<PedidoDetalleModel>> getDetallesPedido(String uuIdPedido) async {
     try {
       final res = await state
@@ -326,6 +344,7 @@ class SupabaseManagement extends _$SupabaseManagement {
           .from('menus')
           .select('nombre_item')
           .eq('id_menu', idMenu)
+          .limit(1)
           .single();
       return res['nombre_item'];
     } on PostgrestException catch (e) {

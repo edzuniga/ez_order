@@ -1,9 +1,9 @@
-import 'package:ez_order_ezr/presentation/dashboard/modals/view_factura_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:ez_order_ezr/presentation/dashboard/modals/view_factura_modal.dart';
 import 'package:ez_order_ezr/data/factura_modelo.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
@@ -54,142 +54,151 @@ class _FacturasDeHoyViewState extends ConsumerState<FacturasDeHoyView> {
             );
           } else {
             List<FacturaModelo> listadoFacturas = snapshot.data!;
-            return ListView.builder(
-              physics: const ClampingScrollPhysics(),
-              itemCount: listadoFacturas.length,
-              itemBuilder: (ctx, index) {
-                FacturaModelo factura = listadoFacturas[index];
-                //Format date
-                String formattedDate =
-                    DateFormat.yMMMEd('es').format(factura.fechaFactura);
-                String formattedTime =
-                    DateFormat('h:mm a').format(factura.fechaFactura);
-                return Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8.0),
-                        border: Border.all(
-                          color: const Color(0xFFE0E3E7),
-                          width: 1.0,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          //Imagen genérica de pedido
-                          const Icon(
-                            Icons.receipt,
-                            color: AppColors.kGeneralPrimaryOrange,
+            return RefreshIndicator(
+              onRefresh: () async {
+                await Future.delayed(const Duration(seconds: 2))
+                    .then((value) => setState(() {}));
+              },
+              child: ListView.builder(
+                physics: const ClampingScrollPhysics(),
+                itemCount: listadoFacturas.length,
+                itemBuilder: (ctx, index) {
+                  FacturaModelo factura = listadoFacturas[index];
+                  //Format date
+                  String formattedDate =
+                      DateFormat.yMMMEd('es').format(factura.fechaFactura);
+                  String formattedTime =
+                      DateFormat('h:mm a').format(factura.fechaFactura);
+                  return Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0),
+                          border: Border.all(
+                            color: const Color(0xFFE0E3E7),
+                            width: 1.0,
                           ),
-                          const Gap(10),
-                          //Fecha y hora
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Factura # ${factura.numFactura}',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: Text(
-                                    'Fecha y hora: $formattedDate | $formattedTime',
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            //Imagen genérica de pedido
+                            const Icon(
+                              Icons.receipt,
+                              color: AppColors.kGeneralPrimaryOrange,
+                            ),
+                            const Gap(10),
+                            //Fecha y hora
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Factura # ${factura.numFactura}',
                                     style: GoogleFonts.inter(
-                                      fontSize: 12,
+                                      fontSize: 14,
                                       letterSpacing: 0.0,
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          //Cliente y total
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Cliente: ${factura.nombreCliente}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: Text(
+                                      'Fecha y hora: $formattedDate | $formattedTime',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12,
+                                        letterSpacing: 0.0,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                Text('Total: L. ${factura.total}'),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          const Gap(15),
-                          //VER
-                          IconButton(
-                            onPressed: () {
-                              _viewFacturaModal();
-                            },
-                            tooltip: 'Ver',
-                            style: IconButton.styleFrom(
-                              backgroundColor: AppColors.kGeneralOrangeBg,
+                            //Cliente y total
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Cliente: ${factura.nombreCliente}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  Text('Total: L. ${factura.total}'),
+                                ],
+                              ),
                             ),
-                            icon: const Icon(
-                              Icons.remove_red_eye_outlined,
-                              color: Colors.white,
+                            const Gap(15),
+                            //VER
+                            IconButton(
+                              onPressed: () {
+                                _viewFacturaModal(factura);
+                              },
+                              tooltip: 'Ver',
+                              style: IconButton.styleFrom(
+                                backgroundColor: AppColors.kGeneralOrangeBg,
+                              ),
+                              icon: const Icon(
+                                Icons.remove_red_eye_outlined,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
-                          //ENVIAR
-                          IconButton(
-                            onPressed: () {},
-                            tooltip: 'Compartir',
-                            style: IconButton.styleFrom(
-                              backgroundColor: AppColors.kGeneralPrimaryOrange,
+                            //ENVIAR
+                            IconButton(
+                              onPressed: () {},
+                              tooltip: 'Compartir',
+                              style: IconButton.styleFrom(
+                                backgroundColor:
+                                    AppColors.kGeneralPrimaryOrange,
+                              ),
+                              icon: const Icon(
+                                Icons.share,
+                                color: Colors.white,
+                              ),
                             ),
-                            icon: const Icon(
-                              Icons.share,
-                              color: Colors.white,
+                            //IMPRIMIR
+                            IconButton(
+                              onPressed: () {},
+                              tooltip: 'Imprimir',
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.green,
+                              ),
+                              icon: const Icon(
+                                Icons.print,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
-                          //IMPRIMIR
-                          IconButton(
-                            onPressed: () {},
-                            tooltip: 'Imprimir',
-                            style: IconButton.styleFrom(
-                              backgroundColor: Colors.green,
-                            ),
-                            icon: const Icon(
-                              Icons.print,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    const Gap(8),
-                  ],
-                );
-              },
+                      const Gap(8),
+                    ],
+                  );
+                },
+              ),
             );
           }
         });
   }
 
-  void _viewFacturaModal() {
+  void _viewFacturaModal(FacturaModelo factura) {
     showDialog(
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.white.withOpacity(0),
-      builder: (_) => const Dialog(
+      builder: (_) => Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,
-        child: ViewFacturaModal(),
+        child: ViewFacturaModal(
+          factura: factura,
+        ),
       ),
     );
   }

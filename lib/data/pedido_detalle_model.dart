@@ -6,6 +6,7 @@ class PedidoDetalleModel extends PedidoDetalle {
     super.uuidPedido,
     required super.idMenu,
     required super.cantidad,
+    super.nombreMenuItem,
   });
 
   factory PedidoDetalleModel.fromJson(Map<String, dynamic> json) {
@@ -30,12 +31,14 @@ class PedidoDetalleModel extends PedidoDetalle {
     String? uuidPedido,
     int? idMenu,
     int? cantidad,
+    String? nombreMenuItem,
   }) {
     return PedidoDetalleModel(
       idPedidosItem: idPedidosItem ?? this.idPedidosItem,
       uuidPedido: uuidPedido ?? this.uuidPedido,
       idMenu: idMenu ?? this.idMenu,
       cantidad: cantidad ?? this.cantidad,
+      nombreMenuItem: nombreMenuItem ?? this.nombreMenuItem,
     );
   }
 }
