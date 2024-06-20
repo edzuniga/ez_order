@@ -265,6 +265,21 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  Future<List<String>> getClienteNameRtn(int clienteId) async {
+    try {
+      final res =
+          await state.from('clientes').select().eq('id_cliente', clienteId);
+      List<String> listadoString = [];
+      String nombreCliente = res.first['nombre_cliente'];
+      String rtnCliente = res.first['rtn_cliente'] ?? '';
+      listadoString.add(nombreCliente);
+      listadoString.add(rtnCliente);
+      return listadoString;
+    } on PostgrestException catch (e) {
+      return [e.message];
+    }
+  }
+
   Future<void> getPedidoPorUuid(String uuidRecibido) async {
     try {
       Map<String, dynamic> singlePedido = await state
@@ -575,9 +590,12 @@ class SupabaseManagement extends _$SupabaseManagement {
       List<FacturaModelo> listado = [];
       for (var element in res) {
         FacturaModelo modelo = FacturaModelo.fromJson(element);
-        //Obtener el nombre del cliente
-        String nombreCliente = await getClienteName(modelo.idCliente!);
-        modelo = modelo.copyWith(nombreCliente: nombreCliente);
+        //Obtener el nombre y RTN del cliente
+        List<String> datosDelCliente =
+            await getClienteNameRtn(modelo.idCliente!);
+        String nombreCliente = datosDelCliente.first;
+        String rtnCliente = datosDelCliente.last;
+        modelo = modelo.copyWith(nombreCliente: nombreCliente, rtn: rtnCliente);
         listado.add(modelo);
       }
       return listado;

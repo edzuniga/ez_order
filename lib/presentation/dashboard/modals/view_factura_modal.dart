@@ -1,12 +1,22 @@
-import 'package:ez_order_ezr/presentation/providers/facturacion/detalles_pedido_para_view.dart';
-import 'package:ez_order_ezr/utils/numbers_to_words.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:random_string/random_string.dart';
+import 'package:share_plus/share_plus.dart';
 
+import 'package:ez_order_ezr/data/datos_factura_modelo.dart';
+import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
+import 'package:ez_order_ezr/data/pedido_model.dart';
+import 'package:ez_order_ezr/presentation/providers/facturacion/detalles_pedido_para_view.dart';
+import 'package:ez_order_ezr/utils/invoice_pdf.dart';
+import 'package:ez_order_ezr/utils/numbers_to_words.dart';
 import 'package:ez_order_ezr/data/factura_modelo.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/providers/facturacion/datos_factura_provider.dart';
@@ -22,7 +32,11 @@ class ViewFacturaModal extends ConsumerStatefulWidget {
 }
 
 class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
+  final GlobalKey _shareButtonKey = GlobalKey();
   bool _isRetrievingInfo = true;
+  // ignore: unused_field
+  bool _isGeneratingPdf = false;
+  late Future<void> _pdfGenerationFuture = Future.value();
 
   @override
   void initState() {
@@ -40,11 +54,74 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
     setState(() => _isRetrievingInfo = false);
   }
 
+  Future<void> _generatePdfAndShare(
+      FacturaModelo factura,
+      DatosFacturaModelo datosFacturacion,
+      List<PedidoDetalleModel> detallesPedido,
+      PedidoModel pedidoParaView) async {
+    setState(() {
+      _isGeneratingPdf = true;
+      _pdfGenerationFuture = _generateAndShare(
+          factura, datosFacturacion, detallesPedido, pedidoParaView);
+    });
+  }
+
+  Future<void> _generateAndShare(
+      FacturaModelo factura,
+      DatosFacturaModelo datosFacturacion,
+      List<PedidoDetalleModel> detallesPedido,
+      PedidoModel pedidoParaView) async {
+    // Generar el archivo PDF
+    final pdfData = await generateFacturaPdf(
+        factura, datosFacturacion, detallesPedido, pedidoParaView);
+    // Guardar el archivo PDF en el dispositivo
+    final directory = await getApplicationDocumentsDirectory();
+    String nombreGenerado = randomString(10);
+    final filePath = '${directory.path}/$nombreGenerado.pdf';
+    final file = File(filePath);
+    await file.writeAsBytes(pdfData);
+
+    // Obtener un XFile para trabajar con share_plus
+    final xFile = XFile(filePath);
+
+    // Obtener el RenderBox del botón
+    final RenderBox? box =
+        _shareButtonKey.currentContext?.findRenderObject() as RenderBox?;
+
+    if (box != null) {
+      // Obtener la posición del botón
+      final position = box.localToGlobal(Offset.zero) & box.size;
+
+      // Compartir el archivo PDF vía WhatsApp
+      await Share.shareXFiles(
+        [xFile],
+        text: 'Aquí está tu recibo en PDF',
+        sharePositionOrigin: position,
+      );
+    } else {
+      Fluttertoast.cancel();
+      Fluttertoast.showToast(
+        msg: 'Pruebe nuevamente',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 3,
+        backgroundColor: Colors.blue,
+        textColor: Colors.white,
+        fontSize: 16.0,
+        webPosition: 'center',
+        webBgColor: 'red',
+      );
+    }
+    setState(() => _isGeneratingPdf = false);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final datosFacturacion = ref.watch(datosFacturaManagerProvider);
-    final pedidoParaView = ref.watch(pedidoParaViewProvider);
-    final detallesPedido = ref.watch(detallesParaPedidoViewProvider);
+    DatosFacturaModelo datosFacturacion =
+        ref.watch(datosFacturaManagerProvider);
+    PedidoModel pedidoParaView = ref.watch(pedidoParaViewProvider);
+    List<PedidoDetalleModel> detallesPedido =
+        ref.watch(detallesParaPedidoViewProvider);
 
 //--------tratamiento de las variables
     //----Numero de factura con ceros
@@ -145,10 +222,14 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                   ),
                   const Gap(10),
                   Text(
-                    widget.factura.nombreCliente.toString(),
+                    'Cliente: ${widget.factura.nombreCliente.toString()}',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
+                      fontSize: 12,
                     ),
+                  ),
+                  Text(
+                    'RTN: ${widget.factura.rtn.toString()}',
                   ),
                   const Text('NO. O/C EXENTA:'),
                   const Text('NO.REG DE EXONERADO:'),
@@ -156,9 +237,9 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                   const Gap(10),
                   Table(
                     columnWidths: const {
-                      0: FixedColumnWidth(40),
+                      0: FixedColumnWidth(25),
                       1: FlexColumnWidth(),
-                      2: FixedColumnWidth(70),
+                      2: FixedColumnWidth(50),
                     },
                     children: [
                       const TableRow(
@@ -309,17 +390,33 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       //ENVIAR
-                      IconButton(
-                        onPressed: () {},
-                        tooltip: 'Compartir',
-                        style: IconButton.styleFrom(
-                          backgroundColor: AppColors.kGeneralPrimaryOrange,
-                        ),
-                        icon: const Icon(
-                          Icons.share,
-                          color: Colors.white,
-                        ),
+                      FutureBuilder(
+                        future: _pdfGenerationFuture,
+                        builder: (context, snapshot) {
+                          return IconButton(
+                            key: _shareButtonKey,
+                            onPressed:
+                                snapshot.connectionState == ConnectionState.done
+                                    ? () async {
+                                        await _generatePdfAndShare(
+                                            widget.factura,
+                                            datosFacturacion,
+                                            detallesPedido,
+                                            pedidoParaView);
+                                      }
+                                    : null,
+                            tooltip: 'Compartir',
+                            style: IconButton.styleFrom(
+                              backgroundColor: AppColors.kGeneralPrimaryOrange,
+                            ),
+                            icon: const Icon(
+                              Icons.share,
+                              color: Colors.white,
+                            ),
+                          );
+                        },
                       ),
+
                       const Gap(15),
                       //IMPRIMIR
                       IconButton(
@@ -340,4 +437,55 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
             ),
     );
   }
+
+  /* Future<void> _generatePdfAndShare(
+      FacturaModelo factura,
+      DatosFacturaModelo datosFacturacion,
+      List<PedidoDetalleModel> detallesPedido,
+      PedidoModel pedidoParaView) async {
+    setState(() => _isGeneratingPdf = true);
+    //Generar el archivo PDF
+    final pdfData = await generateFacturaPdf(
+        factura, datosFacturacion, detallesPedido, pedidoParaView);
+    //Guardar el archivo PDF en el dispositivo
+    final directory = await getApplicationDocumentsDirectory();
+    String nombreGenerado = randomString(10);
+    final filePath = '${directory.path}/$nombreGenerado.pdf';
+    final file = File(filePath);
+    await file.writeAsBytes(pdfData);
+
+    //Obtener un XFile para trabajar con share_plus
+    final xFile = XFile(filePath);
+
+    // Obtener el RenderBox del botón
+    final RenderBox? box =
+        _shareButtonKey.currentContext?.findRenderObject() as RenderBox?;
+
+    if (box != null) {
+      // Obtener la posición del botón
+      final position = box.localToGlobal(Offset.zero) & box.size;
+
+      // Compartir el archivo PDF vía WhatsApp
+      await Share.shareXFiles(
+        [xFile],
+        text: 'Aquí está tu recibo en PDF',
+        sharePositionOrigin: position,
+      );
+      setState(() => _isGeneratingPdf = false);
+    } else {
+      setState(() => _isGeneratingPdf = false);
+      Fluttertoast.cancel();
+      Fluttertoast.showToast(
+        msg: 'Pruebe nuevamente',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 3,
+        backgroundColor: Colors.blue,
+        textColor: Colors.white,
+        fontSize: 16.0,
+        webPosition: 'center',
+        webBgColor: 'red',
+      );
+    }
+  } */
 }

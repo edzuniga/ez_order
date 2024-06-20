@@ -15,6 +15,7 @@ class FacturaModelo extends Factura {
     super.idCliente,
     super.total,
     super.nombreCliente,
+    super.rtnCliente,
   });
 
   factory FacturaModelo.fromJson(Map<String, dynamic> json) => FacturaModelo(
@@ -61,6 +62,7 @@ class FacturaModelo extends Factura {
     int? idCliente,
     double? total,
     String? nombreCliente,
+    String? rtnCliente,
   }) =>
       FacturaModelo(
         idFactura: idFactura ?? this.idFactura,
@@ -76,5 +78,6 @@ class FacturaModelo extends Factura {
         idCliente: idCliente ?? this.idCliente,
         total: total ?? this.total,
         nombreCliente: nombreCliente ?? this.nombreCliente,
+        rtnCliente: rtnCliente ?? this.rtnCliente,
       );
 }

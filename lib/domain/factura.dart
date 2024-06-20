@@ -13,6 +13,7 @@ abstract class Factura {
     this.idCliente,
     this.total,
     this.nombreCliente,
+    this.rtnCliente,
   });
   final int idFactura;
   final int idRestaurante;
@@ -27,4 +28,5 @@ abstract class Factura {
   final int? idCliente;
   final double? total;
   final String? nombreCliente;
+  final String? rtnCliente;
 }
