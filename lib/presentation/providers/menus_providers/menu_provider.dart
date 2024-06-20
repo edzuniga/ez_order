@@ -108,8 +108,20 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
   void addMenuItem(MenuItemModel modelo) {
     //Crear el PedidoDetallesModel necesario para cada elemento de menú
     //agregado al pedido actual
-    PedidoDetalleModel pedidoDetalleProvi =
-        PedidoDetalleModel(idMenu: modelo.idMenu!, cantidad: 1);
+    PedidoDetalleModel pedidoDetalleProvi;
+    if (modelo.precioIncluyeIsv == false) {
+      pedidoDetalleProvi = PedidoDetalleModel(
+          idMenu: modelo.idMenu!,
+          cantidad: 1,
+          importeCobrado: modelo.precioSinIsv);
+    } else {
+      double precioQuitandoleIsv = modelo.precioSinIsv / 1.15;
+      pedidoDetalleProvi = PedidoDetalleModel(
+          idMenu: modelo.idMenu!,
+          cantidad: 1,
+          importeCobrado: precioQuitandoleIsv);
+    }
+
     state = [...state, modelo];
     //Ahora agregar una instancia de PedidoDetallesModelo a su provider
     ref

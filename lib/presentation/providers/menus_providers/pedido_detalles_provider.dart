@@ -29,7 +29,9 @@ class PedidoDetallesManagement extends _$PedidoDetallesManagement {
   void incrementarCantidad(int menuId) {
     for (var element in state) {
       if (element.idMenu == menuId) {
+        double precioBase = (element.importeCobrado / element.cantidad);
         element.cantidad += 1;
+        element.importeCobrado = precioBase * element.cantidad;
         //actualizar los cálculos del pedido general
         ref.read(menuItemPedidoListProvider.notifier).hacerCalculosDelPedido();
         break;
@@ -41,7 +43,9 @@ class PedidoDetallesManagement extends _$PedidoDetallesManagement {
   void decrementarCantidad(int menuId) {
     for (var element in state) {
       if (element.idMenu == menuId) {
+        double precioBase = (element.importeCobrado / element.cantidad);
         element.cantidad -= 1;
+        element.importeCobrado = precioBase * element.cantidad;
         //actualizar los cálculos del pedido general
         ref.read(menuItemPedidoListProvider.notifier).hacerCalculosDelPedido();
         break;

@@ -1,4 +1,5 @@
 import 'package:ez_order_ezr/presentation/providers/facturacion/detalles_pedido_para_view.dart';
+import 'package:ez_order_ezr/utils/numbers_to_words.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -117,7 +118,6 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                   Center(child: Text(datosFacturacion.rtn)),
                   Center(
                     child: SizedBox(
-                      //width: 200,
                       child: Text(
                         datosFacturacion.direccion,
                         textAlign: TextAlign.center,
@@ -171,18 +171,30 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                             Text('IMPORTE'),
                           ]),
                       ...detallesPedido.map((element) {
+                        double precioOriginal =
+                            (element.importeCobrado / element.cantidad);
                         return TableRow(
                           children: [
                             Text(element.cantidad.toString()),
-                            Text(element.nombreMenuItem.toString()),
-                            Text('L 30.00'),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(element.nombreMenuItem.toString()),
+                                Text(
+                                    '1.0 x L ${precioOriginal.toStringAsFixed(2)}'),
+                              ],
+                            ),
+                            Text(
+                                'L ${element.importeCobrado.toStringAsFixed(2)}'),
                           ],
                         );
                       })
                     ],
                   ),
                   const Gap(20),
-                  Text('${detallesPedido.length} Artículos'),
+                  Text(detallesPedido.length == 1
+                      ? '1 Artículo'
+                      : '${detallesPedido.length} Artículos'),
                   const Gap(10),
                   const Divider(
                     color: Colors.black,
@@ -241,10 +253,10 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                     color: Colors.black,
                   ),
                   const Gap(10),
-                  const SizedBox(
+                  SizedBox(
                     height: 60,
-                    child: Text(
-                        'CIENTO TREINTA Y DOS MIL LEMPIRAS CON 25/100 CENTAVOS'),
+                    child: Text(NumberToWordsEs.convertNumberToWords(
+                        widget.factura.total!)),
                   ),
                   const Gap(10),
                   Center(
@@ -290,6 +302,37 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                     children: [
                       Text('Copia:'),
                       Text('Obligado Tributario Emisor'),
+                    ],
+                  ),
+                  const Gap(25),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      //ENVIAR
+                      IconButton(
+                        onPressed: () {},
+                        tooltip: 'Compartir',
+                        style: IconButton.styleFrom(
+                          backgroundColor: AppColors.kGeneralPrimaryOrange,
+                        ),
+                        icon: const Icon(
+                          Icons.share,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const Gap(15),
+                      //IMPRIMIR
+                      IconButton(
+                        onPressed: () {},
+                        tooltip: 'Imprimir',
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.green,
+                        ),
+                        icon: const Icon(
+                          Icons.print,
+                          color: Colors.white,
+                        ),
+                      ),
                     ],
                   ),
                 ],

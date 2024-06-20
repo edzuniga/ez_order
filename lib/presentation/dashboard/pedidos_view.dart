@@ -526,7 +526,7 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                                                               position, // Posición del menú
                                                           items: <PopupMenuEntry<
                                                               int>>[
-                                                            PopupMenuItem(
+                                                            /* PopupMenuItem(
                                                               value: 1,
                                                               onTap: () {},
                                                               child: const Row(
@@ -542,7 +542,7 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                                                                 ],
                                                               ),
                                                             ),
-                                                            const PopupMenuDivider(),
+                                                            const PopupMenuDivider(),*/
                                                             PopupMenuItem(
                                                               value: 2,
                                                               onTap: () async {

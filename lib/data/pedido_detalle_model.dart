@@ -6,6 +6,7 @@ class PedidoDetalleModel extends PedidoDetalle {
     super.uuidPedido,
     required super.idMenu,
     required super.cantidad,
+    required super.importeCobrado,
     super.nombreMenuItem,
   });
 
@@ -15,6 +16,7 @@ class PedidoDetalleModel extends PedidoDetalle {
       uuidPedido: json["uuid_pedido"],
       idMenu: json["id_menu"],
       cantidad: json["cantidad"],
+      importeCobrado: double.tryParse(json["importe_cobrado"].toString())!,
     );
   }
 
@@ -23,6 +25,7 @@ class PedidoDetalleModel extends PedidoDetalle {
       "uuid_pedido": uuidPedido,
       "id_menu": idMenu,
       "cantidad": cantidad,
+      "importe_cobrado": importeCobrado,
     };
   }
 
@@ -31,6 +34,7 @@ class PedidoDetalleModel extends PedidoDetalle {
     String? uuidPedido,
     int? idMenu,
     int? cantidad,
+    double? importeCobrado,
     String? nombreMenuItem,
   }) {
     return PedidoDetalleModel(
@@ -38,6 +42,7 @@ class PedidoDetalleModel extends PedidoDetalle {
       uuidPedido: uuidPedido ?? this.uuidPedido,
       idMenu: idMenu ?? this.idMenu,
       cantidad: cantidad ?? this.cantidad,
+      importeCobrado: importeCobrado ?? this.importeCobrado,
       nombreMenuItem: nombreMenuItem ?? this.nombreMenuItem,
     );
   }

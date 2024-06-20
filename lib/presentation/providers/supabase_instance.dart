@@ -231,8 +231,7 @@ class SupabaseManagement extends _$SupabaseManagement {
             .order('num_factura', ascending: false)
             .limit(1);
 
-        if (lastNumFactura.first['num_factura'] != null &&
-            lastNumFactura.first['num_factura'] != '') {
+        if (lastNumFactura.isNotEmpty) {
           int ultimoNumeroMasUno =
               int.parse(lastNumFactura.first['num_factura'].toString()) + 1;
           factura = factura.copyWith(numFactura: ultimoNumeroMasUno);
@@ -367,6 +366,9 @@ class SupabaseManagement extends _$SupabaseManagement {
     try {
       //Primero borrar los detalles
       await state.from('pedidos_items').delete().eq('uuid_pedido', uuIdPedido);
+      //Luego borrar la factura asociada a ese pedido
+      await state.from('facturas').delete().eq('uuid_pedido', uuIdPedido);
+      //por último borrar el pedido
       await state.from('pedidos').delete().eq('uuid_pedido', uuIdPedido);
       return 'success';
     } on PostgrestException catch (e) {
@@ -574,6 +576,38 @@ class SupabaseManagement extends _$SupabaseManagement {
       for (var element in res) {
         FacturaModelo modelo = FacturaModelo.fromJson(element);
         //Obtener el nombre del cliente
+        String nombreCliente = await getClienteName(modelo.idCliente!);
+        modelo = modelo.copyWith(nombreCliente: nombreCliente);
+        listado.add(modelo);
+      }
+      return listado;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error -> ${e.message}';
+    }
+  }
+
+  Future<List<FacturaModelo>> getFacturasYDetallesPorFecha(
+      DateTime fecha) async {
+    Map<String, String> datosPublicos = ref.read(userPublicDataProvider);
+    int idRes = int.parse(datosPublicos['id_restaurante'].toString());
+
+    // Calcular el inicio y el fin del día para la fecha proporcionada
+    DateTime startOfDay = DateTime(fecha.year, fecha.month, fecha.day);
+    DateTime endOfDay =
+        DateTime(fecha.year, fecha.month, fecha.day, 23, 59, 59);
+
+    try {
+      List<Map<String, dynamic>> res = await state
+          .from('facturas')
+          .select()
+          .eq('id_restaurante', idRes)
+          .gte('fecha_factura', startOfDay.toIso8601String())
+          .lte('fecha_factura', endOfDay.toIso8601String())
+          .order('id_factura', ascending: false);
+      List<FacturaModelo> listado = [];
+      for (var element in res) {
+        FacturaModelo modelo = FacturaModelo.fromJson(element);
+        // Obtener el nombre del cliente
         String nombreCliente = await getClienteName(modelo.idCliente!);
         modelo = modelo.copyWith(nombreCliente: nombreCliente);
         listado.add(modelo);

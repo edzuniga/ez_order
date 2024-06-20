@@ -21,12 +21,17 @@ class DetallesParaPedidoView extends _$DetallesParaPedidoView {
         .read(supabaseManagementProvider.notifier)
         .getDetallesPedido(uuidPedido);
     //Obtener el nombre de cada menú item
+    // Crear una lista temporal para almacenar los elementos actualizados
+    List<PedidoDetalleModel> updatedListadoProvi = [];
+
     for (var element in listadoProvi) {
       String nombreMenuItem = await ref
           .read(supabaseManagementProvider.notifier)
           .getNombreMenuItem(element.idMenu);
-      element = element.copyWith(nombreMenuItem: nombreMenuItem);
+      // Actualizar el elemento con el nombre del menú item
+      var updatedElement = element.copyWith(nombreMenuItem: nombreMenuItem);
+      updatedListadoProvi.add(updatedElement);
     }
-    state = listadoProvi;
+    state = updatedListadoProvi;
   }
 }

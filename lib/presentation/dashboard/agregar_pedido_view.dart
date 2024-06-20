@@ -658,6 +658,11 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                       itemCount: listadoPedido.length,
                       itemBuilder: (ctx, index) {
                         MenuItemModel itemPedido = listadoPedido[index];
+                        String precioDetalle = pedidoDetallesList
+                            .firstWhere((element) =>
+                                element.idMenu == itemPedido.idMenu!)
+                            .importeCobrado
+                            .toStringAsFixed(2);
                         return SizedBox(
                           width: double.infinity,
                           child: Column(
@@ -682,10 +687,11 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text('Precio sin ISV:',
+                                            Text('Precio a cobrarse:',
                                                 style: GoogleFonts.inter(
                                                     fontSize: 10)),
-                                            Text('L ${itemPedido.precioSinIsv}',
+                                            Text('L $precioDetalle',
+                                                //'L ${itemPedido.precioSinIsv}',
                                                 style: GoogleFonts.inter(
                                                     fontSize: 10)),
                                           ],
