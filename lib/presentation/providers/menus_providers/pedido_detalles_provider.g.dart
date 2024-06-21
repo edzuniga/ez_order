@@ -7,7 +7,7 @@ part of 'pedido_detalles_provider.dart';
 // **************************************************************************
 
 String _$pedidoDetallesManagementHash() =>
-    r'c58d6712f37099c75d480f986754069614860e62';
+    r'94e56bdadb5048be7cbc258e31bc4a4afbc25f89';
 
 /// See also [PedidoDetallesManagement].
 @ProviderFor(PedidoDetallesManagement)

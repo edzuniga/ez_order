@@ -1,27 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'supabase_instance.dart';
+part of 'column_table.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$supabaseManagementHash() =>
-    r'ded35ab919deea248796727f9ab56d56d7a54621';
+String _$pedidosTableColumnsHash() =>
+    r'874393453aa760eaec3f661326f132fd0916cff7';
 
-/// See also [SupabaseManagement].
-@ProviderFor(SupabaseManagement)
-final supabaseManagementProvider =
-    NotifierProvider<SupabaseManagement, SupabaseClient>.internal(
-  SupabaseManagement.new,
-  name: r'supabaseManagementProvider',
+/// See also [PedidosTableColumns].
+@ProviderFor(PedidosTableColumns)
+final pedidosTableColumnsProvider =
+    NotifierProvider<PedidosTableColumns, List<DataColumn>>.internal(
+  PedidosTableColumns.new,
+  name: r'pedidosTableColumnsProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$supabaseManagementHash,
+      : _$pedidosTableColumnsHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$SupabaseManagement = Notifier<SupabaseClient>;
+typedef _$PedidosTableColumns = Notifier<List<DataColumn>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

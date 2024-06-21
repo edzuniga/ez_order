@@ -6,7 +6,7 @@ part of 'table_rows.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$pedidosTableRowsHash() => r'423da2e61c0c4313f3bf4881052eb56dcc0c94d7';
+String _$pedidosTableRowsHash() => r'e9062ceb2626f3656126608c7c2a0066daa2cc09';
 
 /// See also [PedidosTableRows].
 @ProviderFor(PedidosTableRows)

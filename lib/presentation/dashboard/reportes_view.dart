@@ -8,10 +8,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-//import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
+import 'package:ez_order_ezr/presentation/providers/reportes/column_table.dart';
+import 'package:ez_order_ezr/utils/ingresos_table_pdf.dart';
 import 'package:ez_order_ezr/presentation/providers/reportes/table_rows.dart';
 import 'package:ez_order_ezr/data/datos_grafico_modelo.dart';
 import 'package:ez_order_ezr/presentation/providers/reportes/datos_grafico_comparativo_ingresos.dart';
@@ -33,6 +33,7 @@ class ReportesView extends ConsumerStatefulWidget {
 }
 
 class _ReportesViewState extends ConsumerState<ReportesView> {
+  final GlobalKey _shareButtonKey = GlobalKey();
   final GlobalKey<FormState> _reporteFormKey = GlobalKey<FormState>();
   String? _fechaInicial;
   String? _fechaFinal;
@@ -69,6 +70,7 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
         ref.watch(restauranteSeleccionadoProvider);
     ReporteModelo valoresReporte = ref.watch(valoresReportesProvider);
     List<DataRow> rowsTable = ref.watch(pedidosTableRowsProvider);
+    List<DataColumn> columnsTable = ref.watch(pedidosTableColumnsProvider);
     return Center(
       child: Container(
         padding: const EdgeInsets.all(15),
@@ -216,21 +218,25 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                         estadistica: '${valoresReporte.cantMenu}',
                         descripcion: 'Productos en catálogo',
                         icono: Icons.restaurant_outlined,
+                        isIconBlack: true,
                       ),
                       EstadisticaContainer(
                         estadistica: '${valoresReporte.cantPedidosDiarios}',
                         descripcion: 'Pedidos en este día',
                         icono: Icons.shopping_bag_outlined,
+                        isIconBlack: true,
                       ),
                       EstadisticaContainer(
                         estadistica: '${valoresReporte.clientes}',
                         descripcion: '# de Clientes ingresados',
                         icono: Icons.group,
+                        isIconBlack: true,
                       ),
                       EstadisticaContainer(
                         estadistica: 'L ${valoresReporte.ingresosDiarios}',
                         descripcion: 'Ingreso del día de hoy',
                         icono: Icons.money,
+                        isIconBlack: true,
                       ),
                       EstadisticaContainer(
                         estadistica: '${valoresReporte.totalEfectivo}',
@@ -238,6 +244,7 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                         icono: Icons.money,
                         includesRibbon: true,
                         cantidad: '${valoresReporte.cantEfectivo}',
+                        isIconBlack: true,
                       ),
                       EstadisticaContainer(
                         estadistica: '${valoresReporte.totalTarjeta}',
@@ -245,6 +252,7 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                         icono: Icons.credit_card,
                         includesRibbon: true,
                         cantidad: '${valoresReporte.cantTarjeta}',
+                        isIconBlack: true,
                       ),
                       EstadisticaContainer(
                         estadistica: '${valoresReporte.totalTransferencia}',
@@ -252,6 +260,7 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                         icono: Icons.system_security_update_good_outlined,
                         includesRibbon: true,
                         cantidad: '${valoresReporte.cantTransferencia}',
+                        isIconBlack: true,
                       ),
                     ],
                   ),
@@ -331,18 +340,22 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                                   });
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.teal,
+                                  backgroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
+                                    side: const BorderSide(
+                                      color: AppColors.kGeneralPrimaryOrange,
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
                                 label: const Text(
                                   'Elegir fechas',
-                                  style: TextStyle(color: Colors.white),
+                                  style: TextStyle(
+                                      color: AppColors.kGeneralPrimaryOrange),
                                 ),
                                 icon: const Icon(
                                   Icons.calendar_month,
-                                  color: Colors.white,
+                                  color: AppColors.kGeneralPrimaryOrange,
                                 ),
                               ),
                             ),
@@ -535,6 +548,41 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                               : SingleChildScrollView(
                                   child: Column(
                                     children: [
+                                      const Gap(15),
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: 15,
+                                          ),
+                                          child: ElevatedButton(
+                                            key: _shareButtonKey,
+                                            onPressed: () async {
+                                              await _exportDataTableToPDF(
+                                                  rowsTable);
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                side: const BorderSide(
+                                                    color: AppColors
+                                                        .kGeneralPrimaryOrange),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              'Descargar tabla',
+                                              style: GoogleFonts.inter(
+                                                color: AppColors
+                                                    .kGeneralPrimaryOrange,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const Gap(15),
                                       //Tabla generada
                                       Row(
                                         children: [
@@ -543,46 +591,7 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                                               child: DataTable(
                                                 dataRowMaxHeight:
                                                     double.infinity,
-                                                columns: const <DataColumn>[
-                                                  DataColumn(
-                                                    label: Expanded(
-                                                      child: Text(
-                                                        '# orden',
-                                                        style: TextStyle(
-                                                            fontStyle: FontStyle
-                                                                .italic),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  DataColumn(
-                                                    label: Expanded(
-                                                      child: Text(
-                                                        'Detalle pedido',
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  DataColumn(
-                                                    label: Expanded(
-                                                      child: Text(
-                                                        'Total (L)',
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  DataColumn(
-                                                    label: Expanded(
-                                                      child: Text(
-                                                        'Fecha',
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  DataColumn(
-                                                    label: Expanded(
-                                                      child: Text(
-                                                        'Método de pago',
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
+                                                columns: columnsTable,
                                                 rows: rowsTable,
                                                 headingTextStyle:
                                                     const TextStyle(
@@ -594,27 +603,6 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                                         ],
                                       ),
                                       const Gap(15),
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          /* await _exportDataTableToPDF(
-
-                                          ); */
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.black,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          'Descargar tabla',
-                                          style: GoogleFonts.inter(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                      ),
                                     ],
                                   ),
                                 )
@@ -749,35 +737,46 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
 //Funciones para el gráfico principal --------------------------------------
 
 //--------------------------Función para crear un pdf
-  Future<void> _exportDataTableToPDF(
-      List<DataRow> rows, List<DataColumn> columns) async {
-    final pdf = pw.Document();
-
-    final tableHeaders = columns.map((col) => col.label.toString()).toList();
-    final tableData = rows.map((row) {
-      return row.cells.map((cell) => cell.child.toString()).toList();
-    }).toList();
-
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.TableHelper.fromTextArray(
-            headers: tableHeaders,
-            data: tableData,
-          );
-        },
-      ),
-    );
+  Future<void> _exportDataTableToPDF(List<DataRow> rows) async {
+    final pdfData =
+        await generateIngresosTablePdf(rows, _initialDate!, _finalDate!);
 
     // Guardar el archivo PDF en el directorio temporal
     final output = await getTemporaryDirectory();
 
-    final file = File("${output.path}/tabla${DateTime.now()}.pdf");
-    await file.writeAsBytes(await pdf.save());
+    final file = File(
+        "${output.path}/tabla_${DateTime.now().millisecondsSinceEpoch}.pdf");
+    await file.writeAsBytes(pdfData);
 
     // Compartir el archivo PDF usando XFile
     final xFile = XFile(file.path);
-    await Share.shareXFiles([xFile], text: 'Aquí está tu tabla en PDF');
+
+    // Obtener el RenderBox del botón
+    final RenderBox? box =
+        _shareButtonKey.currentContext?.findRenderObject() as RenderBox?;
+
+    if (box != null) {
+      // Obtener la posición del botón
+      final position = box.localToGlobal(Offset.zero) & box.size;
+      await Share.shareXFiles(
+        [xFile],
+        text: 'Aquí está tu tabla en PDF',
+        sharePositionOrigin: position,
+      );
+    } else {
+      Fluttertoast.cancel();
+      Fluttertoast.showToast(
+        msg: 'Pruebe nuevamente',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 3,
+        backgroundColor: Colors.blue,
+        textColor: Colors.white,
+        fontSize: 16.0,
+        webPosition: 'center',
+        webBgColor: 'red',
+      );
+    }
   }
 //--------------------------Función para crear un pdf
 }

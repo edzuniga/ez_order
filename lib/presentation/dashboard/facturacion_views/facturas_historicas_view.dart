@@ -1,13 +1,13 @@
-import 'package:ez_order_ezr/data/factura_modelo.dart';
-import 'package:ez_order_ezr/presentation/config/app_colors.dart';
-import 'package:ez_order_ezr/presentation/dashboard/modals/view_factura_modal.dart';
-import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+
+import 'package:ez_order_ezr/data/factura_modelo.dart';
+import 'package:ez_order_ezr/presentation/config/app_colors.dart';
+import 'package:ez_order_ezr/presentation/dashboard/modals/view_factura_modal.dart';
+import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 
 class FacturasHistoricasView extends ConsumerStatefulWidget {
   const FacturasHistoricasView({super.key});
@@ -290,36 +290,11 @@ class _FacturasHistoricasViewState
                                             },
                                             tooltip: 'Ver',
                                             style: IconButton.styleFrom(
-                                              backgroundColor:
-                                                  AppColors.kGeneralOrangeBg,
-                                            ),
-                                            icon: const Icon(
-                                              Icons.remove_red_eye_outlined,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          //ENVIAR
-                                          IconButton(
-                                            onPressed: () {},
-                                            tooltip: 'Compartir',
-                                            style: IconButton.styleFrom(
                                               backgroundColor: AppColors
                                                   .kGeneralPrimaryOrange,
                                             ),
                                             icon: const Icon(
-                                              Icons.share,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          //IMPRIMIR
-                                          IconButton(
-                                            onPressed: () {},
-                                            tooltip: 'Imprimir',
-                                            style: IconButton.styleFrom(
-                                              backgroundColor: Colors.green,
-                                            ),
-                                            icon: const Icon(
-                                              Icons.print,
+                                              Icons.remove_red_eye_outlined,
                                               color: Colors.white,
                                             ),
                                           ),

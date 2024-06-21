@@ -8,8 +8,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
 import 'package:random_string/random_string.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:printing/printing.dart';
 
 import 'package:ez_order_ezr/data/datos_factura_modelo.dart';
 import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
@@ -52,67 +54,6 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
         .read(detallesParaPedidoViewProvider.notifier)
         .getYSetListado(widget.factura.uuidPedido);
     setState(() => _isRetrievingInfo = false);
-  }
-
-  Future<void> _generatePdfAndShare(
-      FacturaModelo factura,
-      DatosFacturaModelo datosFacturacion,
-      List<PedidoDetalleModel> detallesPedido,
-      PedidoModel pedidoParaView) async {
-    setState(() {
-      _isGeneratingPdf = true;
-      _pdfGenerationFuture = _generateAndShare(
-          factura, datosFacturacion, detallesPedido, pedidoParaView);
-    });
-  }
-
-  Future<void> _generateAndShare(
-      FacturaModelo factura,
-      DatosFacturaModelo datosFacturacion,
-      List<PedidoDetalleModel> detallesPedido,
-      PedidoModel pedidoParaView) async {
-    // Generar el archivo PDF
-    final pdfData = await generateFacturaPdf(
-        factura, datosFacturacion, detallesPedido, pedidoParaView);
-    // Guardar el archivo PDF en el dispositivo
-    final directory = await getApplicationDocumentsDirectory();
-    String nombreGenerado = randomString(10);
-    final filePath = '${directory.path}/$nombreGenerado.pdf';
-    final file = File(filePath);
-    await file.writeAsBytes(pdfData);
-
-    // Obtener un XFile para trabajar con share_plus
-    final xFile = XFile(filePath);
-
-    // Obtener el RenderBox del botón
-    final RenderBox? box =
-        _shareButtonKey.currentContext?.findRenderObject() as RenderBox?;
-
-    if (box != null) {
-      // Obtener la posición del botón
-      final position = box.localToGlobal(Offset.zero) & box.size;
-
-      // Compartir el archivo PDF vía WhatsApp
-      await Share.shareXFiles(
-        [xFile],
-        text: 'Aquí está tu recibo en PDF',
-        sharePositionOrigin: position,
-      );
-    } else {
-      Fluttertoast.cancel();
-      Fluttertoast.showToast(
-        msg: 'Pruebe nuevamente',
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 3,
-        backgroundColor: Colors.blue,
-        textColor: Colors.white,
-        fontSize: 16.0,
-        webPosition: 'center',
-        webBgColor: 'red',
-      );
-    }
-    setState(() => _isGeneratingPdf = false);
   }
 
   @override
@@ -165,7 +106,7 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
         ),
         color: Colors.white,
       ),
-      child: _isRetrievingInfo
+      child: _isRetrievingInfo || _isGeneratingPdf
           ? const Center(
               child: CircularProgressIndicator(),
             )
@@ -420,7 +361,10 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                       const Gap(15),
                       //IMPRIMIR
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () async {
+                          await _generatePdfAndPrint(widget.factura,
+                              datosFacturacion, detallesPedido, pedidoParaView);
+                        },
                         tooltip: 'Imprimir',
                         style: IconButton.styleFrom(
                           backgroundColor: Colors.green,
@@ -438,23 +382,34 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
     );
   }
 
-  /* Future<void> _generatePdfAndShare(
+  Future<void> _generatePdfAndShare(
       FacturaModelo factura,
       DatosFacturaModelo datosFacturacion,
       List<PedidoDetalleModel> detallesPedido,
       PedidoModel pedidoParaView) async {
-    setState(() => _isGeneratingPdf = true);
-    //Generar el archivo PDF
+    setState(() {
+      _isGeneratingPdf = true;
+      _pdfGenerationFuture = _generateAndShare(
+          factura, datosFacturacion, detallesPedido, pedidoParaView);
+    });
+  }
+
+  Future<void> _generateAndShare(
+      FacturaModelo factura,
+      DatosFacturaModelo datosFacturacion,
+      List<PedidoDetalleModel> detallesPedido,
+      PedidoModel pedidoParaView) async {
+    // Generar el archivo PDF
     final pdfData = await generateFacturaPdf(
         factura, datosFacturacion, detallesPedido, pedidoParaView);
-    //Guardar el archivo PDF en el dispositivo
+    // Guardar el archivo PDF en el dispositivo
     final directory = await getApplicationDocumentsDirectory();
     String nombreGenerado = randomString(10);
     final filePath = '${directory.path}/$nombreGenerado.pdf';
     final file = File(filePath);
     await file.writeAsBytes(pdfData);
 
-    //Obtener un XFile para trabajar con share_plus
+    // Obtener un XFile para trabajar con share_plus
     final xFile = XFile(filePath);
 
     // Obtener el RenderBox del botón
@@ -471,9 +426,7 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
         text: 'Aquí está tu recibo en PDF',
         sharePositionOrigin: position,
       );
-      setState(() => _isGeneratingPdf = false);
     } else {
-      setState(() => _isGeneratingPdf = false);
       Fluttertoast.cancel();
       Fluttertoast.showToast(
         msg: 'Pruebe nuevamente',
@@ -487,5 +440,29 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
         webBgColor: 'red',
       );
     }
-  } */
+    setState(() => _isGeneratingPdf = false);
+  }
+
+  Future<void> _generatePdfAndPrint(
+      FacturaModelo factura,
+      DatosFacturaModelo datosFacturacion,
+      List<PedidoDetalleModel> detallesPedido,
+      PedidoModel pedidoParaView) async {
+    final pdfData = await generateFacturaPdf(
+        factura, datosFacturacion, detallesPedido, pedidoParaView);
+    // Definir el formato de página de 80mm
+    const receiptFormat = PdfPageFormat(
+      80 * PdfPageFormat.mm,
+      double.infinity,
+      marginTop: 10 * PdfPageFormat.mm,
+      marginBottom: 10 * PdfPageFormat.mm,
+      marginLeft: 3 * PdfPageFormat.mm,
+      marginRight: 3 * PdfPageFormat.mm,
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdfData,
+      format: receiptFormat,
+    );
+  }
 }

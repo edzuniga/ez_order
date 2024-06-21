@@ -143,34 +143,10 @@ class _FacturasDeHoyViewState extends ConsumerState<FacturasDeHoyView> {
                             },
                             tooltip: 'Ver',
                             style: IconButton.styleFrom(
-                              backgroundColor: AppColors.kGeneralOrangeBg,
-                            ),
-                            icon: const Icon(
-                              Icons.remove_red_eye_outlined,
-                              color: Colors.white,
-                            ),
-                          ),
-                          //ENVIAR
-                          IconButton(
-                            onPressed: () {},
-                            tooltip: 'Compartir',
-                            style: IconButton.styleFrom(
                               backgroundColor: AppColors.kGeneralPrimaryOrange,
                             ),
                             icon: const Icon(
-                              Icons.share,
-                              color: Colors.white,
-                            ),
-                          ),
-                          //IMPRIMIR
-                          IconButton(
-                            onPressed: () {},
-                            tooltip: 'Imprimir',
-                            style: IconButton.styleFrom(
-                              backgroundColor: Colors.green,
-                            ),
-                            icon: const Icon(
-                              Icons.print,
+                              Icons.remove_red_eye_outlined,
                               color: Colors.white,
                             ),
                           ),

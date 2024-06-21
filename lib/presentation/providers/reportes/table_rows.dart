@@ -51,7 +51,7 @@ class PedidosTableRows extends _$PedidosTableRows {
         DataRow(
           cells: [
             DataCell(Text(pedido.numPedido.toString())),
-            DataCell(SizedBox(child: Text(detalleDelPedido))),
+            DataCell(Text(detalleDelPedido)),
             DataCell(Text('L ${pedido.total.toString()}')),
             DataCell(Text(formattedDate)),
             DataCell(Text(metodoPago)),

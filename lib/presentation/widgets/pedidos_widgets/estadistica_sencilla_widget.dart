@@ -10,6 +10,7 @@ class EstadisticaContainer extends StatelessWidget {
     required this.icono,
     this.includesRibbon = false,
     this.cantidad,
+    this.isIconBlack = false,
     super.key,
   });
   final String estadistica;
@@ -17,6 +18,7 @@ class EstadisticaContainer extends StatelessWidget {
   final IconData icono;
   final bool includesRibbon;
   final String? cantidad;
+  final bool isIconBlack;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +41,9 @@ class EstadisticaContainer extends StatelessWidget {
             children: [
               Icon(
                 icono,
-                color: AppColors.kGeneralPrimaryOrange,
+                color: isIconBlack
+                    ? Colors.black
+                    : AppColors.kGeneralPrimaryOrange,
               ),
               Text(
                 estadistica,
@@ -66,7 +70,7 @@ class EstadisticaContainer extends StatelessWidget {
                   width: 35,
                   height: 25,
                   decoration: const BoxDecoration(
-                    color: Colors.amber,
+                    color: AppColors.kGeneralPrimaryOrange,
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(4),
                       bottomRight: Radius.circular(4),
