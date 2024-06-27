@@ -28,7 +28,7 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
     PedidoModel pedidoActualInfo = ref.watch(pedidoActualProvider);
     MetodoDePagoEnum metodoSeleccionado = ref.watch(metodoPagoActualProvider);
     return Container(
-      height: 380,
+      height: 460,
       width: 500,
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -79,11 +79,17 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                         children: [
                           Column(
                             children: [
-                              SvgPicture.asset('assets/svg/dinero_azul.svg',
-                                  width: 60,
-                                  height: 60,
-                                  fit: BoxFit.contain,
-                                  semanticsLabel: 'Efectivo'),
+                              InkWell(
+                                onTap: () {
+                                  _setMetodoDePago(MetodoDePagoEnum.efectivo);
+                                },
+                                child: SvgPicture.asset(
+                                    'assets/svg/dinero_azul.svg',
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.contain,
+                                    semanticsLabel: 'Efectivo'),
+                              ),
                               const Gap(5),
                               Text(
                                 'Efectivo',
@@ -102,12 +108,17 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                           const Gap(65),
                           Column(
                             children: [
-                              SvgPicture.asset(
-                                  'assets/svg/tarjeta_credito_azul.svg',
-                                  width: 60,
-                                  height: 60,
-                                  fit: BoxFit.contain,
-                                  semanticsLabel: 'Efectivo'),
+                              InkWell(
+                                onTap: () {
+                                  _setMetodoDePago(MetodoDePagoEnum.tarjeta);
+                                },
+                                child: SvgPicture.asset(
+                                    'assets/svg/tarjeta_credito_azul.svg',
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.contain,
+                                    semanticsLabel: 'Efectivo'),
+                              ),
                               const Gap(5),
                               Text(
                                 'Tarjeta',
@@ -126,12 +137,18 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                           const Gap(65),
                           Column(
                             children: [
-                              SvgPicture.asset(
-                                  'assets/svg/transferencia_azul.svg',
-                                  width: 60,
-                                  height: 60,
-                                  fit: BoxFit.contain,
-                                  semanticsLabel: 'Efectivo'),
+                              InkWell(
+                                onTap: () {
+                                  _setMetodoDePago(
+                                      MetodoDePagoEnum.transferencia);
+                                },
+                                child: SvgPicture.asset(
+                                    'assets/svg/transferencia_azul.svg',
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.contain,
+                                    semanticsLabel: 'Efectivo'),
+                              ),
                               const Gap(5),
                               Text(
                                 'Transferencia',
@@ -149,6 +166,185 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                           ),
                         ],
                       ),
+                      const Gap(40),
+                      //Detalles de factura (subtotal, impuesto, importe..., etc..)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.kInputLiteGray,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: ExpansionTile(
+                          dense: true,
+                          title: const Text(
+                            'Detalles de facturación',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black,
+                            ),
+                          ),
+                          trailing: const Icon(Icons.arrow_drop_down_outlined),
+                          children: [
+                            //Área de Subtotal
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                const Gap(15),
+                                const Icon(
+                                  Icons.circle_outlined,
+                                  color: AppColors.kTextSecondaryGray,
+                                  size: 8,
+                                ),
+                                const Gap(5),
+                                Text(
+                                  'Subtotal:',
+                                  style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  'L ${pedidoActualInfo.subtotal}',
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                                const Gap(15),
+                              ],
+                            ),
+                            //Área de Exonerado
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                const Gap(15),
+                                const Icon(
+                                  Icons.circle_outlined,
+                                  color: AppColors.kTextSecondaryGray,
+                                  size: 8,
+                                ),
+                                const Gap(5),
+                                Text(
+                                  'Importe exonerado:',
+                                  style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  'L ${pedidoActualInfo.importeExonerado}',
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                                const Gap(15),
+                              ],
+                            ),
+                            //Área de Exento
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                const Gap(15),
+                                const Icon(
+                                  Icons.circle_outlined,
+                                  color: AppColors.kTextSecondaryGray,
+                                  size: 8,
+                                ),
+                                const Gap(5),
+                                Text(
+                                  'Importe exento:',
+                                  style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  'L ${pedidoActualInfo.importeExento}',
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                                const Gap(15),
+                              ],
+                            ),
+                            //Área de Gravado
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                const Gap(15),
+                                const Icon(
+                                  Icons.circle_outlined,
+                                  color: AppColors.kTextSecondaryGray,
+                                  size: 8,
+                                ),
+                                const Gap(5),
+                                Text(
+                                  'Importe gravado:',
+                                  style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  'L ${pedidoActualInfo.importeGravado}',
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                                const Gap(15),
+                              ],
+                            ),
+                            //Área de descuento
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                const Gap(15),
+                                const Icon(
+                                  Icons.circle_outlined,
+                                  color: AppColors.kTextSecondaryGray,
+                                  size: 8,
+                                ),
+                                const Gap(5),
+                                Text(
+                                  'Descuento:',
+                                  style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  'L ${pedidoActualInfo.descuento}',
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                                const Gap(15),
+                              ],
+                            ),
+                            //Área de ISV
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                const Gap(15),
+                                const Icon(
+                                  Icons.circle_outlined,
+                                  color: AppColors.kTextSecondaryGray,
+                                  size: 8,
+                                ),
+                                const Gap(5),
+                                Text(
+                                  'ISV (15%):',
+                                  style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  'L ${pedidoActualInfo.impuestos}',
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                                const Gap(15),
+                              ],
+                            ),
+                            const Gap(5),
+                          ],
+                        ),
+                      ),
+
                       const Gap(40),
                       SizedBox(
                         width: 350,

@@ -1,3 +1,4 @@
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,7 +9,6 @@ import 'package:ez_order_ezr/presentation/auth/login_view.dart';
 import 'package:ez_order_ezr/presentation/auth/recovery_view.dart';
 import 'package:ez_order_ezr/presentation/cocina/cocina_page.dart';
 import 'package:ez_order_ezr/presentation/config/routes.dart';
-import 'package:ez_order_ezr/presentation/dashboard/administracion_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/agregar_pedido_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/dashboard_layout.dart';
 import 'package:ez_order_ezr/presentation/dashboard/facturacion_view.dart';
@@ -120,19 +120,6 @@ GoRouter router(Ref ref) {
               ),
             ),
           ),
-          GoRoute(
-            name: Routes.administracion,
-            path: '/administracion',
-            pageBuilder: (context, state) => CustomTransitionPage(
-              child: const AdminView(),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) =>
-                      FadeTransition(
-                opacity: animation,
-                child: child,
-              ),
-            ),
-          ),
         ],
       ),
       GoRoute(
@@ -158,8 +145,8 @@ GoRouter router(Ref ref) {
         '/pedidos',
         '/agregar_pedido',
         '/reportes',
-        '/administracion',
         '/cocina',
+        '/facturacion'
       ];
 
       //Permitir acceso a AUTH sin autenticación
@@ -182,6 +169,13 @@ GoRouter router(Ref ref) {
         ref.read(dashboardPageIndexProvider.notifier).changePageIndex(0);
         // Redirige al usuario al dashboard
         return '/pedidos';
+      }
+
+      //Casos DEPENDIENDO su ROL (COCINA)
+      int rolUsuario =
+          int.parse(ref.read(userPublicDataProvider)['rol'].toString());
+      if (rolUsuario == 4) {
+        return '/cocina';
       }
 
       return null;

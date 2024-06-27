@@ -8,8 +8,6 @@ class Routes {
   static const String agregarPedido = 'agregar_pedido';
   static const String reportes = 'reportes';
   static const String facturacion = 'facturacion';
-  static const String datosFactura = 'datosFactura';
-  static const String administracion = 'administracion';
 
   //Cocina Route
   static const String cocina = 'cocina';

@@ -29,8 +29,10 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_dotenv: ^5.1.0
+  flutter_launcher_icons: ^0.13.1
   flutter_localizations:
     sdk: flutter
+  flutter_native_splash: ^2.4.0
   flutter_riverpod: ^2.5.1
   flutter_secure_storage: ^9.2.2
   flutter_svg: ^2.0.10+1
@@ -62,10 +64,29 @@ dev_dependencies:
   riverpod_generator: ^2.4.0
   riverpod_lint: ^2.3.10
 
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icono_final.jpg"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/icon/icono_final.jpg"
+    background_color: "#000000"
+    theme_color: "#000000"
+
+flutter_native_splash:
+  color: "#FF6A29"
+  image: assets/icon/splash.png
+  android_12:
+    image: assets/icon/splash.png
+    color: "#FF6A29"
+
 flutter:
   uses-material-design: true
   assets:
     - assets/images/
     - assets/lotties/
     - assets/svg/
+    - assets/icon/
     - assets/dotENV.env

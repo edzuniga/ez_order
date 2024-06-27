@@ -12,7 +12,7 @@ class DatosFacturaModelo extends DatosFactura {
     required super.cai,
     required super.rangoInicial,
     required super.rangoFinal,
-    required super.fechaLimite,
+    super.fechaLimite,
   });
 
   factory DatosFacturaModelo.fromJson(Map<String, dynamic> json) =>
@@ -41,7 +41,7 @@ class DatosFacturaModelo extends DatosFactura {
         'cai': cai,
         'rango_inicial': rangoInicial,
         'rango_final': rangoFinal,
-        'fecha_limite': fechaLimite.toIso8601String(),
+        'fecha_limite': fechaLimite?.toIso8601String(),
       };
 
   DatosFacturaModelo copyWith({

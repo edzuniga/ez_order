@@ -57,8 +57,9 @@ class _DatosActualesFacturaViewState
     }
 
     //Trimear la fecha
-    String fechaLimiteTrimeada =
-        datosFactura.fechaLimite.toString().substring(0, 10);
+    String fechaLimiteTrimeada = datosFactura.fechaLimite != null
+        ? datosFactura.fechaLimite.toString().substring(0, 10)
+        : '';
 
     return Expanded(
       child: Container(

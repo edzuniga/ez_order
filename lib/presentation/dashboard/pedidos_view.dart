@@ -35,15 +35,19 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
   @override
   void initState() {
     super.initState();
-    int userIdRestaurante = int.parse(
-        ref.read(userPublicDataProvider)['id_restaurante'].toString());
-    _supabase = ref.read(supabaseManagementProvider);
-    //Stream general filtrado por el id del restaurante
-    _stream = _supabase
-        .from('pedidos')
-        .stream(primaryKey: ['uuid_pedido'])
-        .eq('id_restaurante', userIdRestaurante)
-        .order('created_at', ascending: false);
+    if (ref.read(userPublicDataProvider)['id_restaurante'] != null) {
+      int userIdRestaurante = int.parse(
+          ref.read(userPublicDataProvider)['id_restaurante'].toString());
+      _supabase = ref.read(supabaseManagementProvider);
+      //Stream general filtrado por el id del restaurante
+      _stream = _supabase
+          .from('pedidos')
+          .stream(primaryKey: ['uuid_pedido'])
+          .eq('id_restaurante', userIdRestaurante)
+          .order('created_at', ascending: false);
+    } else {
+      _stream = const Stream.empty();
+    }
 
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);

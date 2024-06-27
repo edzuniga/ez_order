@@ -9,7 +9,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
-import 'package:random_string/random_string.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:printing/printing.dart';
 
@@ -34,11 +33,9 @@ class ViewFacturaModal extends ConsumerStatefulWidget {
 }
 
 class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
-  final GlobalKey _shareButtonKey = GlobalKey();
+  final GlobalKey<State> _shareButtonKey = GlobalKey<State>();
   bool _isRetrievingInfo = true;
-  // ignore: unused_field
   bool _isGeneratingPdf = false;
-  late Future<void> _pdfGenerationFuture = Future.value();
 
   @override
   void initState() {
@@ -90,6 +87,11 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
     String formattedTime =
         DateFormat('h:mm a').format(widget.factura.fechaFactura);
 
+    //Fecha límite de emisión
+    String fechaLimiteEmision = datosFacturacion.fechaLimite != null
+        ? datosFacturacion.fechaLimite.toString().substring(0, 10)
+        : '';
+
 //--------tratamiento de las variables
     return Container(
       height: 800,
@@ -106,7 +108,7 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
         ),
         color: Colors.white,
       ),
-      child: _isRetrievingInfo || _isGeneratingPdf
+      child: _isRetrievingInfo //|| _isGeneratingPdf
           ? const Center(
               child: CircularProgressIndicator(),
             )
@@ -124,26 +126,36 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                       ),
                     ),
                   ),
-                  Center(
-                    child: Text(
-                      datosFacturacion.nombreNegocio,
-                      style: GoogleFonts.archivoNarrow(
-                        fontSize: 20,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  Center(child: Text(datosFacturacion.rtn)),
-                  Center(
-                    child: SizedBox(
-                      child: Text(
-                        datosFacturacion.direccion,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                  Center(child: Text(datosFacturacion.correo)),
-                  Center(child: Text(datosFacturacion.telefono)),
+                  datosFacturacion.nombreNegocio.isNotEmpty
+                      ? Center(
+                          child: Text(
+                            datosFacturacion.nombreNegocio,
+                            style: GoogleFonts.archivoNarrow(
+                              fontSize: 20,
+                              color: Colors.black,
+                            ),
+                          ),
+                        )
+                      : const SizedBox(),
+                  datosFacturacion.rtn.isNotEmpty
+                      ? Center(child: Text(datosFacturacion.rtn))
+                      : const SizedBox(),
+                  datosFacturacion.direccion.isNotEmpty
+                      ? Center(
+                          child: SizedBox(
+                            child: Text(
+                              datosFacturacion.direccion,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                      : const SizedBox(),
+                  datosFacturacion.correo.isNotEmpty
+                      ? Center(child: Text(datosFacturacion.correo))
+                      : const SizedBox(),
+                  datosFacturacion.telefono.isNotEmpty
+                      ? Center(child: Text(datosFacturacion.telefono))
+                      : const SizedBox(),
                   const Gap(10),
                   const Divider(
                     color: Colors.black,
@@ -155,7 +167,9 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text('000-001-01-$resultadoNumFactura'),
+                  resultadoNumFactura != '00000000'
+                      ? Text('000-001-01-$resultadoNumFactura')
+                      : const SizedBox(),
                   Text('$formattedDate | $formattedTime'),
                   const Gap(10),
                   const Divider(
@@ -178,9 +192,9 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                   const Gap(10),
                   Table(
                     columnWidths: const {
-                      0: FixedColumnWidth(25),
+                      0: FixedColumnWidth(35),
                       1: FlexColumnWidth(),
-                      2: FixedColumnWidth(50),
+                      2: FixedColumnWidth(70),
                     },
                     children: [
                       const TableRow(
@@ -223,7 +237,7 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                   ),
                   const Gap(10),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('SUB-TOTAL'),
                       const Gap(15),
@@ -231,7 +245,7 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                     ],
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('DESCUENTOS Y REBAJAS'),
                       const Gap(15),
@@ -239,7 +253,7 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                     ],
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('IMPORTE EXENTO'),
                       const Gap(15),
@@ -247,7 +261,7 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                     ],
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('IMPORTE GRAVADO'),
                       const Gap(15),
@@ -255,7 +269,7 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                     ],
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('ISV (15%)'),
                       const Gap(15),
@@ -263,7 +277,7 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                     ],
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('TOTAL'),
                       const Gap(15),
@@ -305,7 +319,7 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                   ),
                   Center(
                     child: Text(
-                      'Fecha límite de emisión: ${datosFacturacion.fechaLimite.toString().substring(0, 10)}',
+                      'Fecha límite de emisión: $fechaLimiteEmision',
                       style: const TextStyle(
                         fontSize: 10,
                       ),
@@ -331,31 +345,25 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       //ENVIAR
-                      FutureBuilder(
-                        future: _pdfGenerationFuture,
-                        builder: (context, snapshot) {
-                          return IconButton(
-                            key: _shareButtonKey,
-                            onPressed:
-                                snapshot.connectionState == ConnectionState.done
-                                    ? () async {
-                                        await _generatePdfAndShare(
-                                            widget.factura,
-                                            datosFacturacion,
-                                            detallesPedido,
-                                            pedidoParaView);
-                                      }
-                                    : null,
-                            tooltip: 'Compartir',
-                            style: IconButton.styleFrom(
-                              backgroundColor: AppColors.kGeneralPrimaryOrange,
-                            ),
-                            icon: const Icon(
-                              Icons.share,
-                              color: Colors.white,
-                            ),
-                          );
+                      IconButton(
+                        key: _shareButtonKey,
+                        onPressed: () async {
+                          _isGeneratingPdf
+                              ? null
+                              : await _generateAndShare(
+                                  widget.factura,
+                                  datosFacturacion,
+                                  detallesPedido,
+                                  pedidoParaView);
                         },
+                        tooltip: 'Compartir',
+                        style: IconButton.styleFrom(
+                          backgroundColor: AppColors.kGeneralPrimaryOrange,
+                        ),
+                        icon: const Icon(
+                          Icons.share,
+                          color: Colors.white,
+                        ),
                       ),
 
                       const Gap(15),
@@ -382,19 +390,7 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
     );
   }
 
-  Future<void> _generatePdfAndShare(
-      FacturaModelo factura,
-      DatosFacturaModelo datosFacturacion,
-      List<PedidoDetalleModel> detallesPedido,
-      PedidoModel pedidoParaView) async {
-    setState(() {
-      _isGeneratingPdf = true;
-      _pdfGenerationFuture = _generateAndShare(
-          factura, datosFacturacion, detallesPedido, pedidoParaView);
-    });
-  }
-
-  Future<void> _generateAndShare(
+  Future<File> _generateAndSavePdf(
       FacturaModelo factura,
       DatosFacturaModelo datosFacturacion,
       List<PedidoDetalleModel> detallesPedido,
@@ -402,19 +398,27 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
     // Generar el archivo PDF
     final pdfData = await generateFacturaPdf(
         factura, datosFacturacion, detallesPedido, pedidoParaView);
-    // Guardar el archivo PDF en el dispositivo
-    final directory = await getApplicationDocumentsDirectory();
-    String nombreGenerado = randomString(10);
-    final filePath = '${directory.path}/$nombreGenerado.pdf';
-    final file = File(filePath);
+
+    // Guardar el archivo PDF en el directorio temporal
+    final output = await getTemporaryDirectory();
+    final file = File(
+        "${output.path}/factura_${DateTime.now().millisecondsSinceEpoch}.pdf");
     await file.writeAsBytes(pdfData);
 
-    // Obtener un XFile para trabajar con share_plus
-    final xFile = XFile(filePath);
+    return file;
+  }
 
-    // Obtener el RenderBox del botón
-    final RenderBox? box =
-        _shareButtonKey.currentContext?.findRenderObject() as RenderBox?;
+  Future<void> _sharePdf(File file) async {
+    final xFile = XFile(file.path);
+
+    // Esperar hasta que el widget se haya construido completamente
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    RenderBox? box;
+    while (_shareButtonKey.currentContext == null) {
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
+    box = _shareButtonKey.currentContext?.findRenderObject() as RenderBox?;
 
     if (box != null) {
       // Obtener la posición del botón
@@ -441,6 +445,21 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
       );
     }
     setState(() => _isGeneratingPdf = false);
+  }
+
+  Future<void> _generateAndShare(
+      FacturaModelo factura,
+      DatosFacturaModelo datosFacturacion,
+      List<PedidoDetalleModel> detallesPedido,
+      PedidoModel pedidoParaView) async {
+    setState(() => _isGeneratingPdf = true);
+
+    // Generar y guardar el PDF
+    final file = await _generateAndSavePdf(
+        factura, datosFacturacion, detallesPedido, pedidoParaView);
+
+    // Compartir el PDF
+    await _sharePdf(file);
   }
 
   Future<void> _generatePdfAndPrint(

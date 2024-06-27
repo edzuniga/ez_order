@@ -34,4 +34,8 @@ class DetallesParaPedidoView extends _$DetallesParaPedidoView {
     }
     state = updatedListadoProvi;
   }
+
+  void resetListado() {
+    state = [];
+  }
 }

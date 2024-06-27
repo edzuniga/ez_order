@@ -48,6 +48,33 @@ Future<Uint8List> generateFacturaPdf(
     font: cuerpoFont,
     color: PdfColors.black,
   );
+  pw.TextStyle estiloBold = pw.TextStyle(
+    fontSize: 10,
+    font: fontTitulo,
+    fontWeight: pw.FontWeight.bold,
+    color: PdfColors.black,
+  );
+
+  // Fecha limite de emisión
+  String fechaLimiteEmision = datosFacturacion.fechaLimite != null
+      ? datosFacturacion.fechaLimite.toString().substring(0, 10)
+      : '';
+
+  pw.Row buildRow(String left, String right) {
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      children: [
+        pw.Text(
+          left,
+          style: estilo,
+        ),
+        pw.Text(
+          right,
+          style: estilo,
+        ),
+      ],
+    );
+  }
 
   doc.addPage(
     pw.Page(
@@ -81,9 +108,7 @@ Future<Uint8List> generateFacturaPdf(
             pw.SizedBox(height: 10),
             pw.Text(
               'FACTURA VENTA',
-              style: pw.TextStyle(
-                fontWeight: pw.FontWeight.bold,
-              ),
+              style: estiloBold,
             ),
             pw.Text('000-001-01-$resultadoNumFactura', style: estilo),
             pw.Text('$formattedDate | $formattedTime', style: estilo),
@@ -92,10 +117,7 @@ Future<Uint8List> generateFacturaPdf(
             pw.SizedBox(height: 10),
             pw.Text(
               'Cliente: ${factura.nombreCliente}',
-              style: pw.TextStyle(
-                fontWeight: pw.FontWeight.bold,
-                fontSize: 12,
-              ),
+              style: estiloBold.copyWith(fontSize: 12),
             ),
             pw.Text('RTN: ${factura.rtn}', style: estilo),
             pw.Text('NO. O/C EXENTA:', style: estilo),
@@ -111,10 +133,7 @@ Future<Uint8List> generateFacturaPdf(
               },
               context: context,
               border: null,
-              headerStyle: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold,
-                  //font: cuerpoFont,
-                  fontSize: 10),
+              headerStyle: estiloBold.copyWith(fontSize: 10),
               headers: ['UDS', 'DESCRIPCIÓN', 'IMPORTE'],
               data: [
                 ...detallesPedido.map((element) {
@@ -137,53 +156,48 @@ Future<Uint8List> generateFacturaPdf(
             pw.SizedBox(height: 10),
             pw.Divider(color: PdfColors.black),
             pw.SizedBox(height: 10),
-            _buildRow('SUB-TOTAL', 'L ${pedidoParaView.subtotal}'),
-            _buildRow('DESCUENTOS Y REBAJAS', 'L ${pedidoParaView.descuento}'),
-            _buildRow('IMPORTE EXENTO', 'L ${pedidoParaView.importeExento}'),
-            _buildRow('IMPORTE GRAVADO', 'L ${pedidoParaView.importeGravado}'),
-            _buildRow('ISV (15%)', 'L ${pedidoParaView.impuestos}'),
-            _buildRow('TOTAL', 'L ${factura.total}'),
+            buildRow('SUB-TOTAL', 'L ${pedidoParaView.subtotal}'),
+            buildRow('DESCUENTOS Y REBAJAS', 'L ${pedidoParaView.descuento}'),
+            buildRow('IMPORTE EXENTO', 'L ${pedidoParaView.importeExento}'),
+            buildRow('IMPORTE GRAVADO', 'L ${pedidoParaView.importeGravado}'),
+            buildRow('ISV (15%)', 'L ${pedidoParaView.impuestos}'),
+            buildRow('TOTAL', 'L ${factura.total}'),
             pw.SizedBox(height: 10),
             pw.Divider(color: PdfColors.black),
             pw.SizedBox(height: 10),
             pw.Text(
               NumberToWordsEs.convertNumberToWords(factura.total!),
-              style: const pw.TextStyle(fontSize: 10),
+              style: estilo,
             ),
             pw.SizedBox(height: 10),
             pw.Center(
               child: pw.Text(
                 'CAI ${datosFacturacion.cai}',
-                style: const pw.TextStyle(
-                  fontSize: 10,
-                ),
+                style: estilo.copyWith(fontSize: 8),
               ),
             ),
             pw.SizedBox(height: 10),
             pw.Center(
               child: pw.Text(
                 'Rango autorizado',
+                style: estilo,
               ),
             ),
             pw.Center(
               child: pw.Text(
                 '000-001-01-$rangoInicialString a 000-001-01-$rangoFinalString',
-                style: const pw.TextStyle(
-                  fontSize: 10,
-                ),
+                style: estilo.copyWith(fontSize: 8),
               ),
             ),
             pw.Center(
               child: pw.Text(
-                'Fecha límite de emisión: ${datosFacturacion.fechaLimite.toString().substring(0, 10)}',
-                style: const pw.TextStyle(
-                  fontSize: 10,
-                ),
+                'Fecha límite de emisión: $fechaLimiteEmision',
+                style: estilo,
               ),
             ),
             pw.SizedBox(height: 10),
-            _buildRow('Original:', 'Cliente'),
-            _buildRow('Copia:', 'Obligado Tributario Emisor'),
+            buildRow('Original:', 'Cliente'),
+            buildRow('Copia:', 'Obligado Tributario Emisor'),
             pw.SizedBox(height: 25),
           ],
         );
@@ -192,20 +206,4 @@ Future<Uint8List> generateFacturaPdf(
   );
 
   return doc.save();
-}
-
-pw.Row _buildRow(String left, String right) {
-  return pw.Row(
-    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-    children: [
-      pw.Text(
-        left,
-        style: const pw.TextStyle(
-          fontSize: 10,
-          color: PdfColors.black,
-        ),
-      ),
-      pw.Text(right),
-    ],
-  );
 }

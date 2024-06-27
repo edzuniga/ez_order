@@ -10,7 +10,7 @@ abstract class DatosFactura {
     required this.cai,
     required this.rangoInicial,
     required this.rangoFinal,
-    required this.fechaLimite,
+    this.fechaLimite,
   });
 
   final int idDatosFactura;
@@ -23,5 +23,5 @@ abstract class DatosFactura {
   final String cai;
   final int rangoInicial;
   final int rangoFinal;
-  final DateTime fechaLimite;
+  final DateTime? fechaLimite;
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/config/routes.dart';
 import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
@@ -13,7 +14,10 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedPageIndex = ref.watch(dashboardPageIndexProvider);
+    int selectedPageIndex = ref.watch(dashboardPageIndexProvider);
+    int rolUsuario =
+        int.parse(ref.read(userPublicDataProvider)['rol'].toString());
+
     return BottomNavigationBar(
       onTap: (index) {
         ref.read(dashboardPageIndexProvider.notifier).changePageIndex(index);
@@ -22,7 +26,6 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
         i = 1 -> Agregar Pedido
         i = 2 -> Reportes
         i = 3 -> Facturación
-        i = 4 -> Administración
         */
         String pageTitle = '';
         switch (index) {
@@ -38,9 +41,6 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
           case 3:
             pageTitle = Routes.facturacion;
             break;
-          case 4:
-            pageTitle = Routes.administracion;
-            break;
         }
         navigateTo(context, pageTitle);
       },
@@ -50,7 +50,7 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
       showSelectedLabels: true,
       selectedItemColor: AppColors.kGeneralPrimaryOrange,
       unselectedItemColor: AppColors.kTextPrimaryBlack,
-      items: const [
+      items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
             icon: Icon(Icons.shopping_bag_outlined), label: 'Pedidos'),
         BottomNavigationBarItem(
@@ -59,9 +59,6 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
             icon: Icon(Icons.playlist_add_check_outlined), label: 'Reportes'),
         BottomNavigationBarItem(
             icon: Icon(Icons.receipt_long), label: 'Facturación'),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.space_dashboard_outlined),
-            label: 'Administración'),
       ],
     );
   }

@@ -2,6 +2,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -704,27 +705,44 @@ class _AdminViewState extends ConsumerState<UpdateDatosFacturacionModal> {
                         ElevatedButton(
                           onPressed: () async {
                             if (_datosFacturaFormKey.currentState!.validate()) {
-                              int idRes = int.parse(ref
-                                  .read(
-                                      userPublicDataProvider)['id_restaurante']
-                                  .toString());
-                              DatosFacturaModelo modelo = DatosFacturaModelo(
-                                idDatosFactura:
-                                    datosActualesFacturacion.idDatosFactura,
-                                idRestaurante: idRes,
-                                nombreNegocio: _nombreController.text,
-                                rtn: _rtnNegocioController.text,
-                                direccion: _direccionController.text,
-                                correo: _correoController.text,
-                                telefono: _telController.text,
-                                cai: _caiController.text,
-                                rangoInicial:
-                                    int.parse(_rangoInicialController.text),
-                                rangoFinal:
-                                    int.parse(_rangoFinalController.text),
-                                fechaLimite: _fechaElegida!,
-                              );
-                              _tryActualizarDatosFactura(modelo);
+                              if (int.parse(_rangoFinalController.text) >
+                                  int.parse(_rangoInicialController.text)) {
+                                int idRes = int.parse(ref
+                                    .read(userPublicDataProvider)[
+                                        'id_restaurante']
+                                    .toString());
+                                DatosFacturaModelo modelo = DatosFacturaModelo(
+                                  idDatosFactura:
+                                      datosActualesFacturacion.idDatosFactura,
+                                  idRestaurante: idRes,
+                                  nombreNegocio: _nombreController.text,
+                                  rtn: _rtnNegocioController.text,
+                                  direccion: _direccionController.text,
+                                  correo: _correoController.text,
+                                  telefono: _telController.text,
+                                  cai: _caiController.text,
+                                  rangoInicial:
+                                      int.parse(_rangoInicialController.text),
+                                  rangoFinal:
+                                      int.parse(_rangoFinalController.text),
+                                  fechaLimite: _fechaElegida!,
+                                );
+                                _tryActualizarDatosFactura(modelo);
+                              } else {
+                                Fluttertoast.cancel();
+                                Fluttertoast.showToast(
+                                  msg:
+                                      'el rango autorizado final debe ser superior al rango inicial!!',
+                                  toastLength: Toast.LENGTH_LONG,
+                                  gravity: ToastGravity.CENTER,
+                                  timeInSecForIosWeb: 4,
+                                  backgroundColor: Colors.red,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0,
+                                  webPosition: 'center',
+                                  webBgColor: 'red',
+                                );
+                              }
                             }
                           },
                           style: ElevatedButton.styleFrom(

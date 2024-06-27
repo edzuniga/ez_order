@@ -7,7 +7,7 @@ part of 'detalles_pedido_para_view.dart';
 // **************************************************************************
 
 String _$detallesParaPedidoViewHash() =>
-    r'4990b2947bfced7335b5d2c8a2c6b05c023858e8';
+    r'9f670a06024acc2a2c50fbfd9cb142e7629820ec';
 
 /// See also [DetallesParaPedidoView].
 @ProviderFor(DetallesParaPedidoView)

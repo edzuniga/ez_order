@@ -315,14 +315,17 @@ class SupabaseManagement extends _$SupabaseManagement {
 
   Future<int> countMenuItems() async {
     try {
-      int userIdRestaurante = int.parse(
-          ref.read(userPublicDataProvider)['id_restaurante'].toString());
-      final res = await state
-          .from('menus')
-          .select()
-          .eq('id_restaurante', userIdRestaurante)
-          .count(CountOption.exact);
-      return res.count;
+      if (ref.read(userPublicDataProvider)['id_restaurante'] != null) {
+        int userIdRestaurante = int.parse(
+            ref.read(userPublicDataProvider)['id_restaurante'].toString());
+        final res = await state
+            .from('menus')
+            .select()
+            .eq('id_restaurante', userIdRestaurante)
+            .count(CountOption.exact);
+        return res.count;
+      }
+      return 0;
     } on PostgrestException catch (e) {
       throw Exception(
           'Error al contar los elementos del catálogo: ${e.message}');
@@ -334,18 +337,21 @@ class SupabaseManagement extends _$SupabaseManagement {
     final startOfDay = DateTime(today.year, today.month, today.day);
 
     try {
-      int userIdRestaurante = int.parse(
-          ref.read(userPublicDataProvider)['id_restaurante'].toString());
-      final res = await state
-          .from('pedidos')
-          .select()
-          .eq('id_restaurante', userIdRestaurante)
-          .gte(
-            'created_at',
-            startOfDay,
-          )
-          .count(CountOption.exact);
-      return res.count;
+      if (ref.read(userPublicDataProvider)['id_restaurante'] != null) {
+        int userIdRestaurante = int.parse(
+            ref.read(userPublicDataProvider)['id_restaurante'].toString());
+        final res = await state
+            .from('pedidos')
+            .select()
+            .eq('id_restaurante', userIdRestaurante)
+            .gte(
+              'created_at',
+              startOfDay,
+            )
+            .count(CountOption.exact);
+        return res.count;
+      }
+      return 0;
     } on PostgrestException catch (e) {
       throw Exception(
           'Error al contar los elementos del catálogo: ${e.message}');

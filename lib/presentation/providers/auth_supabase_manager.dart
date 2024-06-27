@@ -1,3 +1,11 @@
+import 'package:ez_order_ezr/presentation/providers/categorias/categoria_seleccionada.dart';
+import 'package:ez_order_ezr/presentation/providers/categorias/listado_categorias.dart';
+import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
+import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/reportes_valores_provider.dart';
+import 'package:ez_order_ezr/presentation/providers/facturacion/datos_factura_provider.dart';
+import 'package:ez_order_ezr/presentation/providers/facturacion/detalles_pedido_para_view.dart';
+import 'package:ez_order_ezr/presentation/providers/facturacion/pedido_para_view.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/cliente_actual_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -49,6 +57,7 @@ class AuthManager extends _$AuthManager {
           .from('usuarios_info')
           .select('email, nombre, rol, id_restaurante, uuid_usuario')
           .eq('uuid_usuario', userUuid)
+          .limit(1)
           .single();
 
       //Guardar esta info del usuario en el dispositivo
@@ -75,9 +84,20 @@ class AuthManager extends _$AuthManager {
     final supaInstance = getSupabaseInstance();
     try {
       await supaInstance.auth.signOut();
-      //Guardar esta info del usuario en el dispositivo
+      //Resetear todos los providers importantes
+      ref.read(dashboardPageIndexProvider.notifier).changePageIndex(0);
+      ref.read(categoriaActualProvider.notifier).resetCategoriaSeleccionada();
+      ref.read(listadoCategoriasProvider.notifier).resetCategorias();
+      ref.read(valoresReportesProvider.notifier).resetValores();
+      ref.read(datosFacturaManagerProvider.notifier).resetDatosFactura();
+      ref.read(detallesParaPedidoViewProvider.notifier).resetListado();
+      ref.read(pedidoParaViewProvider.notifier).resetPedidoParaView();
+      ref.read(clientePedidoActualProvider.notifier).resetClienteOriginal();
+      ref.read(dashboardPageIndexProvider.notifier).resetPageIndex();
+      //Eliminar la info de Secure Storage
       final SecureStorage secureStorage = SecureStorage();
-      await secureStorage.getAllValues();
+      await secureStorage.deleteAllValues();
+      ref.read(userPublicDataProvider.notifier).eraseUserData();
       state = false;
       return 'success';
     } on AuthException catch (e) {

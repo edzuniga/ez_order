@@ -20,8 +20,7 @@ class DatosFacturaManager extends _$DatosFacturaManager {
       cai: '',
       rangoInicial: 0,
       rangoFinal: 0,
-      fechaLimite: DateTime(
-          DateTime.now().year + 1, DateTime.now().month, DateTime.now().day),
+      fechaLimite: null,
     );
   }
 
@@ -43,8 +42,7 @@ class DatosFacturaManager extends _$DatosFacturaManager {
       cai: '',
       rangoInicial: 0,
       rangoFinal: 0,
-      fechaLimite: DateTime(
-          DateTime.now().year + 1, DateTime.now().month, DateTime.now().day),
+      fechaLimite: null,
     );
   }
 }

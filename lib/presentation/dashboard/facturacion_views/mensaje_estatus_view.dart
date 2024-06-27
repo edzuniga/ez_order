@@ -18,7 +18,8 @@ class MensajeStatusView extends ConsumerWidget {
     }
 
     //Segunda condición -> hay datos pero ya están vencidos
-    if (datosFactura.fechaLimite.isBefore(DateTime.now())) {
+    if (datosFactura.fechaLimite != null &&
+        datosFactura.fechaLimite!.isBefore(DateTime.now())) {
       mensajePrincipal =
           'Sus facturas ya expiraron.\nActualice datos de facturación.';
       colorFondo = Colors.orange;
