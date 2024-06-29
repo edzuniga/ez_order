@@ -1,5 +1,7 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +22,7 @@ class CocinaAppBar extends ConsumerStatefulWidget {
 
 class _CocinaAppBarState extends ConsumerState<CocinaAppBar> {
   bool _tryingLogout = false;
+  bool _isFullScreen = false;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +53,34 @@ class _CocinaAppBarState extends ConsumerState<CocinaAppBar> {
             ),
           ),
           const Spacer(),
+          const Gap(10),
+          (!kIsWeb)
+              ? IconButton(
+                  onPressed: () {
+                    if (!_isFullScreen) {
+                      setState(() {
+                        _isFullScreen = true;
+                        SystemChrome.setEnabledSystemUIMode(
+                            SystemUiMode.immersiveSticky);
+                      });
+                    } else {
+                      setState(() {
+                        _isFullScreen = false;
+                        SystemChrome.setEnabledSystemUIMode(
+                            SystemUiMode.edgeToEdge);
+                      });
+                    }
+                  },
+                  tooltip: '¿Pantalla completa?',
+                  style: IconButton.styleFrom(
+                      backgroundColor: AppColors.kIconGrayishIcon),
+                  icon: Icon(
+                    !_isFullScreen ? Icons.fullscreen : Icons.fullscreen_exit,
+                    color: Colors.white,
+                  ),
+                )
+              : const SizedBox(),
+          const Gap(10),
           IconButton(
             onPressed: () async {
               _tryingLogout ? null : await _tryLogout();

@@ -73,6 +73,7 @@ class _DatosActualesFacturaViewState
         ),
         child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Align(
                 alignment: Alignment.centerRight,
@@ -111,8 +112,9 @@ class _DatosActualesFacturaViewState
               ),
               const Gap(15),
               //Nombre del negocio
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Wrap(
+                alignment: WrapAlignment.start,
+                spacing: 10,
                 children: [
                   const Text(
                     'Nombre del negocio:',
@@ -121,20 +123,18 @@ class _DatosActualesFacturaViewState
                       color: Colors.black,
                     ),
                   ),
-                  const Gap(10),
-                  Expanded(
-                    child: SizedBox(
-                      child: Text(!_negocioTieneDatosFactura
-                          ? 'NO HA INGRESADO'
-                          : datosFactura.nombreNegocio),
-                    ),
+                  SizedBox(
+                    child: Text(!_negocioTieneDatosFactura
+                        ? 'NO HA INGRESADO'
+                        : datosFactura.nombreNegocio),
                   ),
                 ],
               ),
               const Gap(10),
               //RTN
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Wrap(
+                spacing: 10,
+                alignment: WrapAlignment.start,
                 children: [
                   const Text(
                     'RTN:',
@@ -143,20 +143,18 @@ class _DatosActualesFacturaViewState
                       color: Colors.black,
                     ),
                   ),
-                  const Gap(10),
-                  Expanded(
-                    child: SizedBox(
-                      child: Text(!_negocioTieneDatosFactura
-                          ? 'NO HA INGRESADO'
-                          : datosFactura.rtn),
-                    ),
+                  SizedBox(
+                    child: Text(!_negocioTieneDatosFactura
+                        ? 'NO HA INGRESADO'
+                        : datosFactura.rtn),
                   ),
                 ],
               ),
               const Gap(10),
               //Dirección
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Wrap(
+                spacing: 10,
+                alignment: WrapAlignment.start,
                 children: [
                   const Text(
                     'Dirección:',
@@ -165,20 +163,18 @@ class _DatosActualesFacturaViewState
                       color: Colors.black,
                     ),
                   ),
-                  const Gap(10),
-                  Expanded(
-                    child: SizedBox(
-                      child: Text(!_negocioTieneDatosFactura
-                          ? 'NO HA INGRESADO'
-                          : datosFactura.direccion),
-                    ),
+                  SizedBox(
+                    child: Text(!_negocioTieneDatosFactura
+                        ? 'NO HA INGRESADO'
+                        : datosFactura.direccion),
                   ),
                 ],
               ),
               const Gap(10),
               //Correo
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Wrap(
+                spacing: 10,
+                alignment: WrapAlignment.start,
                 children: [
                   const Text(
                     'Correo:',
@@ -187,20 +183,18 @@ class _DatosActualesFacturaViewState
                       color: Colors.black,
                     ),
                   ),
-                  const Gap(10),
-                  Expanded(
-                    child: SizedBox(
-                      child: Text(!_negocioTieneDatosFactura
-                          ? 'NO HA INGRESADO'
-                          : datosFactura.correo),
-                    ),
+                  SizedBox(
+                    child: Text(!_negocioTieneDatosFactura
+                        ? 'NO HA INGRESADO'
+                        : datosFactura.correo),
                   ),
                 ],
               ),
               const Gap(10),
               //Teléfono
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Wrap(
+                spacing: 10,
+                alignment: WrapAlignment.start,
                 children: [
                   const Text(
                     'Teléfono:',
@@ -209,13 +203,10 @@ class _DatosActualesFacturaViewState
                       color: Colors.black,
                     ),
                   ),
-                  const Gap(10),
-                  Expanded(
-                    child: SizedBox(
-                      child: Text(!_negocioTieneDatosFactura
-                          ? 'NO HA INGRESADO'
-                          : datosFactura.telefono),
-                    ),
+                  SizedBox(
+                    child: Text(!_negocioTieneDatosFactura
+                        ? 'NO HA INGRESADO'
+                        : datosFactura.telefono),
                   ),
                 ],
               ),
@@ -225,8 +216,9 @@ class _DatosActualesFacturaViewState
               ),
               const Gap(10),
               //CAI
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Wrap(
+                spacing: 10,
+                alignment: WrapAlignment.start,
                 children: [
                   const Text(
                     'CAI:',
@@ -235,20 +227,18 @@ class _DatosActualesFacturaViewState
                       color: Colors.black,
                     ),
                   ),
-                  const Gap(10),
-                  Expanded(
-                    child: SizedBox(
-                      child: Text(!_negocioTieneDatosFactura
-                          ? 'NO HA INGRESADO'
-                          : datosFactura.cai),
-                    ),
+                  SizedBox(
+                    child: Text(!_negocioTieneDatosFactura
+                        ? 'NO HA INGRESADO'
+                        : datosFactura.cai),
                   ),
                 ],
               ),
               const Gap(10),
               //Rango inicial
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Wrap(
+                spacing: 10,
+                alignment: WrapAlignment.start,
                 children: [
                   const Text(
                     'Rango Inicial:',
@@ -257,20 +247,18 @@ class _DatosActualesFacturaViewState
                       color: Colors.black,
                     ),
                   ),
-                  const Gap(10),
-                  Expanded(
-                    child: SizedBox(
-                      child: Text(!_negocioTieneDatosFactura
-                          ? 'NO HA INGRESADO'
-                          : rangoInicialString),
-                    ),
+                  SizedBox(
+                    child: Text(!_negocioTieneDatosFactura
+                        ? 'NO HA INGRESADO'
+                        : rangoInicialString),
                   ),
                 ],
               ),
               const Gap(10),
               //Rango final
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Wrap(
+                spacing: 10,
+                alignment: WrapAlignment.start,
                 children: [
                   const Text(
                     'Rango final:',
@@ -279,20 +267,18 @@ class _DatosActualesFacturaViewState
                       color: Colors.black,
                     ),
                   ),
-                  const Gap(10),
-                  Expanded(
-                    child: SizedBox(
-                      child: Text(!_negocioTieneDatosFactura
-                          ? 'NO HA INGRESADO'
-                          : rangoFinalString),
-                    ),
+                  SizedBox(
+                    child: Text(!_negocioTieneDatosFactura
+                        ? 'NO HA INGRESADO'
+                        : rangoFinalString),
                   ),
                 ],
               ),
               const Gap(10),
               //Fecha límite de emisión
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Wrap(
+                spacing: 10,
+                alignment: WrapAlignment.start,
                 children: [
                   const Text(
                     'Fecha límite de emisión:',
@@ -301,13 +287,10 @@ class _DatosActualesFacturaViewState
                       color: Colors.black,
                     ),
                   ),
-                  const Gap(10),
-                  Expanded(
-                    child: SizedBox(
-                      child: Text(!_negocioTieneDatosFactura
-                          ? 'NO HA INGRESADO'
-                          : fechaLimiteTrimeada),
-                    ),
+                  SizedBox(
+                    child: Text(!_negocioTieneDatosFactura
+                        ? 'NO HA INGRESADO'
+                        : fechaLimiteTrimeada),
                   ),
                 ],
               ),

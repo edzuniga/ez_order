@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/config/routes.dart';
 import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
@@ -15,8 +14,6 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     int selectedPageIndex = ref.watch(dashboardPageIndexProvider);
-    int rolUsuario =
-        int.parse(ref.read(userPublicDataProvider)['rol'].toString());
 
     return BottomNavigationBar(
       onTap: (index) {

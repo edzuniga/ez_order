@@ -903,7 +903,7 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
   }
 
   Future<void> _launchUrlWeb() async {
-    const url = 'https://uphn.net';
+    const url = 'https://docs.ezorderhn.com/ezorder';
     final Uri parsedUrl = Uri.parse(url);
 
     if (await canLaunchUrl(parsedUrl)) {

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:ez_order_ezr/presentation/dashboard/modals/ticket_number_modal.dart';
 import 'package:ez_order_ezr/presentation/config/routes.dart';
@@ -107,29 +108,32 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
               : const SizedBox(),
           const Spacer(),
           const Gap(10),
-          IconButton(
-            onPressed: () {
-              if (!_isFullScreen) {
-                setState(() {
-                  _isFullScreen = true;
-                  SystemChrome.setEnabledSystemUIMode(
-                      SystemUiMode.immersiveSticky);
-                });
-              } else {
-                setState(() {
-                  _isFullScreen = false;
-                  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-                });
-              }
-            },
-            tooltip: '¿Pantalla completa?',
-            style: IconButton.styleFrom(
-                backgroundColor: AppColors.kIconGrayishIcon),
-            icon: Icon(
-              !_isFullScreen ? Icons.fullscreen : Icons.fullscreen_exit,
-              color: Colors.white,
-            ),
-          ),
+          (!kIsWeb)
+              ? IconButton(
+                  onPressed: () {
+                    if (!_isFullScreen) {
+                      setState(() {
+                        _isFullScreen = true;
+                        SystemChrome.setEnabledSystemUIMode(
+                            SystemUiMode.immersiveSticky);
+                      });
+                    } else {
+                      setState(() {
+                        _isFullScreen = false;
+                        SystemChrome.setEnabledSystemUIMode(
+                            SystemUiMode.edgeToEdge);
+                      });
+                    }
+                  },
+                  tooltip: '¿Pantalla completa?',
+                  style: IconButton.styleFrom(
+                      backgroundColor: AppColors.kIconGrayishIcon),
+                  icon: Icon(
+                    !_isFullScreen ? Icons.fullscreen : Icons.fullscreen_exit,
+                    color: Colors.white,
+                  ),
+                )
+              : const SizedBox(),
           const Gap(10),
           OutlinedButton.icon(
             onPressed: () {

@@ -39,9 +39,11 @@ class _FacturasHistoricasViewState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+            Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 15,
+              runSpacing: 10,
               children: [
                 IconButton(
                   onPressed: () async {
@@ -80,7 +82,6 @@ class _FacturasHistoricasViewState
                     color: AppColors.kGeneralPrimaryOrange,
                   ),
                 ),
-                const Gap(15),
                 SizedBox(
                   width: 250,
                   child: TextFormField(
@@ -133,7 +134,6 @@ class _FacturasHistoricasViewState
                     },
                   ),
                 ),
-                const Gap(15),
                 ElevatedButton(
                     onPressed: () {
                       if (_facturasHistoricasFormKey.currentState!.validate()) {

@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:convert';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -17,14 +17,16 @@ import 'package:ez_order_ezr/data/menu_item_model.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 
-class AgregarMenuModal extends ConsumerStatefulWidget {
-  const AgregarMenuModal({super.key});
+class AgregarMenuFromWebModal extends ConsumerStatefulWidget {
+  const AgregarMenuFromWebModal({super.key});
 
   @override
-  ConsumerState<AgregarMenuModal> createState() => _AgregarMenuModalState();
+  ConsumerState<AgregarMenuFromWebModal> createState() =>
+      _AgregarMenuFromWebModalState();
 }
 
-class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
+class _AgregarMenuFromWebModalState
+    extends ConsumerState<AgregarMenuFromWebModal> {
   final GlobalKey<FormState> _agregarMenuKey = GlobalKey<FormState>();
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _precioSinIsvController = TextEditingController();
@@ -35,7 +37,8 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
       TextEditingController();
   bool _precioIncluyeIsvSelected = false;
   bool _vaParaCocinaSelected = true;
-  File? _selectedImage;
+  Uint8List? _webImage;
+  XFile? pickedImage;
   bool _isTryingUpload = false;
 
   @override
@@ -775,7 +778,7 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                                             .validate() &&
                                         categoriaSeleccionada.nombreCategoria !=
                                             'Seleccione categoría...') {
-                                      if (_selectedImage != null) {
+                                      if (_webImage != null) {
                                         final menuItem = MenuItemModel(
                                           numMenu: _correlativoController.text,
                                           descripcion:
@@ -783,7 +786,7 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                                           otraInfo:
                                               _informacionAdicionalController
                                                   .text,
-                                          img: _selectedImage!.path,
+                                          img: base64Encode(_webImage!),
                                           precioSinIsv: double.parse(
                                               _precioSinIsvController.text),
                                           precioConIsv: double.parse(
@@ -864,8 +867,10 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
     final supabaseClient = ref.read(supabaseManagementProvider.notifier);
     setState(() => _isTryingUpload = true);
 
+    String storagePath = DateTime.now().millisecondsSinceEpoch.toString();
+
     await supabaseClient
-        .addMenuItem(menuItemModel, _selectedImage!)
+        .addMenuItemFromWeb(menuItemModel, storagePath, _webImage!, pickedImage)
         .then((message) {
       setState(() => _isTryingUpload = false);
       if (message == 'success') {
@@ -916,16 +921,16 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
 
   Future<void> _seleccionarImagen() async {
     final ImagePicker imagePicker = ImagePicker();
-    final XFile? pickedImage = await imagePicker.pickImage(
+    pickedImage = await imagePicker.pickImage(
         source: ImageSource.gallery, imageQuality: 70);
 
     if (pickedImage == null) {
       return;
     }
-    _selectedImage = File(pickedImage.path);
+    _webImage = await pickedImage!.readAsBytes();
     setState(() {
-      imagenDisplay = Image.file(
-        _selectedImage!,
+      imagenDisplay = Image.memory(
+        _webImage!,
         width: double.infinity,
         height: 233.0,
         fit: BoxFit.cover,

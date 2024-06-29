@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:ez_order_ezr/presentation/providers/facturacion/pedido_para_view.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:random_string/random_string.dart';
@@ -65,6 +67,50 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Agregar un ítem para el menú desde la WEB
+  Future<String> addMenuItemFromWeb(MenuItemModel menuItemModel,
+      String storagePath, Uint8List imageBytes, XFile? pickedImage) async {
+    String mimeType = pickedImage!.mimeType.toString();
+    // Determinar la extensión del archivo
+    String extension = '';
+    String contentType = 'image/jpeg';
+    if (mimeType == 'image/jpeg') {
+      extension = 'jpg';
+      contentType = 'image/jpeg';
+    } else if (mimeType == 'image/png') {
+      extension = 'png';
+      contentType = 'image/png';
+    } else if (mimeType == 'image/webp') {
+      extension = 'webp';
+      contentType = 'image/webp';
+    }
+
+    String storagePathFinal = '$storagePath.$extension';
+    try {
+      //Cargar la foto del producto
+      final String fotoPathFromSupa = await state.storage
+          .from('menus')
+          .uploadBinary(storagePathFinal, imageBytes,
+              fileOptions: FileOptions(
+                contentType: contentType,
+                cacheControl: '3600',
+                upsert: false,
+              ));
+      String rutaCompletaImagen =
+          'https://rgvfnyskploauwgnmzqf.supabase.co/storage/v1/object/public/$fotoPathFromSupa';
+      //Asignarle el path de supa al menuItemModel recibido
+      MenuItemModel modeloParaCargar =
+          menuItemModel.copyWith(img: rutaCompletaImagen);
+      Map menuItemMap = modeloParaCargar.toJson();
+      await state.from('menus').insert(menuItemMap);
+      return 'success';
+    } on StorageException catch (s) {
+      return s.message;
+    } on PostgrestException catch (e) {
+      return e.message;
+    }
+  }
+
   //Actualizar un ítem para el menú
   Future<String> updateMenuItem(
       MenuItemModel menuItemModel, File? image) async {
@@ -81,6 +127,67 @@ class SupabaseManagement extends _$SupabaseManagement {
             .from('menus')
             .upload(nombreAleatorioParaImagen, image,
                 fileOptions: const FileOptions(
+                  cacheControl: '3600',
+                  upsert: false,
+                ));
+        String rutaCompletaImagen =
+            'https://rgvfnyskploauwgnmzqf.supabase.co/storage/v1/object/public/$fotoPathFromSupa';
+        //Asignarle el path de supa al menuItemModel recibido
+        MenuItemModel modeloParaCargar =
+            menuItemModel.copyWith(img: rutaCompletaImagen);
+        Map menuItemMap = modeloParaCargar.toJson();
+        await state
+            .from('menus')
+            .update(menuItemMap)
+            .eq('id_menu', menuItemModel.idMenu!);
+        return 'success';
+      } on StorageException catch (s) {
+        return s.message;
+      } on PostgrestException catch (e) {
+        return e.message;
+      }
+    } else {
+      Map menuItemMap = menuItemModel.toJson();
+      try {
+        await state
+            .from('menus')
+            .update(menuItemMap)
+            .eq('id_menu', menuItemModel.idMenu!);
+        return 'success';
+      } on PostgrestException catch (e) {
+        return e.message;
+      }
+    }
+  }
+
+//Actualizar un ítem para el menú
+  Future<String> updateMenuItemFromWeb(MenuItemModel menuItemModel,
+      String storagePath, Uint8List? imageBytes, XFile? pickedImage) async {
+    //Cuando el image decidió NO cambiarlo
+    if (imageBytes != null) {
+      String mimeType = pickedImage!.mimeType.toString();
+      // Determinar la extensión del archivo
+      String extension = '';
+      String contentType = 'image/jpeg';
+      if (mimeType == 'image/jpeg') {
+        extension = 'jpg';
+        contentType = 'image/jpeg';
+      } else if (mimeType == 'image/png') {
+        extension = 'png';
+        contentType = 'image/png';
+      } else if (mimeType == 'image/webp') {
+        extension = 'webp';
+        contentType = 'image/webp';
+      }
+      String storagePathFinal = '$storagePath.$extension';
+
+      try {
+        //Cargar la foto del producto
+        final String fotoPathFromSupa = await state.storage
+            .from('menus')
+            .uploadBinary(storagePathFinal, imageBytes,
+                fileOptions: FileOptions(
+                  contentType: contentType,
                   cacheControl: '3600',
                   upsert: false,
                 ));

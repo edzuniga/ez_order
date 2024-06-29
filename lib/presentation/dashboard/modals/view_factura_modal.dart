@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -11,6 +11,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:printing/printing.dart';
+import 'dart:convert';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as web;
 
 import 'package:ez_order_ezr/data/datos_factura_modelo.dart';
 import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
@@ -348,22 +351,37 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                       IconButton(
                         key: _shareButtonKey,
                         onPressed: () async {
-                          _isGeneratingPdf
-                              ? null
-                              : await _generateAndShare(
-                                  widget.factura,
-                                  datosFacturacion,
-                                  detallesPedido,
-                                  pedidoParaView);
+                          if (kIsWeb) {
+                            _isGeneratingPdf
+                                ? null
+                                : await _generateAndDownloadPdf(
+                                    widget.factura,
+                                    datosFacturacion,
+                                    detallesPedido,
+                                    pedidoParaView);
+                          } else {
+                            _isGeneratingPdf
+                                ? null
+                                : await _generateAndShare(
+                                    widget.factura,
+                                    datosFacturacion,
+                                    detallesPedido,
+                                    pedidoParaView);
+                          }
                         },
                         tooltip: 'Compartir',
                         style: IconButton.styleFrom(
                           backgroundColor: AppColors.kGeneralPrimaryOrange,
                         ),
-                        icon: const Icon(
-                          Icons.share,
-                          color: Colors.white,
-                        ),
+                        icon: kIsWeb
+                            ? const Icon(
+                                Icons.download,
+                                color: Colors.white,
+                              )
+                            : const Icon(
+                                Icons.share,
+                                color: Colors.white,
+                              ),
                       ),
 
                       const Gap(15),
@@ -408,6 +426,24 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
     return file;
   }
 
+  Future<void> _generateAndDownloadPdf(
+      FacturaModelo factura,
+      DatosFacturaModelo datosFacturacion,
+      List<PedidoDetalleModel> detallesPedido,
+      PedidoModel pedidoParaView) async {
+    // Generar el archivo PDF
+    final pdfData = await generateFacturaPdf(
+        factura, datosFacturacion, detallesPedido, pedidoParaView);
+
+    List<int> fileInts = List.from(pdfData);
+    // Crear un enlace y hacer clic para descargar el archivo
+    final url =
+        "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(fileInts)}";
+    web.AnchorElement(href: url)
+      ..setAttribute("download", "${DateTime.now().millisecondsSinceEpoch}.pdf")
+      ..click();
+  }
+
   Future<void> _sharePdf(File file) async {
     final xFile = XFile(file.path);
 
@@ -424,7 +460,7 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
       // Obtener la posición del botón
       final position = box.localToGlobal(Offset.zero) & box.size;
 
-      // Compartir el archivo PDF vía WhatsApp
+      // Compartir el archivo PDF (Para Móviles)
       await Share.shareXFiles(
         [xFile],
         text: 'Aquí está tu recibo en PDF',

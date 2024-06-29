@@ -1,10 +1,10 @@
-import 'dart:io';
+import 'dart:convert';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -17,14 +17,16 @@ import 'package:ez_order_ezr/data/menu_item_model.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 
-class AgregarMenuModal extends ConsumerStatefulWidget {
-  const AgregarMenuModal({super.key});
+class UpdateMenuFromWebModal extends ConsumerStatefulWidget {
+  const UpdateMenuFromWebModal({required this.itemMenu, super.key});
+  final MenuItemModel itemMenu;
 
   @override
-  ConsumerState<AgregarMenuModal> createState() => _AgregarMenuModalState();
+  ConsumerState<UpdateMenuFromWebModal> createState() =>
+      _UpdateMenuModalState();
 }
 
-class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
+class _UpdateMenuModalState extends ConsumerState<UpdateMenuFromWebModal> {
   final GlobalKey<FormState> _agregarMenuKey = GlobalKey<FormState>();
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _precioSinIsvController = TextEditingController();
@@ -35,15 +37,49 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
       TextEditingController();
   bool _precioIncluyeIsvSelected = false;
   bool _vaParaCocinaSelected = true;
-  File? _selectedImage;
+  Uint8List? _webImage;
+  XFile? pickedImage;
   bool _isTryingUpload = false;
+  late final String _imgUrl;
+  late Widget imagenDisplay;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(categoriaActualProvider.notifier).resetCategoriaSeleccionada();
-    });
+    _nombreController.text = widget.itemMenu.nombreItem;
+    _precioSinIsvController.text = widget.itemMenu.precioSinIsv.toString();
+    _precioConIsvController.text = widget.itemMenu.precioConIsv.toString();
+    _descripcionController.text = widget.itemMenu.descripcion;
+    _correlativoController.text = widget.itemMenu.numMenu;
+    //Asignar la categoría actual
+    _asignarCategoriaActual();
+    _informacionAdicionalController.text = widget.itemMenu.otraInfo;
+    _vaParaCocinaSelected = widget.itemMenu.vaParaCocina;
+    _precioIncluyeIsvSelected = widget.itemMenu.precioIncluyeIsv;
+    _imgUrl = widget.itemMenu.img!;
+    imagenDisplay = Image.network(
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) {
+          return child;
+        } else {
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      (loadingProgress.expectedTotalBytes ?? 1)
+                  : null,
+            ),
+          );
+        }
+      },
+      errorBuilder: (context, error, stackTrace) => const Center(
+        child: Text('Error al querer cargar imagen'),
+      ),
+      _imgUrl.toString(),
+      width: double.infinity,
+      height: 233.0,
+      fit: BoxFit.cover,
+    );
   }
 
   @override
@@ -63,12 +99,12 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
         .obtenerCategorias();
   }
 
-  Widget imagenDisplay = Image.asset(
-    'assets/images/pedidos.jpg',
-    width: double.infinity,
-    height: 233.0,
-    fit: BoxFit.cover,
-  );
+  Future<void> _asignarCategoriaActual() async {
+    CategoriaModelo cat = await ref
+        .read(supabaseManagementProvider.notifier)
+        .obtenerCategoriaPorId(widget.itemMenu.idCategoria);
+    ref.read(categoriaActualProvider.notifier).setCategoriaActual(cat);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +183,6 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                         const Gap(12),
                         Column(
                           children: [
-                            //Nombre y correlativo
                             Row(
                               children: [
                                 //Nombre del producto
@@ -354,6 +389,9 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                                           inputFormatters: <TextInputFormatter>[
                                             FilteringTextInputFormatter.allow(
                                                 RegExp(r'^\d+\.?\d{0,2}')),
+                                          ],
+                                          autofillHints: const [
+                                            AutofillHints.name
                                           ],
                                           decoration: InputDecoration(
                                             labelText: 'Precio',
@@ -644,6 +682,7 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                               ],
                             ),
                             const Gap(12),
+
                             //Sección de Cupertino Switches
                             Row(
                               children: [
@@ -746,7 +785,6 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                               ],
                             ),
                             const Gap(25),
-                            //Botones
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
@@ -775,46 +813,33 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                                             .validate() &&
                                         categoriaSeleccionada.nombreCategoria !=
                                             'Seleccione categoría...') {
-                                      if (_selectedImage != null) {
-                                        final menuItem = MenuItemModel(
-                                          numMenu: _correlativoController.text,
-                                          descripcion:
-                                              _descripcionController.text,
-                                          otraInfo:
-                                              _informacionAdicionalController
-                                                  .text,
-                                          img: _selectedImage!.path,
-                                          precioSinIsv: double.parse(
-                                              _precioSinIsvController.text),
-                                          precioConIsv: double.parse(
-                                              _precioConIsvController.text),
-                                          nombreItem: _nombreController.text,
-                                          idRestaurante: int.parse(ref
-                                              .read(userPublicDataProvider)[
-                                                  'id_restaurante']
-                                              .toString()),
-                                          precioIncluyeIsv:
-                                              _precioIncluyeIsvSelected,
-                                          vaParaCocina: _vaParaCocinaSelected,
-                                          idCategoria: categoriaSeleccionada
-                                              .idCategoria!,
-                                        );
-                                        await _tryAddMenu(menuItem);
-                                      } else {
-                                        Fluttertoast.cancel();
-                                        Fluttertoast.showToast(
-                                          msg:
-                                              'Debe proveer de una imagen para el producto',
-                                          toastLength: Toast.LENGTH_LONG,
-                                          gravity: ToastGravity.CENTER,
-                                          timeInSecForIosWeb: 4,
-                                          backgroundColor: Colors.red,
-                                          textColor: Colors.white,
-                                          fontSize: 16.0,
-                                          webPosition: 'center',
-                                          webBgColor: 'red',
-                                        );
-                                      }
+                                      final menuItem = MenuItemModel(
+                                        idMenu: widget.itemMenu.idMenu,
+                                        numMenu: _correlativoController.text,
+                                        descripcion:
+                                            _descripcionController.text,
+                                        otraInfo:
+                                            _informacionAdicionalController
+                                                .text,
+                                        img: _webImage != null
+                                            ? base64Encode(_webImage!)
+                                            : widget.itemMenu.img,
+                                        precioSinIsv: double.parse(
+                                            _precioSinIsvController.text),
+                                        precioConIsv: double.parse(
+                                            _precioConIsvController.text),
+                                        nombreItem: _nombreController.text,
+                                        idRestaurante: int.parse(ref
+                                            .read(userPublicDataProvider)[
+                                                'id_restaurante']
+                                            .toString()),
+                                        precioIncluyeIsv:
+                                            _precioIncluyeIsvSelected,
+                                        vaParaCocina: _vaParaCocinaSelected,
+                                        idCategoria:
+                                            categoriaSeleccionada.idCategoria!,
+                                      );
+                                      await _tryUpdateMenu(menuItem);
                                     } else {
                                       Fluttertoast.cancel();
                                       Fluttertoast.showToast(
@@ -839,7 +864,7 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                                     ),
                                   ),
                                   child: Text(
-                                    'Agregar producto',
+                                    'Actualizar producto',
                                     style: GoogleFonts.inter(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,
@@ -859,13 +884,16 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
           );
   }
 
-  Future<void> _tryAddMenu(MenuItemModel menuItemModel) async {
+  Future<void> _tryUpdateMenu(MenuItemModel menuItemModel) async {
     //llamar la única instancia de supabase
     final supabaseClient = ref.read(supabaseManagementProvider.notifier);
     setState(() => _isTryingUpload = true);
 
+    String storagePath = DateTime.now().millisecondsSinceEpoch.toString();
+
     await supabaseClient
-        .addMenuItem(menuItemModel, _selectedImage!)
+        .updateMenuItemFromWeb(
+            menuItemModel, storagePath, _webImage, pickedImage)
         .then((message) {
       setState(() => _isTryingUpload = false);
       if (message == 'success') {
@@ -873,21 +901,9 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
         ref.read(categoriaActualProvider.notifier).resetCategoriaSeleccionada();
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          backgroundColor: Colors.green,
+          backgroundColor: Colors.blue,
           content: Text(
-            'Producto agregado exitosamente!!',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ));
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          backgroundColor: Colors.green,
-          content: Text(
-            'Agregado exitosamente!!',
+            'Producto actualizado exitosamente!!',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -916,16 +932,16 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
 
   Future<void> _seleccionarImagen() async {
     final ImagePicker imagePicker = ImagePicker();
-    final XFile? pickedImage = await imagePicker.pickImage(
+    pickedImage = await imagePicker.pickImage(
         source: ImageSource.gallery, imageQuality: 70);
 
     if (pickedImage == null) {
       return;
     }
-    _selectedImage = File(pickedImage.path);
+    _webImage = await pickedImage!.readAsBytes();
     setState(() {
-      imagenDisplay = Image.file(
-        _selectedImage!,
+      imagenDisplay = Image.memory(
+        _webImage!,
         width: double.infinity,
         height: 233.0,
         fit: BoxFit.cover,
