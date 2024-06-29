@@ -1,4 +1,5 @@
 import 'package:email_validator/email_validator.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -702,19 +703,35 @@ class _AdminViewState extends ConsumerState<AddDatosFacturacionModal> {
                                 );
                                 _tryAddDatosFactura(modelo);
                               } else {
-                                Fluttertoast.cancel();
-                                Fluttertoast.showToast(
-                                  msg:
-                                      'el rango autorizado final debe ser superior al rango inicial!!',
-                                  toastLength: Toast.LENGTH_LONG,
-                                  gravity: ToastGravity.CENTER,
-                                  timeInSecForIosWeb: 4,
-                                  backgroundColor: Colors.red,
-                                  textColor: Colors.white,
-                                  fontSize: 16.0,
-                                  webPosition: 'center',
-                                  webBgColor: 'red',
-                                );
+                                if (kIsWeb) {
+                                  ScaffoldMessenger.of(context)
+                                      .clearSnackBars();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      backgroundColor: Colors.red,
+                                      content: Text(
+                                        'el rango autorizado final debe ser superior al rango inicial!!',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  Fluttertoast.cancel();
+                                  Fluttertoast.showToast(
+                                    msg:
+                                        'el rango autorizado final debe ser superior al rango inicial!!',
+                                    toastLength: Toast.LENGTH_LONG,
+                                    gravity: ToastGravity.CENTER,
+                                    timeInSecForIosWeb: 4,
+                                    backgroundColor: Colors.red,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0,
+                                    webPosition: 'center',
+                                    webBgColor: 'red',
+                                  );
+                                }
                               }
                             }
                           },

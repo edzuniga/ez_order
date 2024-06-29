@@ -467,18 +467,34 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
         sharePositionOrigin: position,
       );
     } else {
-      Fluttertoast.cancel();
-      Fluttertoast.showToast(
-        msg: 'Pruebe nuevamente',
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 3,
-        backgroundColor: Colors.blue,
-        textColor: Colors.white,
-        fontSize: 16.0,
-        webPosition: 'center',
-        webBgColor: 'red',
-      );
+      if (kIsWeb) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.blue,
+            content: Text(
+              'Pruebe nuevamente',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+          ),
+        );
+      } else {
+        Fluttertoast.cancel();
+        Fluttertoast.showToast(
+          msg: 'Pruebe nuevamente',
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 3,
+          backgroundColor: Colors.blue,
+          textColor: Colors.white,
+          fontSize: 16.0,
+          webPosition: 'center',
+          webBgColor: 'red',
+        );
+      }
     }
     setState(() => _isGeneratingPdf = false);
   }

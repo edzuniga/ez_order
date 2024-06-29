@@ -166,18 +166,31 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                                     'No ha seleccionado...') {
                                   await _hacerCalculosReportesDiarios();
                                 } else {
-                                  Fluttertoast.cancel();
-                                  Fluttertoast.showToast(
-                                    msg: 'Debe seleccionar restaurante!!',
-                                    toastLength: Toast.LENGTH_LONG,
-                                    gravity: ToastGravity.CENTER,
-                                    timeInSecForIosWeb: 5,
-                                    backgroundColor: Colors.red,
-                                    textColor: Colors.white,
-                                    fontSize: 16.0,
-                                    webPosition: 'center',
-                                    webBgColor: 'red',
-                                  );
+                                  if (kIsWeb) {
+                                    ScaffoldMessenger.of(context)
+                                        .clearSnackBars();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            backgroundColor: Colors.red,
+                                            content: Text(
+                                                'Debe seleccionar restaurante!!',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                ))));
+                                  } else {
+                                    Fluttertoast.cancel();
+                                    Fluttertoast.showToast(
+                                      msg: 'Debe seleccionar restaurante!!',
+                                      toastLength: Toast.LENGTH_LONG,
+                                      gravity: ToastGravity.CENTER,
+                                      timeInSecForIosWeb: 4,
+                                      backgroundColor: Colors.red,
+                                      textColor: Colors.white,
+                                      fontSize: 16.0,
+                                      webPosition: 'center',
+                                      webBgColor: 'red',
+                                    );
+                                  }
                                 }
                               },
                         style: ElevatedButton.styleFrom(
@@ -378,19 +391,34 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                               //Hacer los respectivos cálculos con el restaurante seleccionado
                               await _hacerCalculosGenerales();
                             } else {
-                              Fluttertoast.cancel();
-                              Fluttertoast.showToast(
-                                msg:
-                                    'Debe seleccionar restaurante y rango de fechas!!',
-                                toastLength: Toast.LENGTH_LONG,
-                                gravity: ToastGravity.CENTER,
-                                timeInSecForIosWeb: 5,
-                                backgroundColor: Colors.red,
-                                textColor: Colors.white,
-                                fontSize: 16.0,
-                                webPosition: 'center',
-                                webBgColor: 'red',
-                              );
+                              if (kIsWeb) {
+                                ScaffoldMessenger.of(context).clearSnackBars();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.red,
+                                    content: Text(
+                                      'Debe seleccionar restaurante y rango de fechas!!',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                Fluttertoast.cancel();
+                                Fluttertoast.showToast(
+                                  msg:
+                                      'Debe seleccionar restaurante y rango de fechas!!',
+                                  toastLength: Toast.LENGTH_LONG,
+                                  gravity: ToastGravity.CENTER,
+                                  timeInSecForIosWeb: 5,
+                                  backgroundColor: Colors.red,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0,
+                                  webPosition: 'center',
+                                  webBgColor: 'red',
+                                );
+                              }
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -773,18 +801,34 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
         sharePositionOrigin: position,
       );
     } else {
-      Fluttertoast.cancel();
-      Fluttertoast.showToast(
-        msg: 'Pruebe nuevamente',
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 3,
-        backgroundColor: Colors.blue,
-        textColor: Colors.white,
-        fontSize: 16.0,
-        webPosition: 'center',
-        webBgColor: 'red',
-      );
+      if (kIsWeb) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.blue,
+            content: Text(
+              'Pruebe nuevamente',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+          ),
+        );
+      } else {
+        Fluttertoast.cancel();
+        Fluttertoast.showToast(
+          msg: 'Pruebe nuevamente',
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 3,
+          backgroundColor: Colors.blue,
+          textColor: Colors.white,
+          fontSize: 16.0,
+          webPosition: 'center',
+          webBgColor: 'red',
+        );
+      }
     }
   }
 

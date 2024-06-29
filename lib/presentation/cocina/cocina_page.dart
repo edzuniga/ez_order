@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -156,150 +157,180 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
                                           detalleMap['detalle'];
                                       String nombreMenu =
                                           detalleMap['nombreMenu'];
-                                      return '${detalle.cantidad} $nombreMenu';
+                                      if (nombreMenu != '') {
+                                        return '${detalle.cantidad} $nombreMenu';
+                                      } else {
+                                        return '';
+                                      }
                                     }).join(' / ');
-                                    return Column(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(5),
-                                          //height: 91.0,
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            border: Border.all(
-                                              color: const Color(0xFFE0E3E7),
-                                              width: 1.0,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
+                                    return textoDetallePedido != ''
+                                        ? Column(
                                             children: [
-                                              //Imagen genérica de pedido
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                child: SizedBox(
-                                                  width: 100.0,
-                                                  height: 81.0,
-                                                  child: Image.asset(
-                                                    'assets/images/pedidos.jpg',
-                                                    fit: BoxFit.cover,
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.all(5),
+                                                //height: 91.0,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8.0),
+                                                  border: Border.all(
+                                                    color:
+                                                        const Color(0xFFE0E3E7),
+                                                    width: 1.0,
                                                   ),
                                                 ),
-                                              ),
-                                              const Gap(5),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
+                                                child: Row(
                                                   mainAxisSize:
                                                       MainAxisSize.max,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
                                                   children: [
-                                                    Text(
-                                                      '# ${pedido.numPedido} -> Nombre del cliente: $nombreCliente',
-                                                      style: GoogleFonts.inter(
-                                                        fontSize: 14,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FontWeight.w700,
+                                                    //Imagen genérica de pedido
+                                                    ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                      child: SizedBox(
+                                                        width: 100.0,
+                                                        height: 81.0,
+                                                        child: Image.asset(
+                                                          'assets/images/pedidos.jpg',
+                                                          fit: BoxFit.cover,
+                                                        ),
                                                       ),
                                                     ),
-                                                    SizedBox(
-                                                      width: double.infinity,
-                                                      child: Text(
-                                                        textoDetallePedido,
-                                                        style:
-                                                            GoogleFonts.inter(
-                                                          fontSize: 12,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.w500,
+                                                    const Gap(5),
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        mainAxisSize:
+                                                            MainAxisSize.max,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Text(
+                                                            '# ${pedido.numPedido} -> Nombre del cliente: $nombreCliente',
+                                                            style: GoogleFonts
+                                                                .inter(
+                                                              fontSize: 14,
+                                                              letterSpacing:
+                                                                  0.0,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700,
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                            width:
+                                                                double.infinity,
+                                                            child: Text(
+                                                              textoDetallePedido,
+                                                              style: GoogleFonts
+                                                                  .inter(
+                                                                fontSize: 12,
+                                                                letterSpacing:
+                                                                    0.0,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    Expanded(
+                                                      child: Container(
+                                                        height: 80,
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(10),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                                border:
+                                                                    Border.all(
+                                                                  color: Colors
+                                                                      .black26,
+                                                                ),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            8)),
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            const Text(
+                                                              'Nota adicional',
+                                                              style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontSize: 12,
+                                                              ),
+                                                            ),
+                                                            Text((pedido.notaAdicional !=
+                                                                        null) &&
+                                                                    pedido.notaAdicional !=
+                                                                        'null'
+                                                                ? '${pedido.notaAdicional}'
+                                                                : 'sin nota adicional'),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const Gap(15),
+                                                    //Botón de opciones
+                                                    Align(
+                                                      alignment:
+                                                          Alignment.topRight,
+                                                      child: ElevatedButton(
+                                                        onPressed: () async {
+                                                          await _tryChangePedidoStatus(
+                                                              pedido
+                                                                  .uuidPedido!);
+                                                        },
+                                                        style: ElevatedButton
+                                                            .styleFrom(
+                                                          tapTargetSize:
+                                                              MaterialTapTargetSize
+                                                                  .shrinkWrap,
+                                                          elevation: 0.0,
+                                                          backgroundColor:
+                                                              const Color(
+                                                                  0xFFFFDFD0),
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        4.0),
+                                                          ),
+                                                        ),
+                                                        child: Text(
+                                                          'Entregar',
+                                                          style:
+                                                              GoogleFonts.inter(
+                                                            color: Colors.black,
+                                                            fontSize: 12.0,
+                                                            letterSpacing: 0.0,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
                                                   ],
                                                 ),
                                               ),
-                                              Expanded(
-                                                child: Container(
-                                                  height: 80,
-                                                  padding:
-                                                      const EdgeInsets.all(10),
-                                                  decoration: BoxDecoration(
-                                                      border: Border.all(
-                                                        color: Colors.black26,
-                                                      ),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              8)),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      const Text(
-                                                        'Nota adicional',
-                                                        style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: 12,
-                                                        ),
-                                                      ),
-                                                      Text((pedido.notaAdicional !=
-                                                                  null) &&
-                                                              pedido.notaAdicional !=
-                                                                  'null'
-                                                          ? '${pedido.notaAdicional}'
-                                                          : 'sin nota adicional'),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              const Gap(15),
-                                              //Botón de opciones
-                                              Align(
-                                                alignment: Alignment.topRight,
-                                                child: ElevatedButton(
-                                                  onPressed: () async {
-                                                    await _tryChangePedidoStatus(
-                                                        pedido.uuidPedido!);
-                                                  },
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    tapTargetSize:
-                                                        MaterialTapTargetSize
-                                                            .shrinkWrap,
-                                                    elevation: 0.0,
-                                                    backgroundColor:
-                                                        const Color(0xFFFFDFD0),
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              4.0),
-                                                    ),
-                                                  ),
-                                                  child: Text(
-                                                    'Entregar',
-                                                    style: GoogleFonts.inter(
-                                                      color: Colors.black,
-                                                      fontSize: 12.0,
-                                                      letterSpacing: 0.0,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
+                                              const Gap(8),
                                             ],
-                                          ),
-                                        ),
-                                        const Gap(8),
-                                      ],
-                                    );
+                                          )
+                                        : const SizedBox();
                                   }
                                 },
                               );
@@ -324,7 +355,7 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
         .read(supabaseManagementProvider.notifier)
         .getDetallesPedido(uuidPedido);
 
-    List<Future<Map<String, dynamic>>> detalleConNombreMenu =
+    List<Future<Map<String, Object>>> detalleConNombreMenu =
         detalles.map((detalle) async {
       String nombreMenu = await _obtenerNombreMenu(detalle.idMenu);
       return {
@@ -339,7 +370,7 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
   Future<String> _obtenerNombreMenu(int idMenu) async {
     return await ref
         .read(supabaseManagementProvider.notifier)
-        .getNombreMenuItem(idMenu);
+        .getNombreMenuItemParaCocina(idMenu);
   }
 
   Future<String> _obtenerNombreCliente(int clienteId) async {
@@ -367,18 +398,33 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
           ),
         ));
       } else {
-        Fluttertoast.cancel();
-        Fluttertoast.showToast(
-          msg: 'Pedido entregado exitosamente!!',
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 3,
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
-          fontSize: 16.0,
-          webPosition: 'center',
-          webBgColor: 'green',
-        );
+        if (kIsWeb) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text(
+              'Pedido entregado exitosamente!!',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ));
+        } else {
+          Fluttertoast.cancel();
+          Fluttertoast.showToast(
+            msg: 'Pedido entregado exitosamente!!',
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 3,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0,
+            webPosition: 'center',
+            webBgColor: 'green',
+          );
+        }
       }
     });
   }

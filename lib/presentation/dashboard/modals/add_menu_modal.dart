@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
@@ -801,10 +802,58 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                                         );
                                         await _tryAddMenu(menuItem);
                                       } else {
+                                        if (kIsWeb) {
+                                          ScaffoldMessenger.of(context)
+                                              .clearSnackBars();
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              backgroundColor: Colors.red,
+                                              content: Text(
+                                                'Debe proveer de una imagen para el producto',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        } else {
+                                          Fluttertoast.cancel();
+                                          Fluttertoast.showToast(
+                                            msg:
+                                                'Debe proveer de una imagen para el producto',
+                                            toastLength: Toast.LENGTH_LONG,
+                                            gravity: ToastGravity.CENTER,
+                                            timeInSecForIosWeb: 4,
+                                            backgroundColor: Colors.red,
+                                            textColor: Colors.white,
+                                            fontSize: 16.0,
+                                            webPosition: 'center',
+                                            webBgColor: 'red',
+                                          );
+                                        }
+                                      }
+                                    } else {
+                                      if (kIsWeb) {
+                                        ScaffoldMessenger.of(context)
+                                            .clearSnackBars();
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            backgroundColor: Colors.red,
+                                            content: Text(
+                                              'Elija categoría y todos los campos requeridos!!',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      } else {
                                         Fluttertoast.cancel();
                                         Fluttertoast.showToast(
                                           msg:
-                                              'Debe proveer de una imagen para el producto',
+                                              'Elija categoría y todos los campos requeridos!!',
                                           toastLength: Toast.LENGTH_LONG,
                                           gravity: ToastGravity.CENTER,
                                           timeInSecForIosWeb: 4,
@@ -815,20 +864,6 @@ class _AgregarMenuModalState extends ConsumerState<AgregarMenuModal> {
                                           webBgColor: 'red',
                                         );
                                       }
-                                    } else {
-                                      Fluttertoast.cancel();
-                                      Fluttertoast.showToast(
-                                        msg:
-                                            'Elija categoría y todos los campos requeridos!!',
-                                        toastLength: Toast.LENGTH_LONG,
-                                        gravity: ToastGravity.CENTER,
-                                        timeInSecForIosWeb: 4,
-                                        backgroundColor: Colors.red,
-                                        textColor: Colors.white,
-                                        fontSize: 16.0,
-                                        webPosition: 'center',
-                                        webBgColor: 'red',
-                                      );
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(

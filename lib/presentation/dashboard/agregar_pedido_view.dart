@@ -786,19 +786,34 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                                 .decrementarCantidad(
                                                     itemPedido.idMenu!);
                                           } else {
-                                            Fluttertoast.cancel();
-                                            Fluttertoast.showToast(
-                                              msg:
-                                                  'No puede dejar en 0 el producto!!',
-                                              toastLength: Toast.LENGTH_LONG,
-                                              gravity: ToastGravity.CENTER,
-                                              timeInSecForIosWeb: 3,
-                                              backgroundColor: Colors.red,
-                                              textColor: Colors.white,
-                                              fontSize: 16.0,
-                                              webPosition: 'center',
-                                              webBgColor: 'red',
-                                            );
+                                            if (kIsWeb) {
+                                              ScaffoldMessenger.of(context)
+                                                  .clearSnackBars();
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(const SnackBar(
+                                                      backgroundColor:
+                                                          Colors.red,
+                                                      content: Text(
+                                                        'No puede dejar en 0 el producto!!',
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                        ),
+                                                      )));
+                                            } else {
+                                              Fluttertoast.cancel();
+                                              Fluttertoast.showToast(
+                                                msg:
+                                                    'No puede dejar en 0 el producto!!',
+                                                toastLength: Toast.LENGTH_LONG,
+                                                gravity: ToastGravity.CENTER,
+                                                timeInSecForIosWeb: 3,
+                                                backgroundColor: Colors.red,
+                                                textColor: Colors.white,
+                                                fontSize: 16.0,
+                                                webPosition: 'center',
+                                                webBgColor: 'red',
+                                              );
+                                            }
                                           }
                                         },
                                         style: IconButton.styleFrom(
@@ -1823,19 +1838,34 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                                 .decrementarCantidad(
                                                     itemPedido.idMenu!);
                                           } else {
-                                            Fluttertoast.cancel();
-                                            Fluttertoast.showToast(
-                                              msg:
-                                                  'No puede dejar en 0 el producto!!',
-                                              toastLength: Toast.LENGTH_LONG,
-                                              gravity: ToastGravity.CENTER,
-                                              timeInSecForIosWeb: 3,
-                                              backgroundColor: Colors.red,
-                                              textColor: Colors.white,
-                                              fontSize: 16.0,
-                                              webPosition: 'center',
-                                              webBgColor: 'red',
-                                            );
+                                            if (kIsWeb) {
+                                              ScaffoldMessenger.of(context)
+                                                  .clearSnackBars();
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(const SnackBar(
+                                                      backgroundColor:
+                                                          Colors.red,
+                                                      content: Text(
+                                                        'No puede dejar en 0 el producto!!',
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                        ),
+                                                      )));
+                                            } else {
+                                              Fluttertoast.cancel();
+                                              Fluttertoast.showToast(
+                                                msg:
+                                                    'No puede dejar en 0 el producto!!',
+                                                toastLength: Toast.LENGTH_LONG,
+                                                gravity: ToastGravity.CENTER,
+                                                timeInSecForIosWeb: 3,
+                                                backgroundColor: Colors.red,
+                                                textColor: Colors.white,
+                                                fontSize: 16.0,
+                                                webPosition: 'center',
+                                                webBgColor: 'red',
+                                              );
+                                            }
                                           }
                                         },
                                         style: IconButton.styleFrom(
@@ -2305,20 +2335,44 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
               .read(pedidoDetallesManagementProvider.notifier)
               .resetPedidosDetallesList();
         });
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          backgroundColor: Colors.green,
+          content: Text(
+            'Pedido agregado con éxito!!',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        ));
       }
     } else {
-      Fluttertoast.cancel();
-      Fluttertoast.showToast(
-        msg: 'No puede enviar una orden vacía!!',
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 3,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-        webPosition: 'center',
-        webBgColor: 'red',
-      );
+      if (kIsWeb) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            'No puede enviar una orden vacía!!',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        ));
+      } else {
+        Fluttertoast.cancel();
+        Fluttertoast.showToast(
+          msg: 'No puede enviar una orden vacía!!',
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 3,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+          webPosition: 'center',
+          webBgColor: 'red',
+        );
+      }
     }
   }
 
@@ -2369,18 +2423,31 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
       ref.read(menuItemPedidoListProvider.notifier).addMenuItem(itemMenu);
       return true;
     } else {
-      Fluttertoast.cancel();
-      Fluttertoast.showToast(
-        msg: 'Este producto ya está agregado!!',
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 3,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-        webPosition: 'center',
-        webBgColor: 'red',
-      );
+      if (kIsWeb) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            'Este producto ya está agregado!!',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        ));
+      } else {
+        Fluttertoast.cancel();
+        Fluttertoast.showToast(
+          msg: 'Este producto ya está agregado!!',
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 3,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+          webPosition: 'center',
+          webBgColor: 'red',
+        );
+      }
       return false;
     }
   }

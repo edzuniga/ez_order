@@ -479,6 +479,24 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  Future<String> getNombreMenuItemParaCocina(int idMenu) async {
+    try {
+      final res = await state
+          .from('menus')
+          .select('nombre_item, va_para_cocina')
+          .eq('id_menu', idMenu)
+          .limit(1)
+          .single();
+      if (res['va_para_cocina']) {
+        return res['nombre_item'];
+      } else {
+        return '';
+      }
+    } on PostgrestException catch (e) {
+      return e.message;
+    }
+  }
+
   Future<String> changePedidoStatus(String uuIdPedido) async {
     try {
       await state
