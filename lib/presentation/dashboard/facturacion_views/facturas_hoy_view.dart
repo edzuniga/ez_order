@@ -168,7 +168,7 @@ class _FacturasDeHoyViewState extends ConsumerState<FacturasDeHoyView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.white.withOpacity(0),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (_) => Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,

@@ -16,6 +16,7 @@ class FacturaModelo extends Factura {
     super.total,
     super.nombreCliente,
     super.rtnCliente,
+    super.nombreNegocio,
   });
 
   factory FacturaModelo.fromJson(Map<String, dynamic> json) => FacturaModelo(
@@ -31,6 +32,8 @@ class FacturaModelo extends Factura {
         fechaFactura: DateTime.parse(json['fecha_factura']),
         idCliente: json['id_cliente'],
         total: double.tryParse(json['total'].toString())!,
+        nombreNegocio: json['nombre_negocio'],
+        nombreCliente: json['nombre_cliente'],
       );
 
   Map<String, dynamic> toJson() => {
@@ -46,6 +49,8 @@ class FacturaModelo extends Factura {
         "fecha_factura": fechaFactura.toIso8601String(),
         "id_cliente": idCliente,
         "total": total,
+        "nombre_negocio": nombreNegocio,
+        "nombre_cliente": nombreCliente,
       };
 
   FacturaModelo copyWith({
@@ -63,6 +68,7 @@ class FacturaModelo extends Factura {
     double? total,
     String? nombreCliente,
     String? rtnCliente,
+    String? nombreNegocio,
   }) =>
       FacturaModelo(
         idFactura: idFactura ?? this.idFactura,
@@ -79,5 +85,6 @@ class FacturaModelo extends Factura {
         total: total ?? this.total,
         nombreCliente: nombreCliente ?? this.nombreCliente,
         rtnCliente: rtnCliente ?? this.rtnCliente,
+        nombreNegocio: nombreNegocio ?? this.nombreNegocio,
       );
 }

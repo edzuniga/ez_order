@@ -285,9 +285,8 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
                                                     ),
                                                     const Gap(15),
                                                     //Botón de opciones
-                                                    Align(
-                                                      alignment:
-                                                          Alignment.topRight,
+                                                    SizedBox(
+                                                      height: 80,
                                                       child: ElevatedButton(
                                                         onPressed: () async {
                                                           await _tryChangePedidoStatus(

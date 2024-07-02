@@ -305,7 +305,7 @@ class _DatosActualesFacturaViewState
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.white.withOpacity(0),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (_) => const Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,
@@ -318,7 +318,7 @@ class _DatosActualesFacturaViewState
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.white.withOpacity(0),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (_) => const Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,

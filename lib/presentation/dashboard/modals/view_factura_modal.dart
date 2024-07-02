@@ -13,7 +13,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:printing/printing.dart';
 import 'dart:convert';
 // ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as web;
+import 'package:universal_html/html.dart' as web;
 
 import 'package:ez_order_ezr/data/datos_factura_modelo.dart';
 import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
@@ -78,12 +78,18 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
       rangoInicialString += '0';
     }
     rangoInicialString += rangoInicialStr;
+    if (widget.factura.numFactura == 0) {
+      rangoInicialString = '00000000';
+    }
     String rangoFinalString = '';
     String rangoFinalStr = datosFacturacion.rangoFinal.toString();
     for (int i = 1; i <= 8 - rangoFinalStr.length; i++) {
       rangoFinalString += '0';
     }
     rangoFinalString += rangoFinalStr;
+    if (widget.factura.numFactura == 0) {
+      rangoFinalString = '00000000';
+    }
     //Format date
     String formattedDate =
         DateFormat.yMMMEd('es').format(widget.factura.fechaFactura);
@@ -94,6 +100,9 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
     String fechaLimiteEmision = datosFacturacion.fechaLimite != null
         ? datosFacturacion.fechaLimite.toString().substring(0, 10)
         : '';
+    if (widget.factura.numFactura == 0) {
+      fechaLimiteEmision = '';
+    }
 
 //--------tratamiento de las variables
     return Container(
@@ -129,10 +138,10 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                       ),
                     ),
                   ),
-                  datosFacturacion.nombreNegocio.isNotEmpty
+                  widget.factura.nombreNegocio != null
                       ? Center(
                           child: Text(
-                            datosFacturacion.nombreNegocio,
+                            widget.factura.nombreNegocio!,
                             style: GoogleFonts.archivoNarrow(
                               fontSize: 20,
                               color: Colors.black,
@@ -140,24 +149,24 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                           ),
                         )
                       : const SizedBox(),
-                  datosFacturacion.rtn.isNotEmpty
-                      ? Center(child: Text(datosFacturacion.rtn))
+                  widget.factura.rtn != null
+                      ? Center(child: Text(widget.factura.rtn!))
                       : const SizedBox(),
-                  datosFacturacion.direccion.isNotEmpty
+                  widget.factura.direccion != null
                       ? Center(
                           child: SizedBox(
                             child: Text(
-                              datosFacturacion.direccion,
+                              widget.factura.direccion!,
                               textAlign: TextAlign.center,
                             ),
                           ),
                         )
                       : const SizedBox(),
-                  datosFacturacion.correo.isNotEmpty
-                      ? Center(child: Text(datosFacturacion.correo))
+                  widget.factura.correo != null
+                      ? Center(child: Text(widget.factura.correo!))
                       : const SizedBox(),
-                  datosFacturacion.telefono.isNotEmpty
-                      ? Center(child: Text(datosFacturacion.telefono))
+                  widget.factura.telefono != null
+                      ? Center(child: Text(widget.factura.telefono!))
                       : const SizedBox(),
                   const Gap(10),
                   const Divider(
@@ -300,7 +309,9 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                   const Gap(10),
                   Center(
                     child: Text(
-                      'CAI ${datosFacturacion.cai}',
+                      widget.factura.numFactura == 0
+                          ? 'CAI '
+                          : 'CAI ${widget.factura.cai.toString()}',
                       style: const TextStyle(
                         fontSize: 12,
                       ),

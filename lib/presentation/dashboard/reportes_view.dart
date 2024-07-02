@@ -1,5 +1,5 @@
-import 'dart:convert';
 import 'dart:io';
+import 'package:ez_order_ezr/utils/web_specific.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:animate_do/animate_do.dart';
@@ -11,8 +11,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as web;
 
 import 'package:ez_order_ezr/presentation/providers/reportes/column_table.dart';
 import 'package:ez_order_ezr/utils/ingresos_table_pdf.dart';
@@ -591,8 +589,10 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                                             key: _shareButtonKey,
                                             onPressed: () async {
                                               if (kIsWeb) {
-                                                await _exportDataTableToPDFAndDownload(
-                                                    rowsTable);
+                                                await exportDataTableToPDFAndDownload(
+                                                    rowsTable,
+                                                    _initialDate!,
+                                                    _finalDate!);
                                               } else {
                                                 await _exportDataTableToPDF(
                                                     rowsTable);
@@ -830,19 +830,6 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
         );
       }
     }
-  }
-
-  Future<void> _exportDataTableToPDFAndDownload(List<DataRow> rows) async {
-    final pdfData =
-        await generateIngresosTablePdf(rows, _initialDate!, _finalDate!);
-
-    List<int> fileInts = List.from(pdfData);
-    // Crear un enlace y hacer clic para descargar el archivo
-    final url =
-        "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(fileInts)}";
-    web.AnchorElement(href: url)
-      ..setAttribute("download", "${DateTime.now().millisecondsSinceEpoch}.pdf")
-      ..click();
   }
 //--------------------------Función para crear un pdf
 }

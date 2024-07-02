@@ -312,7 +312,13 @@ class SupabaseManagement extends _$SupabaseManagement {
         await state.from('pedidos_items').insert(detalleMap);
       }
 
-      //*NUEVO - INESRTAR FACTURA
+      //Obtener el nombre del cliente (para idCliente != 1)
+      String nombreCliente = 'Consumidor Final';
+      if (pedido.idCliente != 1) {
+        nombreCliente = await getClienteName(pedido.idCliente);
+      }
+
+      //*NUEVO - INSERTAR FACTURA
       final datosFactura = ref.read(datosFacturaManagerProvider);
       FacturaModelo factura = FacturaModelo(
         idFactura: 0,
@@ -327,6 +333,9 @@ class SupabaseManagement extends _$SupabaseManagement {
         fechaFactura: pedido.createdAt,
         idCliente: pedido.idCliente,
         total: pedido.total,
+        nombreNegocio: datosFactura.nombreNegocio,
+        nombreCliente:
+            pedido.idCliente == 1 ? 'Consumidor final' : nombreCliente,
       );
       if (datosFactura.idDatosFactura != 0) {
         //----revisar si hay datos de factura
@@ -363,9 +372,13 @@ class SupabaseManagement extends _$SupabaseManagement {
 
   Future<String> getClienteName(int clienteId) async {
     try {
-      final res =
-          await state.from('clientes').select().eq('id_cliente', clienteId);
-      String nombreCliente = res.first['nombre_cliente'];
+      final res = await state
+          .from('clientes')
+          .select()
+          .eq('id_cliente', clienteId)
+          .limit(1)
+          .single();
+      String nombreCliente = res['nombre_cliente'];
       return nombreCliente;
     } on PostgrestException catch (e) {
       return e.message;
@@ -427,6 +440,25 @@ class SupabaseManagement extends _$SupabaseManagement {
             ref.read(userPublicDataProvider)['id_restaurante'].toString());
         final res = await state
             .from('menus')
+            .select()
+            .eq('id_restaurante', userIdRestaurante)
+            .count(CountOption.exact);
+        return res.count;
+      }
+      return 0;
+    } on PostgrestException catch (e) {
+      throw Exception(
+          'Error al contar los elementos del catálogo: ${e.message}');
+    }
+  }
+
+  Future<int> countClientes() async {
+    try {
+      if (ref.read(userPublicDataProvider)['id_restaurante'] != null) {
+        int userIdRestaurante = int.parse(
+            ref.read(userPublicDataProvider)['id_restaurante'].toString());
+        final res = await state
+            .from('clientes')
             .select()
             .eq('id_restaurante', userIdRestaurante)
             .count(CountOption.exact);

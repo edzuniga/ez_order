@@ -28,7 +28,7 @@ class _TicketModalState extends ConsumerState<TicketModal> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 250,
+      height: 240,
       width: 350,
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(

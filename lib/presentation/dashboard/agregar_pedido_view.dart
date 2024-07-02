@@ -1,6 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:ez_order_ezr/presentation/dashboard/modals/update_menu_from_web_modal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +8,7 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/presentation/dashboard/modals/update_menu_from_web_modal.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/add_menu_from_web_modal.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/add_categoria_modal.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/update_categoria_modal.dart';
@@ -47,6 +47,25 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _pedidoListController = ScrollController();
   int idCat = 0;
+  final ScrollController _categoriasController = ScrollController();
+
+  //Navegación con el controlador de las categorías
+  void _scrollLeft() {
+    _categoriasController.animateTo(
+      _categoriasController.offset - 200,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.ease,
+    );
+  }
+
+  void _scrollRight() {
+    _categoriasController.animateTo(
+      _categoriasController.offset + 200,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.ease,
+    );
+  }
+  //Navegación con el controlador de las categorías
 
   @override
   void initState() {
@@ -143,11 +162,12 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
 
   //For WEB displays ABOVE 1000 px (width) and Tablets
   Row bigBody(
-      List<Widget> listadoBotones,
-      ClienteModelo clienteActual,
-      List<MenuItemModel> listadoPedido,
-      List<PedidoDetalleModel> pedidoDetallesList,
-      PedidoModel pedidoActualInfo) {
+    List<Widget> listadoBotones,
+    ClienteModelo clienteActual,
+    List<MenuItemModel> listadoPedido,
+    List<PedidoDetalleModel> pedidoDetallesList,
+    PedidoModel pedidoActualInfo,
+  ) {
     return Row(
       children: [
         //Área de menú
@@ -207,37 +227,89 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                   color: Color(0xFFE0E3E7),
                 ),
                 const Gap(5),
+                //Listado de categorías
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                _filtrarPorCategoria(
-                                    null); //Mostrar todos los productos
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: idCat == 0
-                                    ? AppColors.kGeneralPrimaryOrange
-                                    : null,
+                      child: Stack(
+                        children: [
+                          SizedBox(
+                            height: 45,
+                            child: SingleChildScrollView(
+                              physics: const ClampingScrollPhysics(),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 50),
+                              controller: _categoriasController,
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      _filtrarPorCategoria(
+                                          null); //Mostrar todos los productos
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: idCat == 0
+                                          ? AppColors.kGeneralPrimaryOrange
+                                          : null,
+                                    ),
+                                    child: Text(
+                                      'Todo',
+                                      style: TextStyle(
+                                        color: idCat == 0
+                                            ? Colors.white
+                                            : Colors.black,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  const Gap(10),
+                                  ...listadoBotones,
+                                ],
                               ),
-                              child: Text(
-                                'Todo',
-                                style: TextStyle(
-                                  color:
-                                      idCat == 0 ? Colors.white : Colors.black,
-                                  fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Positioned(
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: IconButton(
+                                onPressed: _scrollLeft,
+                                style: IconButton.styleFrom(
+                                  side: const BorderSide(
+                                      color: AppColors.kGeneralPrimaryOrange),
+                                  backgroundColor: const Color(0xFFF6F6F6),
+                                ),
+                                icon: const Icon(
+                                  Icons.arrow_left,
+                                  color: Colors.black,
                                 ),
                               ),
                             ),
-                            const Gap(10),
-                            ...listadoBotones,
-                          ],
-                        ),
+                          ),
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: IconButton(
+                                onPressed: _scrollRight,
+                                style: IconButton.styleFrom(
+                                    side: const BorderSide(
+                                        color: AppColors.kGeneralPrimaryOrange),
+                                    backgroundColor: const Color(0xFFF6F6F6)),
+                                icon: const Icon(
+                                  Icons.arrow_right,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const Gap(5),
@@ -267,7 +339,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                     ),
                   ],
                 ),
-                const Gap(5),
+                const Gap(10),
                 //ÁREA DE MENÚ DINÁMICO
                 Expanded(
                   child: StreamBuilder(
@@ -2267,7 +2339,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.white.withOpacity(0),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (_) => const Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,
@@ -2280,7 +2352,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.white.withOpacity(0),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (_) => const Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,
@@ -2293,7 +2365,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.white.withOpacity(0),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (_) => const Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,
@@ -2306,7 +2378,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.white.withOpacity(0),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (_) => const Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,
@@ -2321,7 +2393,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
       bool? res = await showDialog(
         context: context,
         barrierDismissible: false,
-        barrierColor: Colors.white.withOpacity(0),
+        barrierColor: Colors.black.withOpacity(0.5),
         builder: (_) => const Dialog(
           elevation: 8,
           backgroundColor: Colors.transparent,
@@ -2380,7 +2452,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.white.withOpacity(0),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (_) => Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,
@@ -2393,7 +2465,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.white.withOpacity(0),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (_) => Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,
@@ -2406,7 +2478,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.white.withOpacity(0),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (_) => Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,
@@ -2456,7 +2528,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.white.withOpacity(0),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (_) => const Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,
@@ -2469,7 +2541,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.white.withOpacity(0),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (_) => const Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,
@@ -2482,7 +2554,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.white.withOpacity(0),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (_) => Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,

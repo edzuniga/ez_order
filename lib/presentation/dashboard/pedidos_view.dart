@@ -1,6 +1,8 @@
 import 'package:ez_order_ezr/presentation/dashboard/modals/borrar_pedido_modal.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,6 +32,7 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
   late Stream<List<Map<String, dynamic>>> _pedidosStreamEntregados;
   int _countPedidos = 0;
   int _countMenu = 0;
+  int _countClientes = 0;
   late List<GlobalKey> _buttonKeys;
 
   @override
@@ -71,15 +74,17 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
             pedido['en_preparacion'] == false;
       }).toList();
     });
-    countMenuItemsyPedidos();
+    countMenuSimpleStatistics();
   }
 
-  Future<void> countMenuItemsyPedidos() async {
+  Future<void> countMenuSimpleStatistics() async {
     _countMenu =
         await ref.read(supabaseManagementProvider.notifier).countMenuItems();
     _countPedidos = await ref
         .read(supabaseManagementProvider.notifier)
         .countPedidosDelDia();
+    _countClientes =
+        await ref.read(supabaseManagementProvider.notifier).countClientes();
     setState(() {});
   }
 
@@ -102,7 +107,7 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    //Containers con estadísticas senciilas del día
+                    //Containers con estadísticas sencillas del día
                     Wrap(
                       spacing: 8.0,
                       runSpacing: 8.0,
@@ -116,6 +121,11 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                           estadistica: '$_countPedidos',
                           descripcion: 'Número de pedidos',
                           icono: Icons.shopping_bag_outlined,
+                        ),
+                        EstadisticaContainer(
+                          estadistica: '$_countClientes',
+                          descripcion: 'Clientes registrados',
+                          icono: Icons.group,
                         ),
                       ],
                     ),
@@ -483,127 +493,79 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                                                     ),
                                                   ),
                                                   //Botón para las acciones del pedido
-                                                  Align(
-                                                    alignment:
-                                                        Alignment.topRight,
-                                                    child: ElevatedButton(
-                                                      key: _buttonKeys[index],
-                                                      onPressed: () {
-                                                        //-----obtener la posición del botón
-                                                        final RenderBox button =
-                                                            _buttonKeys[index]
-                                                                    .currentContext!
-                                                                    .findRenderObject()
-                                                                as RenderBox;
-                                                        final RenderBox
-                                                            overlay =
-                                                            Overlay.of(context)
-                                                                    .context
-                                                                    .findRenderObject()
-                                                                as RenderBox;
-                                                        final RelativeRect
-                                                            position =
-                                                            RelativeRect
-                                                                .fromRect(
-                                                          Rect.fromPoints(
-                                                            button.localToGlobal(
-                                                                Offset.zero,
-                                                                ancestor:
-                                                                    overlay),
-                                                            button.localToGlobal(
-                                                                button.size
-                                                                    .bottomRight(
-                                                                        Offset
-                                                                            .zero),
-                                                                ancestor:
-                                                                    overlay),
+                                                  Column(
+                                                    children: [
+                                                      ElevatedButton(
+                                                        key: _buttonKeys[index],
+                                                        onPressed: () async {
+                                                          await _tryChangePedidoStatus(
+                                                              pedido
+                                                                  .uuidPedido!);
+                                                        },
+                                                        style: ElevatedButton
+                                                            .styleFrom(
+                                                          tapTargetSize:
+                                                              MaterialTapTargetSize
+                                                                  .shrinkWrap,
+                                                          elevation: 0.0,
+                                                          backgroundColor: AppColors
+                                                              .kGeneralPrimaryOrange,
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        4.0),
                                                           ),
-                                                          Offset.zero &
-                                                              overlay.size,
-                                                        );
-                                                        //-----obtener la posición del botón
-
-                                                        //Mostrar el PopupMenu
-                                                        showMenu(
-                                                          context: context,
-                                                          position:
-                                                              position, // Posición del menú
-                                                          items: <PopupMenuEntry<
-                                                              int>>[
-                                                            /* PopupMenuItem(
-                                                              value: 1,
-                                                              onTap: () {},
-                                                              child: const Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .spaceEvenly,
-                                                                children: [
-                                                                  Icon(Icons
-                                                                      .edit),
-                                                                  Gap(5),
-                                                                  Text(
-                                                                      'Editar'),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            const PopupMenuDivider(),*/
-                                                            PopupMenuItem(
-                                                              value: 2,
-                                                              onTap: () async {
-                                                                await _tryBorrarPedido(
-                                                                    pedido
-                                                                        .uuidPedido!);
-                                                              },
-                                                              child: const Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .spaceEvenly,
-                                                                children: [
-                                                                  Icon(Icons
-                                                                      .delete_forever),
-                                                                  Gap(5),
-                                                                  Text(
-                                                                      'Cancelar'),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ).then((value) {
-                                                          // Manejar la selección
-                                                          if (value != null) {
-                                                            // Acción en base al valor seleccionado
-                                                          }
-                                                        });
-                                                      },
-                                                      style: ElevatedButton
-                                                          .styleFrom(
-                                                        tapTargetSize:
-                                                            MaterialTapTargetSize
-                                                                .shrinkWrap,
-                                                        elevation: 0.0,
-                                                        backgroundColor:
-                                                            const Color(
-                                                                0xFFFFDFD0),
-                                                        shape:
-                                                            RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      4.0),
+                                                        ),
+                                                        child: Text(
+                                                          'Entregar',
+                                                          style:
+                                                              GoogleFonts.inter(
+                                                            color: Colors.white,
+                                                            fontSize: 12.0,
+                                                            letterSpacing: 0.0,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                          ),
                                                         ),
                                                       ),
-                                                      child: Text(
-                                                        'Opciones',
-                                                        style:
-                                                            GoogleFonts.inter(
-                                                          color: Colors.black,
-                                                          fontSize: 12.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.w700,
+                                                      const Gap(10),
+                                                      ElevatedButton(
+                                                        onPressed: () async {
+                                                          await _tryBorrarPedido(
+                                                              pedido
+                                                                  .uuidPedido!);
+                                                        },
+                                                        style: ElevatedButton
+                                                            .styleFrom(
+                                                          tapTargetSize:
+                                                              MaterialTapTargetSize
+                                                                  .shrinkWrap,
+                                                          elevation: 0.0,
+                                                          backgroundColor:
+                                                              Colors.black,
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        4.0),
+                                                          ),
+                                                        ),
+                                                        child: Text(
+                                                          'Cancelar',
+                                                          style:
+                                                              GoogleFonts.inter(
+                                                            color: Colors.white,
+                                                            fontSize: 12.0,
+                                                            letterSpacing: 0.0,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
+                                                    ],
                                                   ),
                                                 ],
                                               ),
@@ -917,12 +879,62 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.white.withOpacity(0),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (_) => Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,
         child: BorrarPedidoModal(uuIdPedido: uuIdPedido),
       ),
     );
+  }
+
+  Future<void> _tryChangePedidoStatus(String uuIdPedido) async {
+    await ref
+        .read(supabaseManagementProvider.notifier)
+        .changePedidoStatus(uuIdPedido)
+        .then((message) {
+      if (message != 'success') {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            'Ocurrió un error al intentar entregar la orden -> $message',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ));
+      } else {
+        if (kIsWeb) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text(
+              'Pedido entregado exitosamente!!',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ));
+        } else {
+          Fluttertoast.cancel();
+          Fluttertoast.showToast(
+            msg: 'Pedido entregado exitosamente!!',
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 3,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0,
+            webPosition: 'center',
+            webBgColor: 'green',
+          );
+        }
+      }
+    });
   }
 }
