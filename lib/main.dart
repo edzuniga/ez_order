@@ -16,6 +16,7 @@ Future<void> main() async {
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
+    DeviceOrientation.portraitUp,
   ]);
   await dotenv.load(fileName: 'assets/dotENV.env');
   //Supabase initialize
