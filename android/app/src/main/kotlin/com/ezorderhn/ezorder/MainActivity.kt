@@ -1,4 +1,4 @@
-package com.example.ez_order_ezr
+package com.ezorderhn.ezorder
 
 import io.flutter.embedding.android.FlutterActivity
 
