@@ -26,6 +26,8 @@ class _CocinaAppBarState extends ConsumerState<CocinaAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.of(context).size;
+
     return Container(
       width: double.infinity,
       height: 60,
@@ -43,16 +45,18 @@ class _CocinaAppBarState extends ConsumerState<CocinaAppBar> {
             ),
           ),
           const Spacer(),
-          Text(
-            'Pedidos por entregar',
-            style: GoogleFonts.roboto(
-              color: AppColors.kTextPrimaryBlack,
-              fontSize: 18.0,
-              letterSpacing: 0.0,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const Spacer(),
+          screenSize.width < 360
+              ? const SizedBox()
+              : Text(
+                  'Pedidos por entregar',
+                  style: GoogleFonts.roboto(
+                    color: AppColors.kTextPrimaryBlack,
+                    fontSize: 18.0,
+                    letterSpacing: 0.0,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+          screenSize.width < 360 ? const SizedBox() : const Spacer(),
           const Gap(10),
           (!kIsWeb)
               ? IconButton(

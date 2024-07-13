@@ -83,7 +83,7 @@ class _FacturasHistoricasViewState
                   ),
                 ),
                 SizedBox(
-                  width: 250,
+                  width: 180,
                   child: TextFormField(
                     enabled: false,
                     controller: _fecha,
@@ -147,7 +147,7 @@ class _FacturasHistoricasViewState
                       ),
                     ),
                     child: const Text(
-                      'Listar facturas',
+                      'Listar',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -155,6 +155,7 @@ class _FacturasHistoricasViewState
                     )),
               ],
             ),
+            const Gap(5),
             _tieneCargadasFechasHistoricas
                 ? Expanded(
                     child: FutureBuilder(
@@ -264,6 +265,7 @@ class _FacturasHistoricasViewState
                                               ],
                                             ),
                                           ),
+                                          const Gap(5),
                                           //Cliente y total
                                           Expanded(
                                             child: Column(

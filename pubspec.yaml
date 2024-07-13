@@ -92,4 +92,5 @@ flutter:
     - assets/lotties/
     - assets/svg/
     - assets/icon/
+    - assets/png/
     - assets/dotENV.env

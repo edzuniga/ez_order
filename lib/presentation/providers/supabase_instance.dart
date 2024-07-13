@@ -497,6 +497,74 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  Future<int> countPedidosDelDiaEnPreparacion() async {
+    final today = DateTime.now();
+    final startOfDay = DateTime(today.year, today.month, today.day);
+
+    try {
+      if (ref.read(userPublicDataProvider)['id_restaurante'] != null) {
+        int userIdRestaurante = int.parse(
+            ref.read(userPublicDataProvider)['id_restaurante'].toString());
+        List<Map<String, dynamic>> res = await state
+            .from('pedidos')
+            .select()
+            .eq('id_restaurante', userIdRestaurante)
+            .gte(
+              'created_at',
+              startOfDay,
+            );
+        if (res.isNotEmpty) {
+          List<int> cuentaEnPreparacion = [];
+          for (var element in res) {
+            if (element['en_preparacion'] == true) {
+              cuentaEnPreparacion.add(1);
+            }
+          }
+          return cuentaEnPreparacion.length;
+        }
+        return 0;
+      }
+      return 0;
+    } on PostgrestException catch (e) {
+      throw Exception(
+          'Error al contar los elementos del catálogo: ${e.message}');
+    }
+  }
+
+  Future<int> countPedidosDelDiaEntregados() async {
+    final today = DateTime.now();
+    final startOfDay = DateTime(today.year, today.month, today.day);
+
+    try {
+      if (ref.read(userPublicDataProvider)['id_restaurante'] != null) {
+        int userIdRestaurante = int.parse(
+            ref.read(userPublicDataProvider)['id_restaurante'].toString());
+        List<Map<String, dynamic>> res = await state
+            .from('pedidos')
+            .select()
+            .eq('id_restaurante', userIdRestaurante)
+            .gte(
+              'created_at',
+              startOfDay,
+            );
+        if (res.isNotEmpty) {
+          List<int> cuentaEnPreparacion = [];
+          for (var element in res) {
+            if (element['en_preparacion'] == false) {
+              cuentaEnPreparacion.add(1);
+            }
+          }
+          return cuentaEnPreparacion.length;
+        }
+        return 0;
+      }
+      return 0;
+    } on PostgrestException catch (e) {
+      throw Exception(
+          'Error al contar los elementos del catálogo: ${e.message}');
+    }
+  }
+
   Future<String> getNombreMenuItem(int idMenu) async {
     try {
       final res = await state

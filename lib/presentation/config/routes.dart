@@ -11,4 +11,8 @@ class Routes {
 
   //Cocina Route
   static const String cocina = 'cocina';
+
+  //En preparación Route
+  static const String enPreparacion = 'en_preparacion';
+  static const String entregados = 'pedidos_entregados';
 }

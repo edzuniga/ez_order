@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:ez_order_ezr/presentation/widgets/mobile_appbar.dart';
 import 'package:ez_order_ezr/presentation/config/routes.dart';
 import 'package:ez_order_ezr/presentation/providers/dashboard_view.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
@@ -50,7 +52,19 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
 
   @override
   Widget build(BuildContext context) {
+    Orientation orientation = MediaQuery.of(context).orientation;
+    bool chequeoPortraitYNoWeb =
+        (!kIsWeb && orientation == Orientation.portrait);
     final Widget view = ref.watch(dashboardViewProvider);
+
+    if (chequeoPortraitYNoWeb) {
+      return mobileAndPortraitView(view);
+    }
+    return webAndLandscapeView(view);
+  }
+
+  //View para WEB y Landscape en general
+  Widget webAndLandscapeView(Widget view) {
     return Container(
       height: double.infinity,
       width: double.infinity,
@@ -80,6 +94,24 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
           ),
           bottomNavigationBar: const DashboardBottomNavigationBar(),
         ),
+      ),
+    );
+  }
+
+  //View para MÓVILES y Portrait
+  Widget mobileAndPortraitView(Widget view) {
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const MobileAppBar(),
+            Expanded(
+              child: view,
+            ),
+          ],
+        ),
+        bottomNavigationBar: const DashboardBottomNavigationBar(),
       ),
     );
   }

@@ -119,6 +119,7 @@ class _FacturasDeHoyViewState extends ConsumerState<FacturasDeHoyView> {
                               ],
                             ),
                           ),
+                          const Gap(5),
                           //Cliente y total
                           Expanded(
                             child: Column(

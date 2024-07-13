@@ -26,7 +26,7 @@ class MensajeStatusView extends ConsumerWidget {
     }
 
     return Container(
-      height: 150,
+      height: 100,
       padding: const EdgeInsets.symmetric(
         vertical: 25,
         horizontal: 15,

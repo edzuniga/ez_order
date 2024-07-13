@@ -55,6 +55,8 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
 
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.of(context).size;
+
     return Container(
       width: double.infinity,
       height: double.infinity,
@@ -77,272 +79,448 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
                 const CocinaAppBar(),
                 const Gap(8),
                 //listado de pedidos pendientes
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(10.0),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: StreamBuilder(
-                      stream: _pedidosStream,
-                      builder: (BuildContext ctx,
-                          AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CircularProgressIndicator(),
-                                Text('Cargando datos, por favor espere.'),
-                              ],
-                            ),
-                          );
-                        }
-
-                        if (snapshot.hasError) {
-                          return const Center(
-                            child: Text(
-                                'Ocurrió un error al querer cargar los datos!!'),
-                          );
-                        }
-
-                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return const Center(
-                            child: Text('Aún no hay pedidos!!'),
-                          );
-                        } else {
-                          //Obtener listado de pedidos
-                          List<PedidoModel> listadoPedidos = snapshot.data!
-                              .map((pedido) => PedidoModel.fromJson(pedido))
-                              .toList();
-                          return ListView.builder(
-                            physics: const ClampingScrollPhysics(),
-                            itemCount: listadoPedidos.length,
-                            itemBuilder: (ctx, index) {
-                              PedidoModel pedido = listadoPedidos[index];
-                              return FutureBuilder(
-                                future: Future.wait([
-                                  _obtenerDetallePedidoConNombreMenu(
-                                      pedido.uuidPedido!),
-                                  _obtenerNombreCliente(pedido.idCliente)
-                                ]),
-                                builder: (_, AsyncSnapshot<dynamic> s) {
-                                  if (s.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return const Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  }
-
-                                  if (s.hasError) {
-                                    return const Center(
-                                      child: Text('Ocurrió un error!!'),
-                                    );
-                                  }
-
-                                  if (!s.hasData) {
-                                    return const Center(
-                                      child: Text('Sin datos!!'),
-                                    );
-                                  } else {
-                                    List<Map<String, dynamic>>
-                                        detallesConNombreMenu = s.data[0];
-                                    String nombreCliente = s.data[1];
-                                    String textoDetallePedido =
-                                        detallesConNombreMenu.map((detalleMap) {
-                                      PedidoDetalleModel detalle =
-                                          detalleMap['detalle'];
-                                      String nombreMenu =
-                                          detalleMap['nombreMenu'];
-                                      if (nombreMenu != '') {
-                                        return '${detalle.cantidad} $nombreMenu';
-                                      } else {
-                                        return '';
-                                      }
-                                    }).join(' / ');
-                                    return textoDetallePedido != ''
-                                        ? Column(
-                                            children: [
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.all(5),
-                                                //height: 91.0,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                  border: Border.all(
-                                                    color:
-                                                        const Color(0xFFE0E3E7),
-                                                    width: 1.0,
-                                                  ),
-                                                ),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.max,
-                                                  children: [
-                                                    //Imagen genérica de pedido
-                                                    ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              8),
-                                                      child: SizedBox(
-                                                        width: 100.0,
-                                                        height: 81.0,
-                                                        child: Image.asset(
-                                                          'assets/images/pedidos.jpg',
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    const Gap(5),
-                                                    Expanded(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        mainAxisSize:
-                                                            MainAxisSize.max,
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          Text(
-                                                            '# ${pedido.numPedido} -> Nombre del cliente: $nombreCliente',
-                                                            style: GoogleFonts
-                                                                .inter(
-                                                              fontSize: 14,
-                                                              letterSpacing:
-                                                                  0.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w700,
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                            width:
-                                                                double.infinity,
-                                                            child: Text(
-                                                              textoDetallePedido,
-                                                              style: GoogleFonts
-                                                                  .inter(
-                                                                fontSize: 12,
-                                                                letterSpacing:
-                                                                    0.0,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: Container(
-                                                        height: 80,
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(10),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                                border:
-                                                                    Border.all(
-                                                                  color: Colors
-                                                                      .black26,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            8)),
-                                                        child: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            const Text(
-                                                              'Nota adicional',
-                                                              style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                fontSize: 12,
-                                                              ),
-                                                            ),
-                                                            Text((pedido.notaAdicional !=
-                                                                        null) &&
-                                                                    pedido.notaAdicional !=
-                                                                        'null'
-                                                                ? '${pedido.notaAdicional}'
-                                                                : 'sin nota adicional'),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    const Gap(15),
-                                                    //Botón de opciones
-                                                    SizedBox(
-                                                      height: 80,
-                                                      child: ElevatedButton(
-                                                        onPressed: () async {
-                                                          await _tryChangePedidoStatus(
-                                                              pedido
-                                                                  .uuidPedido!);
-                                                        },
-                                                        style: ElevatedButton
-                                                            .styleFrom(
-                                                          tapTargetSize:
-                                                              MaterialTapTargetSize
-                                                                  .shrinkWrap,
-                                                          elevation: 0.0,
-                                                          backgroundColor:
-                                                              const Color(
-                                                                  0xFFFFDFD0),
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        4.0),
-                                                          ),
-                                                        ),
-                                                        child: Text(
-                                                          'Entregar',
-                                                          style:
-                                                              GoogleFonts.inter(
-                                                            color: Colors.black,
-                                                            fontSize: 12.0,
-                                                            letterSpacing: 0.0,
-                                                            fontWeight:
-                                                                FontWeight.w700,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              const Gap(8),
-                                            ],
-                                          )
-                                        : const SizedBox();
-                                  }
-                                },
-                              );
-                            },
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                ),
+                screenSize.width <= 750 ? portraitList() : landscapeList(),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  //Listado para width superior a 749 px
+  Expanded landscapeList() {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(10.0),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: StreamBuilder(
+          stream: _pedidosStream,
+          builder: (BuildContext ctx,
+              AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    Text('Cargando datos, por favor espere.'),
+                  ],
+                ),
+              );
+            }
+
+            if (snapshot.hasError) {
+              return const Center(
+                child: Text('Ocurrió un error al querer cargar los datos!!'),
+              );
+            }
+
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(
+                child: Text('Aún no hay pedidos!!'),
+              );
+            } else {
+              //Obtener listado de pedidos
+              List<PedidoModel> listadoPedidos = snapshot.data!
+                  .map((pedido) => PedidoModel.fromJson(pedido))
+                  .toList();
+              return ListView.builder(
+                physics: const ClampingScrollPhysics(),
+                itemCount: listadoPedidos.length,
+                itemBuilder: (ctx, index) {
+                  PedidoModel pedido = listadoPedidos[index];
+                  return FutureBuilder(
+                    future: Future.wait([
+                      _obtenerDetallePedidoConNombreMenu(pedido.uuidPedido!),
+                      _obtenerNombreCliente(pedido.idCliente)
+                    ]),
+                    builder: (_, AsyncSnapshot<dynamic> s) {
+                      if (s.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+
+                      if (s.hasError) {
+                        return const Center(
+                          child: Text('Ocurrió un error!!'),
+                        );
+                      }
+
+                      if (!s.hasData) {
+                        return const Center(
+                          child: Text('Sin datos!!'),
+                        );
+                      } else {
+                        List<Map<String, dynamic>> detallesConNombreMenu =
+                            s.data[0];
+                        String nombreCliente = s.data[1];
+                        String textoDetallePedido =
+                            detallesConNombreMenu.map((detalleMap) {
+                          PedidoDetalleModel detalle = detalleMap['detalle'];
+                          String nombreMenu = detalleMap['nombreMenu'];
+                          if (nombreMenu != '') {
+                            return '${detalle.cantidad} $nombreMenu';
+                          } else {
+                            return '';
+                          }
+                        }).join(' / ');
+                        return textoDetallePedido != ''
+                            ? Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(5),
+                                    //height: 91.0,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      border: Border.all(
+                                        color: const Color(0xFFE0E3E7),
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        //Imagen genérica de pedido
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          child: SizedBox(
+                                            width: 100.0,
+                                            height: 81.0,
+                                            child: Image.asset(
+                                              'assets/images/pedidos.jpg',
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                        const Gap(5),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                '# ${pedido.numPedido} -> Nombre del cliente: $nombreCliente',
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 14,
+                                                  letterSpacing: 0.0,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: double.infinity,
+                                                child: Text(
+                                                  textoDetallePedido,
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 12,
+                                                    letterSpacing: 0.0,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const Gap(5),
+                                        Expanded(
+                                          child: Container(
+                                            //height: 80,
+                                            padding: const EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color: Colors.black26,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8)),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                const Text(
+                                                  'Nota adicional',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                                Text((pedido.notaAdicional !=
+                                                            null) &&
+                                                        pedido.notaAdicional !=
+                                                            'null'
+                                                    ? '${pedido.notaAdicional}'
+                                                    : 'sin nota adicional'),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        const Gap(5),
+                                        //Botón de opciones
+                                        SizedBox(
+                                          height: 80,
+                                          child: ElevatedButton(
+                                            onPressed: () async {
+                                              await _tryChangePedidoStatus(
+                                                  pedido.uuidPedido!);
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              tapTargetSize:
+                                                  MaterialTapTargetSize
+                                                      .shrinkWrap,
+                                              elevation: 0.0,
+                                              backgroundColor:
+                                                  const Color(0xFFFFDFD0),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(4.0),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              'Entregar',
+                                              style: GoogleFonts.inter(
+                                                color: Colors.black,
+                                                fontSize: 12.0,
+                                                letterSpacing: 0.0,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Gap(8),
+                                ],
+                              )
+                            : const SizedBox();
+                      }
+                    },
+                  );
+                },
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+//Listado para width inferior a 750 px
+  Expanded portraitList() {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(10.0),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: StreamBuilder(
+          stream: _pedidosStream,
+          builder: (BuildContext ctx,
+              AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    Text('Cargando datos, por favor espere.'),
+                  ],
+                ),
+              );
+            }
+
+            if (snapshot.hasError) {
+              return const Center(
+                child: Text('Ocurrió un error al querer cargar los datos!!'),
+              );
+            }
+
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(
+                child: Text('Aún no hay pedidos!!'),
+              );
+            } else {
+              //Obtener listado de pedidos
+              List<PedidoModel> listadoPedidos = snapshot.data!
+                  .map((pedido) => PedidoModel.fromJson(pedido))
+                  .toList();
+              return ListView.builder(
+                physics: const ClampingScrollPhysics(),
+                itemCount: listadoPedidos.length,
+                itemBuilder: (ctx, index) {
+                  PedidoModel pedido = listadoPedidos[index];
+                  return FutureBuilder(
+                    future: Future.wait([
+                      _obtenerDetallePedidoConNombreMenu(pedido.uuidPedido!),
+                      _obtenerNombreCliente(pedido.idCliente)
+                    ]),
+                    builder: (_, AsyncSnapshot<dynamic> s) {
+                      if (s.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+
+                      if (s.hasError) {
+                        return const Center(
+                          child: Text('Ocurrió un error!!'),
+                        );
+                      }
+
+                      if (!s.hasData) {
+                        return const Center(
+                          child: Text('Sin datos!!'),
+                        );
+                      } else {
+                        List<Map<String, dynamic>> detallesConNombreMenu =
+                            s.data[0];
+                        String nombreCliente = s.data[1];
+                        String textoDetallePedido =
+                            detallesConNombreMenu.map((detalleMap) {
+                          PedidoDetalleModel detalle = detalleMap['detalle'];
+                          String nombreMenu = detalleMap['nombreMenu'];
+                          if (nombreMenu != '') {
+                            return '${detalle.cantidad} $nombreMenu';
+                          } else {
+                            return '';
+                          }
+                        }).join(' / ');
+                        return textoDetallePedido != ''
+                            ? Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(5),
+                                    //height: 91.0,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      border: Border.all(
+                                        color: const Color(0xFFE0E3E7),
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                '# ${pedido.numPedido} -> Nombre del cliente: $nombreCliente',
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 14,
+                                                  letterSpacing: 0.0,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: double.infinity,
+                                                child: Text(
+                                                  textoDetallePedido,
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 12,
+                                                    letterSpacing: 0.0,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const Gap(5),
+                                        Expanded(
+                                          child: Container(
+                                            //height: 80,
+                                            padding: const EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color: Colors.black26,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8)),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                const Text(
+                                                  'Nota adicional',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                                Text((pedido.notaAdicional !=
+                                                            null) &&
+                                                        pedido.notaAdicional !=
+                                                            'null'
+                                                    ? '${pedido.notaAdicional}'
+                                                    : 'sin nota adicional'),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        const Gap(5),
+                                        //Botón de opciones
+                                        SizedBox(
+                                          height: 80,
+                                          child: ElevatedButton(
+                                            onPressed: () async {
+                                              await _tryChangePedidoStatus(
+                                                  pedido.uuidPedido!);
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              tapTargetSize:
+                                                  MaterialTapTargetSize
+                                                      .shrinkWrap,
+                                              elevation: 0.0,
+                                              backgroundColor:
+                                                  const Color(0xFFFFDFD0),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(4.0),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              'Entregar',
+                                              style: GoogleFonts.inter(
+                                                color: Colors.black,
+                                                fontSize: 12.0,
+                                                letterSpacing: 0.0,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Gap(8),
+                                ],
+                              )
+                            : const SizedBox();
+                      }
+                    },
+                  );
+                },
+              );
+            }
+          },
         ),
       ),
     );

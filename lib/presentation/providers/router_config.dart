@@ -1,9 +1,11 @@
-import 'package:ez_order_ezr/presentation/providers/users_data.dart';
+import 'package:ez_order_ezr/presentation/dashboard/pedidos/en_preparacion_page.dart';
+import 'package:ez_order_ezr/presentation/dashboard/pedidos/entregados_page.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/auth/auth_layout.dart';
 import 'package:ez_order_ezr/presentation/auth/login_view.dart';
 import 'package:ez_order_ezr/presentation/auth/recovery_view.dart';
@@ -127,6 +129,30 @@ GoRouter router(Ref ref) {
         path: '/cocina',
         pageBuilder: (context, state) => CustomTransitionPage(
           child: const CocinaPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        ),
+      ),
+      GoRoute(
+        name: Routes.enPreparacion,
+        path: '/en_preparacion',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: const EnPreparacionPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        ),
+      ),
+      GoRoute(
+        name: Routes.entregados,
+        path: '/pedidos_entregados',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: const EntregadosPage(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>
               FadeTransition(
             opacity: animation,
