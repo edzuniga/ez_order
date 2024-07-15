@@ -81,6 +81,11 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
     countMenuSimpleStatistics();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future<void> countMenuSimpleStatistics() async {
     _countMenu =
         await ref.read(supabaseManagementProvider.notifier).countMenuItems();

@@ -1,4 +1,3 @@
-import 'package:ez_order_ezr/presentation/providers/menus_providers/descuento_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,16 +5,18 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:ez_order_ezr/presentation/providers/menus_providers/descuento_provider.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 
-class DescuentoModal extends ConsumerStatefulWidget {
-  const DescuentoModal({super.key});
+class DescuentoMobileModal extends ConsumerStatefulWidget {
+  const DescuentoMobileModal({super.key});
 
   @override
-  ConsumerState<DescuentoModal> createState() => _DescuentoModalState();
+  ConsumerState<DescuentoMobileModal> createState() =>
+      _DescuentoMobileModalState();
 }
 
-class _DescuentoModalState extends ConsumerState<DescuentoModal> {
+class _DescuentoMobileModalState extends ConsumerState<DescuentoMobileModal> {
   final GlobalKey<FormState> _descuentoFormKey = GlobalKey<FormState>();
   final TextEditingController _descuentoController = TextEditingController();
 
@@ -108,7 +109,7 @@ class _DescuentoModalState extends ConsumerState<DescuentoModal> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      context.pop();
+                      context.pop(false);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
@@ -158,7 +159,7 @@ class _DescuentoModalState extends ConsumerState<DescuentoModal> {
       ref
           .read(descuentoPedidoActualProvider.notifier)
           .actualizarDescuento(descuento);
-      context.pop();
+      context.pop(true);
     }
   }
 }

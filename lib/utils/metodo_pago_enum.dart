@@ -1,1 +1,1 @@
-enum MetodoDePagoEnum { efectivo, tarjeta, transferencia }
+enum MetodoDePagoEnum { efectivo, tarjeta, transferencia, delivery }

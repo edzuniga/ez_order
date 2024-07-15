@@ -74,97 +74,133 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                         ),
                       ),
                       const Gap(40),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Column(
-                            children: [
-                              InkWell(
-                                onTap: () {
-                                  _setMetodoDePago(MetodoDePagoEnum.efectivo);
-                                },
-                                child: SvgPicture.asset(
-                                    'assets/svg/dinero_azul.svg',
-                                    width: 60,
-                                    height: 60,
-                                    fit: BoxFit.contain,
-                                    semanticsLabel: 'Efectivo'),
-                              ),
-                              const Gap(5),
-                              Text(
-                                'Efectivo',
-                                style: GoogleFonts.inter(
-                                    fontSize: 16, fontWeight: FontWeight.w700),
-                              ),
-                              const Gap(5),
-                              CupertinoRadio(
-                                  value: MetodoDePagoEnum.efectivo,
-                                  groupValue: metodoSeleccionado,
-                                  onChanged: (v) {
-                                    _setMetodoDePago(v!);
-                                  }),
-                            ],
-                          ),
-                          const Gap(65),
-                          Column(
-                            children: [
-                              InkWell(
-                                onTap: () {
-                                  _setMetodoDePago(MetodoDePagoEnum.tarjeta);
-                                },
-                                child: SvgPicture.asset(
-                                    'assets/svg/tarjeta_credito_azul.svg',
-                                    width: 60,
-                                    height: 60,
-                                    fit: BoxFit.contain,
-                                    semanticsLabel: 'Efectivo'),
-                              ),
-                              const Gap(5),
-                              Text(
-                                'Tarjeta',
-                                style: GoogleFonts.inter(
-                                    fontSize: 16, fontWeight: FontWeight.w700),
-                              ),
-                              const Gap(5),
-                              CupertinoRadio(
-                                  value: MetodoDePagoEnum.tarjeta,
-                                  groupValue: metodoSeleccionado,
-                                  onChanged: (v) {
-                                    _setMetodoDePago(v!);
-                                  }),
-                            ],
-                          ),
-                          const Gap(65),
-                          Column(
-                            children: [
-                              InkWell(
-                                onTap: () {
-                                  _setMetodoDePago(
-                                      MetodoDePagoEnum.transferencia);
-                                },
-                                child: SvgPicture.asset(
-                                    'assets/svg/transferencia_azul.svg',
-                                    width: 60,
-                                    height: 60,
-                                    fit: BoxFit.contain,
-                                    semanticsLabel: 'Efectivo'),
-                              ),
-                              const Gap(5),
-                              Text(
-                                'Transferencia',
-                                style: GoogleFonts.inter(
-                                    fontSize: 16, fontWeight: FontWeight.w700),
-                              ),
-                              const Gap(5),
-                              CupertinoRadio(
-                                  value: MetodoDePagoEnum.transferencia,
-                                  groupValue: metodoSeleccionado,
-                                  onChanged: (v) {
-                                    _setMetodoDePago(v!);
-                                  }),
-                            ],
-                          ),
-                        ],
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Column(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    _setMetodoDePago(MetodoDePagoEnum.efectivo);
+                                  },
+                                  child: SvgPicture.asset(
+                                      'assets/svg/dinero_azul.svg',
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.contain,
+                                      semanticsLabel: 'Efectivo'),
+                                ),
+                                const Gap(5),
+                                Text(
+                                  'Efectivo',
+                                  style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                                const Gap(5),
+                                CupertinoRadio(
+                                    value: MetodoDePagoEnum.efectivo,
+                                    groupValue: metodoSeleccionado,
+                                    onChanged: (v) {
+                                      _setMetodoDePago(v!);
+                                    }),
+                              ],
+                            ),
+                            const Gap(65),
+                            Column(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    _setMetodoDePago(MetodoDePagoEnum.tarjeta);
+                                  },
+                                  child: SvgPicture.asset(
+                                      'assets/svg/tarjeta_credito_azul.svg',
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.contain,
+                                      semanticsLabel: 'Efectivo'),
+                                ),
+                                const Gap(5),
+                                Text(
+                                  'Tarjeta',
+                                  style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                                const Gap(5),
+                                CupertinoRadio(
+                                    value: MetodoDePagoEnum.tarjeta,
+                                    groupValue: metodoSeleccionado,
+                                    onChanged: (v) {
+                                      _setMetodoDePago(v!);
+                                    }),
+                              ],
+                            ),
+                            const Gap(65),
+                            Column(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    _setMetodoDePago(
+                                        MetodoDePagoEnum.transferencia);
+                                  },
+                                  child: SvgPicture.asset(
+                                      'assets/svg/transferencia_azul.svg',
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.contain,
+                                      semanticsLabel: 'Efectivo'),
+                                ),
+                                const Gap(5),
+                                Text(
+                                  'Transferencia',
+                                  style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                                const Gap(5),
+                                CupertinoRadio(
+                                    value: MetodoDePagoEnum.transferencia,
+                                    groupValue: metodoSeleccionado,
+                                    onChanged: (v) {
+                                      _setMetodoDePago(v!);
+                                    }),
+                              ],
+                            ),
+                            const Gap(65),
+                            Column(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    _setMetodoDePago(MetodoDePagoEnum.delivery);
+                                  },
+                                  child: SvgPicture.asset(
+                                      'assets/svg/transferencia_azul.svg',
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.contain,
+                                      semanticsLabel: 'Delivery'),
+                                ),
+                                const Gap(5),
+                                Text(
+                                  'Delivery',
+                                  style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                                const Gap(5),
+                                CupertinoRadio(
+                                    value: MetodoDePagoEnum.delivery,
+                                    groupValue: metodoSeleccionado,
+                                    onChanged: (v) {
+                                      _setMetodoDePago(v!);
+                                    }),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                       const Gap(40),
                       //Detalles de factura (subtotal, impuesto, importe..., etc..)

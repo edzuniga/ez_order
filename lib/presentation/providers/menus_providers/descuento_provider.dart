@@ -13,4 +13,8 @@ class DescuentoPedidoActual extends _$DescuentoPedidoActual {
     state = newValue;
     ref.read(menuItemPedidoListProvider.notifier).hacerCalculosDelPedido();
   }
+
+  void resetDescuento() {
+    state = 0.0;
+  }
 }

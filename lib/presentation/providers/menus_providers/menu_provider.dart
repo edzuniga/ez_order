@@ -1,9 +1,9 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/cliente_actual_provider.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/descuento_provider.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/metodo_pago_actual.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/num_pedido_actual.dart';
 import 'package:ez_order_ezr/utils/metodo_pago_enum.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ez_order_ezr/data/menu_item_model.dart';
 import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/pedido_actual_provider.dart';
@@ -36,6 +36,9 @@ class MenuItemPedidoList extends _$MenuItemPedidoList {
         break;
       case MetodoDePagoEnum.transferencia:
         metPagoInt = 3;
+        break;
+      case MetodoDePagoEnum.delivery:
+        metPagoInt = 4;
         break;
     }
     //Efectuar operaciones para actualizar info general del pedido actual

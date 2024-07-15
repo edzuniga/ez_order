@@ -28,6 +28,9 @@ class PedidoActual extends _$PedidoActual {
       case MetodoDePagoEnum.transferencia:
         metPagoInt = 3;
         break;
+      case MetodoDePagoEnum.delivery:
+        metPagoInt = 4;
+        break;
     }
 
     return PedidoModel(
@@ -101,6 +104,9 @@ class PedidoActual extends _$PedidoActual {
         break;
       case MetodoDePagoEnum.transferencia:
         metPagoInt = 3;
+        break;
+      case MetodoDePagoEnum.delivery:
+        metPagoInt = 4;
         break;
     }
 

@@ -25,6 +25,11 @@ class PedidoDetallesManagement extends _$PedidoDetallesManagement {
     state = [];
   }
 
+  //Obtener la cantidad de productos en el pedido
+  int cantProductosEnPedido() {
+    return state.length;
+  }
+
   //INCREMENTAR la cantidad en una instancia en específico
   void incrementarCantidad(int menuId) {
     for (var element in state) {
