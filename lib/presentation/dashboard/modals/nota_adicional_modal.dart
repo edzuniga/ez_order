@@ -11,10 +11,10 @@ class NotaAdicionalModal extends ConsumerStatefulWidget {
   const NotaAdicionalModal({super.key});
 
   @override
-  ConsumerState<NotaAdicionalModal> createState() => _TicketModalState();
+  ConsumerState<NotaAdicionalModal> createState() => _NotaAdicionalModalState();
 }
 
-class _TicketModalState extends ConsumerState<NotaAdicionalModal> {
+class _NotaAdicionalModalState extends ConsumerState<NotaAdicionalModal> {
   final TextEditingController _notaAdicionalController =
       TextEditingController();
 
@@ -109,7 +109,7 @@ class _TicketModalState extends ConsumerState<NotaAdicionalModal> {
                     ),
                   ),
                   child: Text(
-                    'Guardar nota adicional',
+                    'Guardar nota',
                     style: GoogleFonts.inter(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,

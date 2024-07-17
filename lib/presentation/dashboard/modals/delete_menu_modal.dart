@@ -1,11 +1,12 @@
-import 'package:ez_order_ezr/data/menu_item_model.dart';
-import 'package:ez_order_ezr/presentation/config/app_colors.dart';
-import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import 'package:ez_order_ezr/data/menu_item_model.dart';
+import 'package:ez_order_ezr/presentation/config/app_colors.dart';
+import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 
 class DeleteMenuItemModal extends ConsumerStatefulWidget {
   const DeleteMenuItemModal({required this.menuItem, super.key});

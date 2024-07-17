@@ -1,8 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:ez_order_ezr/presentation/dashboard/modals/add_menu_mobile.dart';
-import 'package:ez_order_ezr/presentation/dashboard/modals/descuento_mobile_modal.dart';
-import 'package:ez_order_ezr/presentation/providers/menus_providers/descuento_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +9,11 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/presentation/dashboard/modals/add_menu_mobile.dart';
+import 'package:ez_order_ezr/presentation/dashboard/modals/descuento_mobile_modal.dart';
+import 'package:ez_order_ezr/presentation/dashboard/modals/metodo_pago_mobile_modal.dart';
+import 'package:ez_order_ezr/presentation/dashboard/modals/update_menu_mobile.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/descuento_provider.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/update_menu_from_web_modal.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/add_menu_from_web_modal.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/add_categoria_modal.dart';
@@ -2783,7 +2785,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                                       await _updateMenuFromWebModal(
                                                           itemMenu);
                                                     } else {
-                                                      await _updateMenuModal(
+                                                      await _updateMenuMobileModal(
                                                           itemMenu);
                                                     }
                                                     break;
@@ -3734,9 +3736,12 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
         barrierDismissible: false,
         barrierColor: Colors.black.withOpacity(0.5),
         builder: (_) => const Dialog(
+          insetPadding: EdgeInsets.symmetric(
+            horizontal: 10,
+          ),
           elevation: 8,
           backgroundColor: Colors.transparent,
-          child: MetodoPagoModal(),
+          child: MetodoPagoMobileModal(),
         ),
       );
 
@@ -3799,6 +3804,20 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
         elevation: 8,
         backgroundColor: Colors.transparent,
         child: UpdateMenuModal(itemMenu: itemMenu),
+      ),
+    );
+  }
+
+  Future<void> _updateMenuMobileModal(MenuItemModel itemMenu) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.5),
+      builder: (_) => Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+        elevation: 8,
+        backgroundColor: Colors.transparent,
+        child: UpdateMenuMobileModal(itemMenu: itemMenu),
       ),
     );
   }

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -28,7 +27,7 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
     PedidoModel pedidoActualInfo = ref.watch(pedidoActualProvider);
     MetodoDePagoEnum metodoSeleccionado = ref.watch(metodoPagoActualProvider);
     return Container(
-      height: 460,
+      height: 700,
       width: 500,
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -57,6 +56,7 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      const Gap(20),
                       Text(
                         'Método de pago',
                         style: GoogleFonts.inter(
@@ -67,142 +67,177 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                       ),
                       const Gap(5),
                       Text(
-                        'Seleccione el método de pago para esta orden',
+                        'Seleccione el método de pago',
                         style: GoogleFonts.inter(
                           fontStyle: FontStyle.italic,
                           color: Colors.grey,
                         ),
                       ),
-                      const Gap(40),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Column(
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    _setMetodoDePago(MetodoDePagoEnum.efectivo);
-                                  },
-                                  child: SvgPicture.asset(
-                                      'assets/svg/dinero_azul.svg',
-                                      width: 60,
-                                      height: 60,
-                                      fit: BoxFit.contain,
-                                      semanticsLabel: 'Efectivo'),
+                      const Gap(30),
+                      //EFECTIVO y TARJETA
+                      Row(
+                        children: [
+                          //EFECTIVO
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                _setMetodoDePago(MetodoDePagoEnum.efectivo);
+                              },
+                              child: Container(
+                                height: 128,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: metodoSeleccionado ==
+                                            MetodoDePagoEnum.efectivo
+                                        ? AppColors.kGeneralPrimaryOrange
+                                        : const Color(0xFFE1E1E1),
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                const Gap(5),
-                                Text(
-                                  'Efectivo',
-                                  style: GoogleFonts.inter(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SvgPicture.asset('assets/svg/efectivo.svg',
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.contain,
+                                        semanticsLabel: 'Efectivo'),
+                                    const Gap(5),
+                                    Text(
+                                      'Efectivo',
+                                      style: GoogleFonts.inter(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                  ],
                                 ),
-                                const Gap(5),
-                                CupertinoRadio(
-                                    value: MetodoDePagoEnum.efectivo,
-                                    groupValue: metodoSeleccionado,
-                                    onChanged: (v) {
-                                      _setMetodoDePago(v!);
-                                    }),
-                              ],
+                              ),
                             ),
-                            const Gap(65),
-                            Column(
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    _setMetodoDePago(MetodoDePagoEnum.tarjeta);
-                                  },
-                                  child: SvgPicture.asset(
-                                      'assets/svg/tarjeta_credito_azul.svg',
-                                      width: 60,
-                                      height: 60,
-                                      fit: BoxFit.contain,
-                                      semanticsLabel: 'Efectivo'),
+                          ),
+                          const Gap(10),
+                          //TARJETA
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                _setMetodoDePago(MetodoDePagoEnum.tarjeta);
+                              },
+                              child: Container(
+                                height: 128,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: metodoSeleccionado ==
+                                            MetodoDePagoEnum.tarjeta
+                                        ? AppColors.kGeneralPrimaryOrange
+                                        : const Color(0xFFE1E1E1),
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                const Gap(5),
-                                Text(
-                                  'Tarjeta',
-                                  style: GoogleFonts.inter(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SvgPicture.asset('assets/svg/tarjeta.svg',
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.contain,
+                                        semanticsLabel: 'Tarjeta'),
+                                    const Gap(5),
+                                    Text(
+                                      'Tarjeta',
+                                      style: GoogleFonts.inter(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                  ],
                                 ),
-                                const Gap(5),
-                                CupertinoRadio(
-                                    value: MetodoDePagoEnum.tarjeta,
-                                    groupValue: metodoSeleccionado,
-                                    onChanged: (v) {
-                                      _setMetodoDePago(v!);
-                                    }),
-                              ],
+                              ),
                             ),
-                            const Gap(65),
-                            Column(
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    _setMetodoDePago(
-                                        MetodoDePagoEnum.transferencia);
-                                  },
-                                  child: SvgPicture.asset(
-                                      'assets/svg/transferencia_azul.svg',
-                                      width: 60,
-                                      height: 60,
-                                      fit: BoxFit.contain,
-                                      semanticsLabel: 'Efectivo'),
-                                ),
-                                const Gap(5),
-                                Text(
-                                  'Transferencia',
-                                  style: GoogleFonts.inter(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                                const Gap(5),
-                                CupertinoRadio(
-                                    value: MetodoDePagoEnum.transferencia,
-                                    groupValue: metodoSeleccionado,
-                                    onChanged: (v) {
-                                      _setMetodoDePago(v!);
-                                    }),
-                              ],
-                            ),
-                            const Gap(65),
-                            Column(
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    _setMetodoDePago(MetodoDePagoEnum.delivery);
-                                  },
-                                  child: SvgPicture.asset(
-                                      'assets/svg/transferencia_azul.svg',
-                                      width: 60,
-                                      height: 60,
-                                      fit: BoxFit.contain,
-                                      semanticsLabel: 'Delivery'),
-                                ),
-                                const Gap(5),
-                                Text(
-                                  'Delivery',
-                                  style: GoogleFonts.inter(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                                const Gap(5),
-                                CupertinoRadio(
-                                    value: MetodoDePagoEnum.delivery,
-                                    groupValue: metodoSeleccionado,
-                                    onChanged: (v) {
-                                      _setMetodoDePago(v!);
-                                    }),
-                              ],
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      const Gap(40),
+                      const Gap(10),
+                      //TRANSFERENCIA y DELIVERY
+                      Row(
+                        children: [
+                          //TRANSFERENCIA
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                _setMetodoDePago(
+                                    MetodoDePagoEnum.transferencia);
+                              },
+                              child: Container(
+                                height: 128,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: metodoSeleccionado ==
+                                            MetodoDePagoEnum.transferencia
+                                        ? AppColors.kGeneralPrimaryOrange
+                                        : const Color(0xFFE1E1E1),
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SvgPicture.asset(
+                                        'assets/svg/transferencia.svg',
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.contain,
+                                        semanticsLabel: 'Transferencia'),
+                                    const Gap(5),
+                                    Text(
+                                      'Transferencia',
+                                      style: GoogleFonts.inter(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const Gap(10),
+                          //DELIVERY
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                _setMetodoDePago(MetodoDePagoEnum.delivery);
+                              },
+                              child: Container(
+                                height: 128,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: metodoSeleccionado ==
+                                            MetodoDePagoEnum.delivery
+                                        ? AppColors.kGeneralPrimaryOrange
+                                        : const Color(0xFFE1E1E1),
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SvgPicture.asset('assets/svg/delivery.svg',
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.contain,
+                                        semanticsLabel: 'Delivery'),
+                                    const Gap(5),
+                                    Text(
+                                      'Delivery',
+                                      style: GoogleFonts.inter(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Gap(30),
                       //Detalles de factura (subtotal, impuesto, importe..., etc..)
                       Container(
                         decoration: BoxDecoration(

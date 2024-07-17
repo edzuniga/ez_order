@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
@@ -47,15 +48,71 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
       showSelectedLabels: true,
       selectedItemColor: AppColors.kGeneralPrimaryOrange,
       unselectedItemColor: AppColors.kTextPrimaryBlack,
-      items: const <BottomNavigationBarItem>[
+      items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag_outlined), label: 'Pedidos'),
+            icon: SvgPicture.asset(
+              'assets/svg/bolsa-compras.svg',
+              height: 20,
+              width: 20,
+              colorFilter:
+                  const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+            ),
+            activeIcon: SvgPicture.asset(
+              'assets/svg/bolsa-compras.svg',
+              height: 22,
+              width: 22,
+              colorFilter: const ColorFilter.mode(
+                  AppColors.kGeneralPrimaryOrange, BlendMode.srcIn),
+            ),
+            label: 'Pedidos'),
         BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag_outlined), label: 'Agregar Pedido'),
+            icon: SvgPicture.asset(
+              'assets/svg/carrito.svg',
+              height: 20,
+              width: 20,
+              colorFilter:
+                  const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+            ),
+            activeIcon: SvgPicture.asset(
+              'assets/svg/carrito.svg',
+              height: 22,
+              width: 22,
+              colorFilter: const ColorFilter.mode(
+                  AppColors.kGeneralPrimaryOrange, BlendMode.srcIn),
+            ),
+            label: 'Agregar pedido'),
         BottomNavigationBarItem(
-            icon: Icon(Icons.playlist_add_check_outlined), label: 'Reportes'),
+            icon: SvgPicture.asset(
+              'assets/svg/reportes.svg',
+              height: 20,
+              width: 20,
+              colorFilter:
+                  const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+            ),
+            activeIcon: SvgPicture.asset(
+              'assets/svg/reportes.svg',
+              height: 22,
+              width: 22,
+              colorFilter: const ColorFilter.mode(
+                  AppColors.kGeneralPrimaryOrange, BlendMode.srcIn),
+            ),
+            label: 'Reportes'),
         BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long), label: 'Facturación'),
+            icon: SvgPicture.asset(
+              'assets/svg/facturacion.svg',
+              height: 20,
+              width: 20,
+              colorFilter:
+                  const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+            ),
+            activeIcon: SvgPicture.asset(
+              'assets/svg/facturacion.svg',
+              height: 22,
+              width: 22,
+              colorFilter: const ColorFilter.mode(
+                  AppColors.kGeneralPrimaryOrange, BlendMode.srcIn),
+            ),
+            label: 'Facturación'),
       ],
     );
   }

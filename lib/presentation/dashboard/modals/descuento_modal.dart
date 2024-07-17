@@ -1,4 +1,3 @@
-import 'package:ez_order_ezr/presentation/providers/menus_providers/descuento_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:ez_order_ezr/presentation/providers/menus_providers/descuento_provider.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 
 class DescuentoModal extends ConsumerStatefulWidget {

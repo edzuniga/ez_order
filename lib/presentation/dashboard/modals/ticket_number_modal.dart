@@ -151,7 +151,7 @@ class _TicketModalState extends ConsumerState<TicketModal> {
                       ),
                     ),
                     child: Text(
-                      'Nuevo # de Ticket',
+                      'Nuevo #',
                       style: GoogleFonts.inter(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,

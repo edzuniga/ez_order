@@ -1,7 +1,4 @@
 import 'package:email_validator/email_validator.dart';
-import 'package:ez_order_ezr/data/cliente_modelo.dart';
-import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
-import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +6,9 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:ez_order_ezr/data/cliente_modelo.dart';
+import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 
 class ClienteModal extends ConsumerStatefulWidget {

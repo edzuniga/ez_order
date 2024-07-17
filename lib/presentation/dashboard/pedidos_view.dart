@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -2272,11 +2273,7 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              const Icon(
-                                Icons.shopping_bag_outlined,
-                                color: Colors.white,
-                                size: 35,
-                              ),
+                              SvgPicture.asset('assets/svg/bolsa-compras.svg'),
                               Text(
                                 'AGREGAR PEDIDO',
                                 style: GoogleFonts.inter(
@@ -2320,11 +2317,7 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              const Icon(
-                                Icons.restaurant_outlined,
-                                color: AppColors.kGeneralPrimaryOrange,
-                                size: 35,
-                              ),
+                              SvgPicture.asset('assets/svg/utensilios.svg'),
                               Text(
                                 'COCINA',
                                 style: GoogleFonts.inter(
@@ -2358,7 +2351,7 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                                 subDescripcion: 'Pedidos en cocina',
                                 cantidadPedidos: '$_countPedidosEnPreparacion',
                                 hasCounter: true,
-                                icono: Icons.help_outline_rounded,
+                                svg: SvgPicture.asset('assets/svg/olla.svg'),
                               ),
                             ),
                           ),
@@ -2373,7 +2366,7 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                                 subDescripcion: 'Pedidos entregados',
                                 cantidadPedidos: '$_countPedidosEntregados',
                                 hasCounter: true,
-                                icono: Icons.check_circle_outline,
+                                svg: SvgPicture.asset('assets/svg/cheque.svg'),
                               ),
                             ),
                           ),
@@ -2388,11 +2381,11 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                               onTap: () async {
                                 await _launchUrlWeb();
                               },
-                              child: const EstadisticaMobileMinimalista(
+                              child: EstadisticaMobileMinimalista(
                                 descripcion: 'Ayuda',
                                 subDescripcion: 'Sitio de ayuda',
                                 iconIsOrange: true,
-                                icono: Icons.help_outline_rounded,
+                                svg: SvgPicture.asset('assets/svg/ayuda.svg'),
                               ),
                             ),
                           ),
@@ -2402,11 +2395,11 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                               onTap: () async {
                                 await _launchURL();
                               },
-                              child: const EstadisticaMobileMinimalista(
+                              child: EstadisticaMobileMinimalista(
                                 descripcion: 'Soporte',
                                 subDescripcion: 'vía WhatsApp',
                                 iconIsOrange: true,
-                                icono: Icons.record_voice_over_outlined,
+                                svg: SvgPicture.asset('assets/svg/soporte.svg'),
                               ),
                             ),
                           ),

@@ -1,7 +1,5 @@
 import 'dart:io';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:ez_order_ezr/data/categoria_modelo.dart';
-import 'package:ez_order_ezr/presentation/providers/categorias/categoria_seleccionada.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +10,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:ez_order_ezr/data/categoria_modelo.dart';
+import 'package:ez_order_ezr/presentation/providers/categorias/categoria_seleccionada.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/data/menu_item_model.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';

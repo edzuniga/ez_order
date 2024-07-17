@@ -1,5 +1,6 @@
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -7,18 +8,20 @@ class EstadisticaMobileMinimalista extends StatelessWidget {
   const EstadisticaMobileMinimalista({
     required this.descripcion,
     required this.subDescripcion,
-    required this.icono,
+    this.icono,
     this.hasCounter = false,
     this.cantidadPedidos,
     this.iconIsOrange = false,
+    this.svg,
     super.key,
   });
   final String descripcion;
   final String subDescripcion;
-  final IconData icono;
+  final IconData? icono;
   final bool hasCounter;
   final String? cantidadPedidos;
   final bool iconIsOrange;
+  final SvgPicture? svg;
 
   @override
   Widget build(BuildContext context) {
@@ -35,14 +38,16 @@ class EstadisticaMobileMinimalista extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          IconTheme(
-            data: const IconThemeData(size: 60, weight: 0.5, grade: 0.5),
-            child: Icon(
-              icono,
-              color:
-                  iconIsOrange ? AppColors.kGeneralPrimaryOrange : Colors.black,
-            ),
-          ),
+          svg ??
+              IconTheme(
+                data: const IconThemeData(size: 60, weight: 0.5, grade: 0.5),
+                child: Icon(
+                  icono,
+                  color: iconIsOrange
+                      ? AppColors.kGeneralPrimaryOrange
+                      : Colors.black,
+                ),
+              ),
           const Gap(10),
           Text(
             descripcion,

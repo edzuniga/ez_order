@@ -58,10 +58,10 @@ class _MobileAppBarState extends ConsumerState<MobileAppBar> {
                       await _changeTicketNumber();
                     },
                     child: Container(
-                      width: 180,
+                      width: 150,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: AppColors.kGeneralPrimaryOrange,
+                        color: const Color(0xFFF3F3F3),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       alignment: Alignment.center,
@@ -69,7 +69,7 @@ class _MobileAppBarState extends ConsumerState<MobileAppBar> {
                         '# Ticket: $numOrdenActual',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: 16,
                         ),
                       ),
@@ -100,52 +100,30 @@ class _MobileAppBarState extends ConsumerState<MobileAppBar> {
                     )
                   : const SizedBox()
               : const SizedBox(),
-          const Spacer(),
-          /* OutlinedButton.icon(
-            onPressed: () {
-              context.pushNamed(Routes.cocina);
-            },
-            style: OutlinedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                side: const BorderSide(width: 1.0),
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            icon: const Icon(
-              Icons.soup_kitchen_sharp,
-              color: AppColors.kGeneralPrimaryOrange,
-              size: 15,
-            ),
-            label: Text(
-              'Cocina',
-              style: GoogleFonts.inter(
-                color: Colors.black,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ), */
-          //const Gap(20),
-          IconButton(
-            onPressed: () async {
-              _tryingLogout ? null : await _tryLogout();
-            },
-            tooltip: 'Cerrar sesión',
-            style: IconButton.styleFrom(
-              backgroundColor: AppColors.kGeneralPrimaryOrange,
-            ),
-            icon: _tryingLogout
-                ? SpinPerfect(
-                    infinite: true,
-                    child: const Icon(
-                      Icons.refresh,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Icon(
-                    Icons.logout,
-                    color: Colors.white,
+          selectedPageIndex == 0 ? const Spacer() : const SizedBox(),
+          selectedPageIndex == 0
+              ? IconButton(
+                  onPressed: () async {
+                    _tryingLogout ? null : await _tryLogout();
+                  },
+                  tooltip: 'Cerrar sesión',
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.kGeneralPrimaryOrange,
                   ),
-          ),
+                  icon: _tryingLogout
+                      ? SpinPerfect(
+                          infinite: true,
+                          child: const Icon(
+                            Icons.refresh,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.logout,
+                          color: Colors.white,
+                        ),
+                )
+              : const SizedBox(),
           const Gap(15),
         ],
       ),

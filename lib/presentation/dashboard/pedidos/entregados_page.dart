@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -134,122 +135,115 @@ class _EntregadosPageState extends ConsumerState<EntregadosPage> {
                         );
                       } else {
                         String nombreCliente = s.data!;
-                        return Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(5),
-                              //height: 91.0,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8.0),
-                                border: Border.all(
-                                  color: const Color(0xFFE0E3E7),
-                                  width: 1.0,
-                                ),
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            //height: 91.0,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8.0),
+                              border: Border.all(
+                                color: const Color(0xFFE0E3E7),
+                                width: 1.0,
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  //Imagen del pedido
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: SizedBox(
-                                      width: 100.0,
-                                      height: 81.0,
-                                      child: Image.asset(
-                                        'assets/images/pedidos.jpg',
-                                        fit: BoxFit.cover,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                //Imagen del pedido
+                                SizedBox(
+                                  width: 90.0,
+                                  height: 70.0,
+                                  child:
+                                      SvgPicture.asset('assets/svg/olla.svg'),
+                                ),
+                                const Gap(5),
+                                //Información del pedido
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        '# ${pedido.numPedido}',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 14,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                  const Gap(5),
-                                  //Información del pedido
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          '# ${pedido.numPedido}',
+                                      Text(
+                                        'Total: L ${pedido.total}',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      const Gap(10),
+                                      RichText(
+                                        text: TextSpan(
+                                          text: 'Orden: ',
                                           style: GoogleFonts.inter(
-                                            fontSize: 14,
-                                            letterSpacing: 0.0,
+                                            color: Colors.black,
                                             fontWeight: FontWeight.w700,
+                                            fontSize: 8.0,
                                           ),
-                                        ),
-                                        Text(
-                                          'Total: L ${pedido.total}',
-                                          style: GoogleFonts.inter(
-                                            fontSize: 12,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        const Gap(10),
-                                        RichText(
-                                          text: TextSpan(
-                                            text: 'Orden: ',
-                                            style: GoogleFonts.inter(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: 8.0,
-                                            ),
-                                            children: [
-                                              TextSpan(
-                                                text: pedido.orden,
-                                                style: GoogleFonts.inter(
-                                                  color: Colors.grey,
-                                                  fontSize: 8.0,
-                                                ),
-                                              ),
-                                              TextSpan(
-                                                text: '\nCliente: ',
-                                                style: GoogleFonts.inter(
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.w700,
-                                                  fontSize: 8.0,
-                                                ),
-                                              ),
-                                              TextSpan(
-                                                text: nombreCliente,
-                                                style: GoogleFonts.inter(
-                                                  color: Colors.grey,
-                                                  fontSize: 8.0,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
                                           children: [
-                                            Icon(Icons.circle,
-                                                size: 10,
-                                                color: (pedido.enPreparacion)
-                                                    ? AppColors
-                                                        .kGeneralPrimaryOrange
-                                                    : Colors.green),
-                                            const Gap(8),
-                                            const Text(
-                                              'Entregado',
-                                              style: TextStyle(
-                                                fontSize: 10,
+                                            TextSpan(
+                                              text: pedido.orden,
+                                              style: GoogleFonts.inter(
+                                                color: Colors.grey,
+                                                fontSize: 8.0,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text: '\nCliente: ',
+                                              style: GoogleFonts.inter(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 8.0,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text: nombreCliente,
+                                              style: GoogleFonts.inter(
+                                                color: Colors.grey,
+                                                fontSize: 8.0,
                                               ),
                                             ),
                                           ],
-                                        )
-                                      ],
-                                    ),
+                                        ),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Icon(Icons.circle,
+                                              size: 10,
+                                              color: (pedido.enPreparacion)
+                                                  ? AppColors
+                                                      .kGeneralPrimaryOrange
+                                                  : Colors.green),
+                                          const Gap(8),
+                                          const Text(
+                                            'Entregado',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                            const Gap(8),
-                          ],
+                          ),
                         );
                       }
                     },
