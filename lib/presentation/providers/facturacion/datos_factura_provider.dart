@@ -1,14 +1,17 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ez_order_ezr/data/datos_factura_modelo.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'datos_factura_provider.g.dart';
 
 @Riverpod(keepAlive: true)
 class DatosFacturaManager extends _$DatosFacturaManager {
   @override
   DatosFacturaModelo build() {
-    int resId = int.parse(
-        ref.read(userPublicDataProvider)['id_restaurante'].toString());
+    int resId = 0;
+    if (ref.read(userPublicDataProvider)['id_restaurante'] != null) {
+      resId = int.parse(
+          ref.read(userPublicDataProvider)['id_restaurante'].toString());
+    }
     return DatosFacturaModelo(
       idDatosFactura: 0,
       idRestaurante: resId,
@@ -29,8 +32,11 @@ class DatosFacturaManager extends _$DatosFacturaManager {
   }
 
   void resetDatosFactura() {
-    int resId = int.parse(
-        ref.read(userPublicDataProvider)['id_restaurante'].toString());
+    int resId = 0;
+    if (ref.read(userPublicDataProvider)['id_restaurante'] != null) {
+      resId = int.parse(
+          ref.read(userPublicDataProvider)['id_restaurante'].toString());
+    }
     state = DatosFacturaModelo(
       idDatosFactura: 0,
       idRestaurante: resId,

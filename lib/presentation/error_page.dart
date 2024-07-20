@@ -1,9 +1,10 @@
-import 'package:ez_order_ezr/presentation/config/app_colors.dart';
-import 'package:ez_order_ezr/presentation/config/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import 'package:ez_order_ezr/presentation/config/app_colors.dart';
+import 'package:ez_order_ezr/presentation/config/routes.dart';
 
 class ErrorPage extends StatelessWidget {
   const ErrorPage({super.key});

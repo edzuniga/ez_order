@@ -1,15 +1,18 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:ez_order_ezr/presentation/config/app_colors.dart';
-import 'package:ez_order_ezr/presentation/config/routes.dart';
-import 'package:ez_order_ezr/presentation/providers/auth_supabase_manager.dart';
-import 'package:ez_order_ezr/presentation/providers/users_data.dart';
-import 'package:ez_order_ezr/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import 'package:ez_order_ezr/presentation/config/app_colors.dart';
+import 'package:ez_order_ezr/presentation/config/routes.dart';
+import 'package:ez_order_ezr/presentation/providers/auth_supabase_manager.dart';
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
+import 'package:ez_order_ezr/presentation/widgets/link_text_widget.dart';
+import 'package:ez_order_ezr/utils/secure_storage.dart';
 
 class LoginView extends ConsumerStatefulWidget {
   const LoginView({super.key});
@@ -343,6 +346,35 @@ class _LoginViewState extends ConsumerState<LoginView> {
                       color: Colors.white,
                       size: 30.0,
                     ),
+                    const Gap(30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '© 2024 ',
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () async {
+                            await _launchUrlWeb();
+                          },
+                          child: const LinkText(
+                            textito: 'EZ Order.',
+                            colorcito: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          ' Todos los derechos reservados.',
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
                     const Gap(40),
                   ],
                 ),
@@ -378,6 +410,17 @@ class _LoginViewState extends ConsumerState<LoginView> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _launchUrlWeb() async {
+    const url = 'https://ezorderhn.com/';
+    final Uri parsedUrl = Uri.parse(url);
+
+    if (await canLaunchUrl(parsedUrl)) {
+      await launchUrl(parsedUrl);
+    } else {
+      throw 'No se pudo abrir $url';
     }
   }
 }

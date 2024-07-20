@@ -1,10 +1,11 @@
-import 'package:ez_order_ezr/presentation/dashboard/pedidos/en_preparacion_page.dart';
-import 'package:ez_order_ezr/presentation/dashboard/pedidos/entregados_page.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:ez_order_ezr/presentation/auth/password_recovery_page.dart';
+import 'package:ez_order_ezr/presentation/dashboard/pedidos/en_preparacion_page.dart';
+import 'package:ez_order_ezr/presentation/dashboard/pedidos/entregados_page.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/auth/auth_layout.dart';
 import 'package:ez_order_ezr/presentation/auth/login_view.dart';
@@ -24,14 +25,6 @@ part 'router_config.g.dart';
 @Riverpod(keepAlive: true)
 GoRouter router(Ref ref) {
   return GoRouter(
-    errorPageBuilder: (context, state) => CustomTransitionPage(
-      child: const ErrorPage(),
-      transitionsBuilder: ((context, animation, secondaryAnimation, child) =>
-          FadeTransition(
-            opacity: animation,
-            child: child,
-          )),
-    ),
     initialLocation: '/',
     routes: [
       //Auth routes
@@ -160,20 +153,47 @@ GoRouter router(Ref ref) {
           ),
         ),
       ),
+      GoRoute(
+        name: Routes.pwRecovery,
+        path: '/pw_recovery',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: const PasswordRecoveryPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        ),
+      ),
     ],
+    errorPageBuilder: (context, state) => CustomTransitionPage(
+      child: const ErrorPage(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+          FadeTransition(
+        opacity: animation,
+        child: child,
+      ),
+    ),
     redirect: (context, state) {
       //Obtener el estado de autenticación
       final isAuthenticated = ref.read(authManagerProvider);
 
       //Rutas accesibles e inaccesibles dependiendo autenticación
-      const accessibleRoutes = ['/', '/recovery'];
+      const accessibleRoutes = ['/', '/recovery', '/pw_recovery'];
       const unaccessibleRoutes = [
         '/pedidos',
         '/agregar_pedido',
         '/reportes',
         '/cocina',
-        '/facturacion'
+        '/facturacion',
+        '/pedidos_entregados',
+        '/en_preparacion'
       ];
+
+      //Caso específico de '/pw_recovery'
+      /*if (!isAuthenticated && state.matchedLocation == '/pw_recovery') {
+        return '/';
+      }*/
 
       //Permitir acceso a AUTH sin autenticación
       if (!isAuthenticated &&
@@ -198,10 +218,12 @@ GoRouter router(Ref ref) {
       }
 
       //Casos DEPENDIENDO su ROL (COCINA)
-      int rolUsuario =
-          int.parse(ref.read(userPublicDataProvider)['rol'].toString());
-      if (rolUsuario == 4) {
-        return '/cocina';
+      if (ref.read(userPublicDataProvider)['rol'] != null) {
+        int rolUsuario =
+            int.parse(ref.read(userPublicDataProvider)['rol'].toString());
+        if (rolUsuario == 4) {
+          return '/cocina';
+        }
       }
 
       return null;

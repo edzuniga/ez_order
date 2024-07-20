@@ -1,5 +1,5 @@
-import 'package:ez_order_ezr/data/categoria_modelo.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:ez_order_ezr/data/categoria_modelo.dart';
 part 'categoria_seleccionada.g.dart';
 
 @Riverpod(keepAlive: true)

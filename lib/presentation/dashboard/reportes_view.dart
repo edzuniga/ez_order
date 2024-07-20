@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:ez_order_ezr/presentation/widgets/pedidos_widgets/estadistica_sencilla_mobile_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:animate_do/animate_do.dart';
@@ -12,6 +11,7 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:ez_order_ezr/presentation/widgets/pedidos_widgets/estadistica_sencilla_mobile_widget.dart';
 import 'package:ez_order_ezr/utils/web_specific.dart';
 import 'package:ez_order_ezr/presentation/providers/reportes/column_table.dart';
 import 'package:ez_order_ezr/utils/ingresos_table_pdf.dart';

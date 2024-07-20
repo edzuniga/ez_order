@@ -1,6 +1,6 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/menu_provider.dart';
 import 'package:ez_order_ezr/utils/metodo_pago_enum.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'metodo_pago_actual.g.dart';
 
 @Riverpod(keepAlive: true)

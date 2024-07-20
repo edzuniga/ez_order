@@ -2,6 +2,7 @@ class Routes {
   //Auth Route Names
   static const String login = 'login';
   static const String recovery = 'recovery';
+  static const String pwRecovery = 'pw_recovery';
 
   //Dashboard Route Names
   static const String pedidos = 'pedidos';

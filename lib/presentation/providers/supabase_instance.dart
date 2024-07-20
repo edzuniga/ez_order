@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:ez_order_ezr/presentation/providers/facturacion/pedido_para_view.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
@@ -8,6 +7,7 @@ import 'package:random_string/random_string.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/presentation/providers/facturacion/pedido_para_view.dart';
 import 'package:ez_order_ezr/data/factura_modelo.dart';
 import 'package:ez_order_ezr/data/categoria_modelo.dart';
 import 'package:ez_order_ezr/data/datos_factura_modelo.dart';
@@ -759,7 +759,10 @@ class SupabaseManagement extends _$SupabaseManagement {
 
   Future<String> getDatosFactura() async {
     Map<String, String> datosPublicos = ref.read(userPublicDataProvider);
-    int idRes = int.parse(datosPublicos['id_restaurante'].toString());
+    int idRes = 0;
+    if (datosPublicos['id_restaurante'] != null) {
+      idRes = int.parse(datosPublicos['id_restaurante'].toString());
+    }
 
     try {
       final res = await state

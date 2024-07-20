@@ -1,6 +1,6 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ez_order_ezr/data/pedido_model.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'pedido_para_view.g.dart';
 
 @Riverpod(keepAlive: true)

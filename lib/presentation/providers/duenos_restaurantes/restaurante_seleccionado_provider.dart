@@ -1,5 +1,5 @@
-import 'package:ez_order_ezr/data/restaurante_modelo.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:ez_order_ezr/data/restaurante_modelo.dart';
 part 'restaurante_seleccionado_provider.g.dart';
 
 @Riverpod(keepAlive: true)

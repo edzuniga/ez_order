@@ -1,5 +1,5 @@
-import 'package:ez_order_ezr/presentation/providers/menus_providers/menu_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/menu_provider.dart';
 import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
 part 'pedido_detalles_provider.g.dart';
 

@@ -1,14 +1,14 @@
-import 'package:ez_order_ezr/presentation/providers/categorias/categoria_seleccionada.dart';
-import 'package:ez_order_ezr/presentation/providers/categorias/listado_categorias.dart';
-import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
-import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/reportes_valores_provider.dart';
-import 'package:ez_order_ezr/presentation/providers/facturacion/datos_factura_provider.dart';
-import 'package:ez_order_ezr/presentation/providers/facturacion/detalles_pedido_para_view.dart';
-import 'package:ez_order_ezr/presentation/providers/facturacion/pedido_para_view.dart';
-import 'package:ez_order_ezr/presentation/providers/menus_providers/cliente_actual_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/presentation/providers/facturacion/detalles_pedido_para_view.dart';
+import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/reportes_valores_provider.dart';
+import 'package:ez_order_ezr/presentation/providers/categorias/categoria_seleccionada.dart';
+import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
+import 'package:ez_order_ezr/presentation/providers/facturacion/datos_factura_provider.dart';
+import 'package:ez_order_ezr/presentation/providers/facturacion/pedido_para_view.dart';
+import 'package:ez_order_ezr/presentation/providers/categorias/listado_categorias.dart';
+import 'package:ez_order_ezr/presentation/providers/menus_providers/cliente_actual_provider.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/utils/secure_storage.dart';

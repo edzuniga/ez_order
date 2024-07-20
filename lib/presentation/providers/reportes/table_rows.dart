@@ -1,9 +1,9 @@
-import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
-import 'package:ez_order_ezr/data/pedido_model.dart';
-import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
+import 'package:ez_order_ezr/data/pedido_model.dart';
+import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 part 'table_rows.g.dart';
 
 @Riverpod(keepAlive: true)

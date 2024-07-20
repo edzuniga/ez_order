@@ -6,6 +6,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:intl/intl.dart';
 
 import 'package:ez_order_ezr/presentation/dashboard/modals/ticket_number_modal.dart';
 import 'package:ez_order_ezr/presentation/config/routes.dart';
@@ -14,7 +15,6 @@ import 'package:ez_order_ezr/presentation/providers/dashboard_page_index.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/num_pedido_actual.dart';
 import 'package:ez_order_ezr/presentation/providers/dashboard_page_title.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
-import 'package:intl/intl.dart';
 
 class CustomAppBar extends ConsumerStatefulWidget {
   const CustomAppBar({

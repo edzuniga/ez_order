@@ -10,7 +10,7 @@ import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/providers/router_config.dart';
 
 Future<void> main() async {
-  //ensure flutter
+//ensure flutter
   WidgetsFlutterBinding.ensureInitialized();
   //Set preferred orientation
   SystemChrome.setPreferredOrientations([

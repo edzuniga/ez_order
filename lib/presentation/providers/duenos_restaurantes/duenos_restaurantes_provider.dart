@@ -1,7 +1,7 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ez_order_ezr/data/restaurante_modelo.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'duenos_restaurantes_provider.g.dart';
 
 @Riverpod(keepAlive: true)
