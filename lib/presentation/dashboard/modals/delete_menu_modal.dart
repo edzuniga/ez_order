@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:ez_order_ezr/data/menu_item_model.dart';
@@ -64,7 +63,7 @@ class _DeleteMenuItemModalState extends ConsumerState<DeleteMenuItemModal> {
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          context.pop();
+                          Navigator.of(context).pop();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
@@ -116,9 +115,11 @@ class _DeleteMenuItemModalState extends ConsumerState<DeleteMenuItemModal> {
         .then((message) {
       setState(() => _isTryingDelete = false);
       if (message == 'success') {
-        context.pop();
+        if (!mounted) return;
+        Navigator.of(context).pop();
       } else {
-        context.pop();
+        if (!mounted) return;
+        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.red,

@@ -1,3 +1,5 @@
+import 'package:ez_order_ezr/presentation/caja/caja_page.dart';
+import 'package:ez_order_ezr/presentation/dashboard/gastos_caja_view.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -115,6 +117,19 @@ GoRouter router(Ref ref) {
               ),
             ),
           ),
+          GoRoute(
+            name: Routes.gastosCaja,
+            path: '/gastos_caja',
+            pageBuilder: (context, state) => CustomTransitionPage(
+              child: const GastosCajaView(),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) =>
+                      FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            ),
+          ),
         ],
       ),
       GoRoute(
@@ -165,6 +180,18 @@ GoRouter router(Ref ref) {
           ),
         ),
       ),
+      GoRoute(
+        name: Routes.caja,
+        path: '/caja',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: const CajaPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        ),
+      ),
     ],
     errorPageBuilder: (context, state) => CustomTransitionPage(
       child: const ErrorPage(),
@@ -187,7 +214,9 @@ GoRouter router(Ref ref) {
         '/cocina',
         '/facturacion',
         '/pedidos_entregados',
-        '/en_preparacion'
+        '/en_preparacion',
+        '/caja',
+        '/gastos_caja',
       ];
 
       //Caso específico de '/pw_recovery'

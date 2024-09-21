@@ -6,16 +6,17 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 
-class BorrarPedidoModal extends ConsumerStatefulWidget {
-  const BorrarPedidoModal({super.key, required this.uuIdPedido});
+class BorrarGastoCajaModal extends ConsumerStatefulWidget {
+  const BorrarGastoCajaModal({super.key, required this.idGastoCaja});
 
-  final String uuIdPedido;
+  final int idGastoCaja;
 
   @override
-  ConsumerState<BorrarPedidoModal> createState() => _BorrarPedidoModalState();
+  ConsumerState<BorrarGastoCajaModal> createState() =>
+      _BorrarGastoCajaModalState();
 }
 
-class _BorrarPedidoModalState extends ConsumerState<BorrarPedidoModal> {
+class _BorrarGastoCajaModalState extends ConsumerState<BorrarGastoCajaModal> {
   bool _isTryingDelete = false;
 
   @override
@@ -50,7 +51,7 @@ class _BorrarPedidoModalState extends ConsumerState<BorrarPedidoModal> {
                 ),
                 const Gap(5),
                 const Text(
-                  'Si borras el pedido NO podrás recuperarlo',
+                  'Si borras el gasto de caja NO podrás recuperarlo',
                   style: TextStyle(
                     fontStyle: FontStyle.italic,
                     color: Colors.grey,
@@ -83,7 +84,7 @@ class _BorrarPedidoModalState extends ConsumerState<BorrarPedidoModal> {
                     const Gap(8),
                     ElevatedButton(
                       onPressed: () async {
-                        await _tryBorrarPedido();
+                        await _tryBorrarGastoCaja();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.kGeneralPrimaryOrange,
@@ -92,7 +93,7 @@ class _BorrarPedidoModalState extends ConsumerState<BorrarPedidoModal> {
                         ),
                       ),
                       child: Text(
-                        'Borrar pedido',
+                        'Borrar gasto',
                         style: GoogleFonts.inter(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
@@ -106,16 +107,16 @@ class _BorrarPedidoModalState extends ConsumerState<BorrarPedidoModal> {
     );
   }
 
-  Future<void> _tryBorrarPedido() async {
+  Future<void> _tryBorrarGastoCaja() async {
     setState(() => _isTryingDelete = true);
     await ref
         .read(supabaseManagementProvider.notifier)
-        .borrarPedido(widget.uuIdPedido)
+        .borrarGastoCajaPorId(widget.idGastoCaja)
         .then((message) {
       setState(() => _isTryingDelete = false);
       if (message == 'success') {
         if (!mounted) return;
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true);
       } else {
         if (!mounted) return;
         Navigator.of(context).pop();
@@ -123,7 +124,7 @@ class _BorrarPedidoModalState extends ConsumerState<BorrarPedidoModal> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.red,
           content: Text(
-            'Ocurrió un error al intentar cancelar el pedido -> $message',
+            'Ocurrió un error al intentar borrar el gasto de caja -> $message',
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,

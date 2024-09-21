@@ -1,4 +1,5 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,8 +36,10 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
     final selectedPageTitle = ref.watch(dashboardPageTitleProvider);
     final selectedPageIndex = ref.watch(dashboardPageIndexProvider);
     final numOrdenActual = ref.watch(numeroPedidoActualProvider);
+    final datosPublicos = ref.watch(userPublicDataProvider);
     DateTime hoy = DateTime.now();
     String hoyFormateado = DateFormat.yMMMd('es').format(hoy);
+
     return Container(
       width: double.infinity,
       height: 60,
@@ -131,6 +134,32 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
                   icon: Icon(
                     !_isFullScreen ? Icons.fullscreen : Icons.fullscreen_exit,
                     color: Colors.white,
+                  ),
+                )
+              : const SizedBox(),
+          const Gap(10),
+          datosPublicos['rol'] == '2' || datosPublicos['rol'] == '1'
+              ? OutlinedButton.icon(
+                  onPressed: () {
+                    context.pushNamed(Routes.caja);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      side: const BorderSide(width: 1.0),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(
+                    Icons.point_of_sale_rounded,
+                    color: AppColors.kGeneralPrimaryOrange,
+                    size: 15,
+                  ),
+                  label: Text(
+                    'Inicio/Cierre',
+                    style: GoogleFonts.inter(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 )
               : const SizedBox(),

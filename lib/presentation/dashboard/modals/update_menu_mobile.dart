@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -754,7 +753,7 @@ class _UpdateMenuMobileModalState extends ConsumerState<UpdateMenuMobileModal> {
                             children: [
                               ElevatedButton(
                                 onPressed: () {
-                                  context.pop();
+                                  Navigator.of(context).pop();
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.black,
@@ -856,6 +855,7 @@ class _UpdateMenuMobileModalState extends ConsumerState<UpdateMenuMobileModal> {
       if (message == 'success') {
         //Resetear la categoría seleccionada
         ref.read(categoriaActualProvider.notifier).resetCategoriaSeleccionada();
+        if (!mounted) return;
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           backgroundColor: Colors.blue,
@@ -868,9 +868,11 @@ class _UpdateMenuMobileModalState extends ConsumerState<UpdateMenuMobileModal> {
             textAlign: TextAlign.center,
           ),
         ));
-        context.pop();
+        if (!mounted) return;
+        Navigator.of(context).pop();
       } else {
-        context.pop();
+        if (!mounted) return;
+        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.red,

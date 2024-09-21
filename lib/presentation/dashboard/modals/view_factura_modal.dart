@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -12,7 +11,6 @@ import 'package:pdf/pdf.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:printing/printing.dart';
 import 'dart:convert';
-// ignore: avoid_web_libraries_in_flutter
 import 'package:universal_html/html.dart' as web;
 
 import 'package:ez_order_ezr/data/datos_factura_modelo.dart';
@@ -131,7 +129,7 @@ class _ViewFacturaModalState extends ConsumerState<ViewFacturaModal> {
                   Align(
                     alignment: Alignment.topRight,
                     child: IconButton(
-                      onPressed: () => context.pop(),
+                      onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.close),
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.black.withOpacity(0.1),

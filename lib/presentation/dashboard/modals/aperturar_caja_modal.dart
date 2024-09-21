@@ -1,26 +1,31 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:ez_order_ezr/presentation/providers/caja/caja_abierta.dart';
+import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
-import 'package:ez_order_ezr/presentation/providers/menus_providers/num_pedido_actual.dart';
 
-class TicketModal extends ConsumerStatefulWidget {
-  const TicketModal({super.key});
+class AperturarCajaModal extends ConsumerStatefulWidget {
+  const AperturarCajaModal({required this.restauranteId, super.key});
+  final int restauranteId;
 
   @override
-  ConsumerState<TicketModal> createState() => _TicketModalState();
+  ConsumerState<AperturarCajaModal> createState() => _AperturarCajaModalState();
 }
 
-class _TicketModalState extends ConsumerState<TicketModal> {
-  final TextEditingController _numeroTicketController = TextEditingController();
-  final GlobalKey<FormState> _ticketFormKey = GlobalKey<FormState>();
+class _AperturarCajaModalState extends ConsumerState<AperturarCajaModal> {
+  final TextEditingController _cantidadInicialController =
+      TextEditingController();
+  final GlobalKey<FormState> _aperturarCajaFormKey = GlobalKey<FormState>();
+  bool _isSendingData = false;
 
   @override
   void dispose() {
-    _numeroTicketController.dispose();
+    _cantidadInicialController.dispose();
     super.dispose();
   }
 
@@ -40,12 +45,12 @@ class _TicketModalState extends ConsumerState<TicketModal> {
       ),
       child: SingleChildScrollView(
         child: Form(
-          key: _ticketFormKey,
+          key: _aperturarCajaFormKey,
           child: Column(
             children: [
               //Título
               const Text(
-                'Asignar # de ticket manualmente',
+                '¿Con cuánto efectivo aperturará caja hoy?',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -56,15 +61,16 @@ class _TicketModalState extends ConsumerState<TicketModal> {
               SizedBox(
                 width: 250,
                 child: TextFormField(
-                  controller: _numeroTicketController,
+                  controller: _cantidadInicialController,
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.digitsOnly,
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d+\.?\d{0,2}')),
                   ],
                   autofillHints: const [AutofillHints.name],
                   decoration: InputDecoration(
-                    labelText: 'Nuevo número de ticket',
+                    labelText: 'Efectivo inicial en caja',
                     labelStyle: GoogleFonts.inter(
                       color: AppColors.kTextPrimaryBlack,
                     ),
@@ -133,29 +139,51 @@ class _TicketModalState extends ConsumerState<TicketModal> {
                   ),
                   const Gap(8),
                   ElevatedButton(
-                    onPressed: () {
-                      if (_ticketFormKey.currentState!.validate()) {
-                        //Change current ticket number
-                        int newValue = int.parse(_numeroTicketController.text);
-                        ref
-                            .read(numeroPedidoActualProvider.notifier)
-                            .setCustomNumeroPedido(newValue);
-                        Navigator.of(context).pop();
-                      }
-                    },
+                    onPressed: _isSendingData
+                        ? () {}
+                        : () async {
+                            if (_aperturarCajaFormKey.currentState!
+                                .validate()) {
+                              setState(() => _isSendingData = true);
+                              //Crear el registro de CANTIDAD en caja
+                              await ref
+                                  .read(supabaseManagementProvider.notifier)
+                                  .aperturarCaja(
+                                      widget.restauranteId,
+                                      double.parse(
+                                          _cantidadInicialController.text));
+                              //Cambiar el estado de la CAJA (abierta/cerrada)
+                              ref
+                                  .read(supabaseManagementProvider.notifier)
+                                  .statusCaja(widget.restauranteId, true);
+                              //refrescar el estado local del status de la caja
+                              ref.read(cajaAbiertaProvider.notifier).refresh();
+                              setState(() => _isSendingData = false);
+                              if (!context.mounted) return;
+                              Navigator.of(context).pop(true);
+                            }
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.kGeneralPrimaryOrange,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: Text(
-                      'Nuevo #',
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                    child: _isSendingData
+                        ? SpinPerfect(
+                            infinite: true,
+                            child: const Icon(
+                              Icons.refresh,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            'Aperturar',
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                   ),
                 ],
               ),

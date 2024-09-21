@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:ez_order_ezr/presentation/providers/facturacion/datos_factura_provider.dart';
@@ -686,7 +685,7 @@ class _AdminViewState extends ConsumerState<UpdateDatosFacturacionModal> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         ElevatedButton(
-                          onPressed: () => context.pop(),
+                          onPressed: () => Navigator.of(context).pop(),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.black,
                             shape: RoundedRectangleBorder(
@@ -776,6 +775,7 @@ class _AdminViewState extends ConsumerState<UpdateDatosFacturacionModal> {
         .then((message) {
       setState(() => _isWaitingAnswer = false);
       if (message == 'success') {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           backgroundColor: Colors.blue,
@@ -788,9 +788,11 @@ class _AdminViewState extends ConsumerState<UpdateDatosFacturacionModal> {
             textAlign: TextAlign.center,
           ),
         ));
-        context.pop();
+        if (!mounted) return;
+        Navigator.of(context).pop();
       } else {
-        context.pop();
+        if (!mounted) return;
+        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.red,

@@ -24,6 +24,7 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
         i = 1 -> Agregar Pedido
         i = 2 -> Reportes
         i = 3 -> Facturación
+        i = 4 -> Gastos de Caja
         */
         String pageTitle = '';
         switch (index) {
@@ -38,6 +39,9 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
             break;
           case 3:
             pageTitle = Routes.facturacion;
+            break;
+          case 4:
+            pageTitle = Routes.gastosCaja;
             break;
         }
         navigateTo(context, pageTitle);
@@ -113,6 +117,17 @@ class DashboardBottomNavigationBar extends ConsumerWidget {
                   AppColors.kGeneralPrimaryOrange, BlendMode.srcIn),
             ),
             label: 'Facturación'),
+        const BottomNavigationBarItem(
+            icon: Icon(
+              Icons.point_of_sale,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.point_of_sale,
+              color: AppColors.kGeneralPrimaryOrange,
+              size: 22,
+            ),
+            label: 'Gastos Caja'),
       ],
     );
   }

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -2953,7 +2952,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
             }
 
             void cerrarModal() {
-              context.pop();
+              Navigator.of(context).pop();
             }
 
             return Container(
@@ -3584,7 +3583,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black.withOpacity(0.5),
-      builder: (_) => const Dialog(
+      builder: (context) => const Dialog(
         elevation: 8,
         backgroundColor: Colors.transparent,
         child: AgregarMenuModal(),

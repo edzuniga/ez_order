@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
@@ -77,7 +76,7 @@ class _NotaAdicionalModalState extends ConsumerState<NotaAdicionalModal> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    context.pop();
+                    Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
@@ -99,7 +98,7 @@ class _NotaAdicionalModalState extends ConsumerState<NotaAdicionalModal> {
                     if (_notaAdicionalController.text.isNotEmpty) {
                       //Change current nota adicional
                       _cambiarNotaAdicional();
-                      context.pop();
+                      Navigator.of(context).pop();
                     }
                   },
                   style: ElevatedButton.styleFrom(

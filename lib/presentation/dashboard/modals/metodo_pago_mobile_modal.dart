@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:ez_order_ezr/data/pedido_model.dart';
@@ -464,7 +463,7 @@ class _MetodoPagoMobileModalState extends ConsumerState<MetodoPagoMobileModal> {
                       right: 0,
                       top: 0,
                       child: IconButton(
-                        onPressed: () => context.pop(false),
+                        onPressed: () => Navigator.of(context).pop(false),
                         style: IconButton.styleFrom(
                           backgroundColor: AppColors.kGeneralFadedGray,
                         ),
@@ -489,9 +488,11 @@ class _MetodoPagoMobileModalState extends ConsumerState<MetodoPagoMobileModal> {
     await supabaseClient.agregarPedido(pedidoActual).then((message) {
       setState(() => _isTryingUpload = false);
       if (message == 'success') {
-        context.pop(true);
+        if (!mounted) return;
+        Navigator.of(context).pop(true);
       } else {
-        context.pop(false);
+        if (!mounted) return;
+        Navigator.of(context).pop(false);
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.red,

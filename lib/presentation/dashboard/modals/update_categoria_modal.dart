@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:ez_order_ezr/data/categoria_modelo.dart';
@@ -125,7 +124,7 @@ class _CategoriaModalState extends ConsumerState<UpdateCategoriaModal> {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            context.pop();
+                            Navigator.of(context).pop();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.black,
@@ -175,28 +174,6 @@ class _CategoriaModalState extends ConsumerState<UpdateCategoriaModal> {
                         ),
                       ],
                     ),
-                    /*const Gap(10),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          context.pop();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'Inactivar categoría',
-                          style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),*/
                   ],
                 ),
               ),
@@ -226,9 +203,10 @@ class _CategoriaModalState extends ConsumerState<UpdateCategoriaModal> {
             textAlign: TextAlign.center,
           ),
         ));
-        context.pop();
+        Navigator.of(context).pop();
       } else {
-        context.pop();
+        if (!mounted) return;
+        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.red,

@@ -342,6 +342,7 @@ class _EnPreparacionPageState extends ConsumerState<EnPreparacionPage> {
         .changePedidoStatus(uuIdPedido)
         .then((message) {
       if (message != 'success') {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.red,
@@ -356,6 +357,7 @@ class _EnPreparacionPageState extends ConsumerState<EnPreparacionPage> {
         ));
       } else {
         if (kIsWeb) {
+          if (!mounted) return;
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             backgroundColor: Colors.green,

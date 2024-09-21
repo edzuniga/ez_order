@@ -1,3 +1,4 @@
+import 'package:ez_order_ezr/presentation/dashboard/gastos_caja_view.dart';
 import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -21,6 +22,7 @@ class DashboardPageIndex extends _$DashboardPageIndex {
   i = 1 -> Agregar Pedido
   i = 2 -> Reportes
   i = 3 -> Facturación
+  i = 4 -> Gastos Caja
   */
 
   void changePageIndex(int i) {
@@ -44,6 +46,11 @@ class DashboardPageIndex extends _$DashboardPageIndex {
       case 3:
         pageTitle = 'Facturación';
         view = const FacturacionView();
+        break;
+
+      case 4:
+        pageTitle = 'Gastos de Caja';
+        view = const GastosCajaView();
         break;
     }
     //Dependiendo el index se ajusta el title y view

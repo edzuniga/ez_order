@@ -7,6 +7,9 @@ import 'package:random_string/random_string.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/data/registro_caja_modelo.dart';
+import 'package:ez_order_ezr/data/caja_abierta_modelo.dart';
+import 'package:ez_order_ezr/data/caja_apertura_modelo.dart';
 import 'package:ez_order_ezr/presentation/providers/facturacion/pedido_para_view.dart';
 import 'package:ez_order_ezr/data/factura_modelo.dart';
 import 'package:ez_order_ezr/data/categoria_modelo.dart';
@@ -25,6 +28,7 @@ import 'package:ez_order_ezr/presentation/providers/menus_providers/pedido_detal
 import 'package:ez_order_ezr/data/menu_item_model.dart';
 import 'package:ez_order_ezr/data/cliente_modelo.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
+
 part 'supabase_instance.g.dart';
 
 @Riverpod(keepAlive: true)
@@ -295,12 +299,149 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Agregar un Gasto de Caja
+  Future<String> agregarGastoCaja(RegistroCajaModelo registroCaja) async {
+    Map<String, dynamic> mapa = registroCaja.toJson();
+    try {
+      await state.from('registros_caja').insert(mapa);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return e.message;
+    }
+  }
+
+  //Actualizar un Gasto de Caja
+  Future<String> actualizarGastoCaja(RegistroCajaModelo registroCaja) async {
+    Map<String, dynamic> mapa = registroCaja.toJson();
+    try {
+      await state
+          .from('registros_caja')
+          .update(mapa)
+          .eq('id', registroCaja.id!);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return e.message;
+    }
+  }
+
+  //Borrar un Gasto de Caja
+  Future<String> borrarGastoCajaPorId(int id) async {
+    try {
+      await state.from('registros_caja').delete().eq('id', id);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return e.message;
+    }
+  }
+
+  //Borrar un Gasto de Caja
+  Future<String> borrarGastoCajaPorUuidPedido(String uuid) async {
+    try {
+      await state.from('registros_caja').delete().eq('uuid_pedido', uuid);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return e.message;
+    }
+  }
+
+  //Obtener Gastos de Caja por restaurante
+  Future<RegistroCajaModelo> getGastosCajaPorId(int id) async {
+    List<RegistroCajaModelo> listado = [];
+    try {
+      final res = await state.from('registros_caja').select().eq('id', id);
+
+      for (var element in res) {
+        RegistroCajaModelo modelo = RegistroCajaModelo.fromJson(element);
+        listado.add(modelo);
+      }
+      return listado.first;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error: ${e.message}';
+    }
+  }
+
+  //Obtener Gastos de Caja por restaurante
+  Future<List<RegistroCajaModelo>> getGastosCajaPorRestaurante(
+      int restauranteId) async {
+    List<RegistroCajaModelo> listado = [];
+    try {
+      // Obtener la fecha actual
+      final DateTime today = DateTime.now();
+      final res = await state
+          .from('registros_caja')
+          .select()
+          .eq('restaurante_id', restauranteId)
+          .gte('created_at',
+              today.toString().substring(0, 10)) // desde el inicio del día
+          .lt(
+              'created_at',
+              today
+                  .add(const Duration(days: 1))
+                  .toString()
+                  .substring(0, 10)) // antes del siguiente día
+          .order('id', ascending: false);
+
+      for (var element in res) {
+        RegistroCajaModelo modelo = RegistroCajaModelo.fromJson(element);
+        listado.add(modelo);
+      }
+      return listado;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error: ${e.message}';
+    }
+  }
+
+  //Obtener un Gastos de Caja por uuid_pedido
+  Future<bool> existeGastosCajaPorUuidPedido(String uuid) async {
+    try {
+      final res = await state
+          .from('registros_caja')
+          .select()
+          .eq('uuid_pedido', uuid)
+          .count(CountOption.exact);
+      if (res.count > 0) {
+        return true;
+      }
+      return false;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error: ${e.message}';
+    }
+  }
+
+  //Aperturar caja e un restaurante
+  Future<String> aperturarCaja(int restauranteId, double cantidad) async {
+    try {
+      await state.from('caja').insert({
+        'created_at': DateTime.now().toIso8601String(),
+        'restaurante_uid': restauranteId,
+        'cantidad': cantidad,
+      });
+      return 'success';
+    } on PostgrestException catch (e) {
+      return e.message;
+    }
+  }
+
   //Agregar pedido
   Future<String> agregarPedido(PedidoModel pedido) async {
     Map<String, dynamic> mapaPedido = pedido.toJson();
     try {
       final resPedido = await state.from('pedidos').insert(mapaPedido).select();
       String pedidoUuid = resPedido.first['uuid_pedido'];
+
+      //Guardar el ingreso en registro de CAJA (SOLO si fue en EFECTIVO)
+      if (pedido.idMetodoPago == 1) {
+        RegistroCajaModelo registroCaja = RegistroCajaModelo(
+          createdAt: DateTime.now(),
+          restauranteId: pedido.idRestaurante,
+          ingreso: pedido.total,
+          egreso: null,
+          proveedor: null,
+          descripcion: 'Compra en efectivo',
+          uuidPedido: pedidoUuid,
+        );
+        await agregarGastoCaja(registroCaja);
+      }
 
       //Guardar los detalles del pedido
       List<PedidoDetalleModel> listadoProviDetalles =
@@ -614,6 +755,11 @@ class SupabaseManagement extends _$SupabaseManagement {
       await state.from('pedidos_items').delete().eq('uuid_pedido', uuIdPedido);
       //Luego borrar la factura asociada a ese pedido
       await state.from('facturas').delete().eq('uuid_pedido', uuIdPedido);
+      //Borrar el ingreso en caja (solo si fue en efectivo y si existiera)
+      bool registroCajaExiste = await existeGastosCajaPorUuidPedido(uuIdPedido);
+      if (registroCajaExiste) {
+        await borrarGastoCajaPorUuidPedido(uuIdPedido);
+      }
       //por último borrar el pedido
       await state.from('pedidos').delete().eq('uuid_pedido', uuIdPedido);
       return 'success';
@@ -753,7 +899,28 @@ class SupabaseManagement extends _$SupabaseManagement {
           .eq('id_categoria', cat.idCategoria!);
       return 'success';
     } on PostgrestException catch (e) {
-      return 'Ocurrió un error al querer agregar la categoría -> ${e.message}';
+      return 'Ocurrió un error al querer actualizar la categoría -> ${e.message}';
+    }
+  }
+
+  Future<String> actualizarCajaApertura(CajaAperturaModelo cajaApertura) async {
+    Map<String, dynamic> mapa = cajaApertura.toJson();
+    try {
+      await state.from('caja').update(mapa).eq('id', cajaApertura.id!);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return 'Ocurrió un error al querer actualizar la categoría -> ${e.message}';
+    }
+  }
+
+  Future<String> statusCaja(int restauranteId, bool status) async {
+    try {
+      await state.from('caja_abierta').update({
+        'abierto': status,
+      }).eq('restaurante_uid', restauranteId);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return 'Ocurrió un error al querer actualizar el registro -> ${e.message}';
     }
   }
 
@@ -838,6 +1005,57 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  Future<CajaAbiertaModelo> getCajaAbierta(int restauranteId) async {
+    try {
+      List<Map<String, dynamic>> res = await state
+          .from('caja_abierta')
+          .select()
+          .eq('restaurante_uid', restauranteId);
+      List<CajaAbiertaModelo> listado = [];
+      for (var element in res) {
+        CajaAbiertaModelo modelo = CajaAbiertaModelo.fromJson(element);
+        listado.add(modelo);
+      }
+      return listado.first;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error -> ${e.message}';
+    }
+  }
+
+  Future<List<CajaAperturaModelo>> getCajaAperturasPorRestaurante(
+      int restauranteId) async {
+    try {
+      List<Map<String, dynamic>> res = await state
+          .from('caja')
+          .select()
+          .eq('restaurante_uid', restauranteId)
+          .order('id', ascending: false);
+      List<CajaAperturaModelo> listado = [];
+      for (var element in res) {
+        CajaAperturaModelo modelo = CajaAperturaModelo.fromJson(element);
+        listado.add(modelo);
+      }
+      return listado;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error -> ${e.message}';
+    }
+  }
+
+  Future<CajaAperturaModelo> getCajaApertura(int id) async {
+    try {
+      List<Map<String, dynamic>> res =
+          await state.from('caja').select().eq('id', id);
+      List<CajaAperturaModelo> listado = [];
+      for (var element in res) {
+        CajaAperturaModelo modelo = CajaAperturaModelo.fromJson(element);
+        listado.add(modelo);
+      }
+      return listado.first;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error -> ${e.message}';
+    }
+  }
+
   Future<List<FacturaModelo>> getFacturasYDetallesPorFecha(
       DateTime fecha) async {
     Map<String, String> datosPublicos = ref.read(userPublicDataProvider);
@@ -877,6 +1095,32 @@ class SupabaseManagement extends _$SupabaseManagement {
       return 'success';
     } on PostgrestException catch (e) {
       return 'Ocurrió un error -> ${e.message}';
+    }
+  }
+
+  //Calcular el total en el cierre de caja
+  Future<double> calcularTotalCierreCaja(int resId) async {
+    //Obtener el dato de la última apertura de la caja
+    try {
+      final res = await getCajaAperturasPorRestaurante(resId);
+      double cantidadInicioCaja =
+          res.first.cantidad; //Cantidad de inicio de caja
+
+      //Obtener los gastos del día
+      List<RegistroCajaModelo> listado =
+          await getGastosCajaPorRestaurante(resId);
+
+      for (RegistroCajaModelo element in listado) {
+        if (element.egreso != null) {
+          cantidadInicioCaja -= element.egreso!;
+        } else {
+          cantidadInicioCaja += element.ingreso!;
+        }
+      }
+
+      return cantidadInicioCaja;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error al querer hacer la consulta -> ${e.message}';
     }
   }
 }
