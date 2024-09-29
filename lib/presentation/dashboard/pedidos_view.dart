@@ -29,6 +29,7 @@ class PedidosView extends ConsumerStatefulWidget {
 }
 
 class _PedidosViewState extends ConsumerState<PedidosView> {
+  bool _isDisposed = false;
   late SupabaseClient _supabase;
   late Stream<List<Map<String, dynamic>>> _stream;
   late Stream<List<Map<String, dynamic>>> _pedidosStreamPorEntregar;
@@ -84,25 +85,32 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
 
   @override
   void dispose() {
+    _isDisposed = true;
     super.dispose();
   }
 
   Future<void> countMenuSimpleStatistics() async {
+    if (_isDisposed || !mounted) return;
     _countMenu =
         await ref.read(supabaseManagementProvider.notifier).countMenuItems();
+    if (_isDisposed || !mounted) return;
     _countPedidos = await ref
         .read(supabaseManagementProvider.notifier)
         .countPedidosDelDia();
+    if (_isDisposed || !mounted) return;
     _countClientes =
         await ref.read(supabaseManagementProvider.notifier).countClientes();
+    if (_isDisposed || !mounted) return;
     _countPedidosEnPreparacion = await ref
         .read(supabaseManagementProvider.notifier)
         .countPedidosDelDiaEnPreparacion();
+    if (_isDisposed || !mounted) return;
     _countPedidosEntregados = await ref
         .read(supabaseManagementProvider.notifier)
         .countPedidosDelDiaEntregados();
-
-    setState(() {});
+    if (!_isDisposed && mounted) {
+      setState(() {});
+    }
   }
 
   @override

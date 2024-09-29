@@ -218,7 +218,7 @@ class _CajaPageState extends ConsumerState<CajaPage> {
                   const Gap(20),
                   Expanded(
                     child: Container(
-                      width: 400,
+                      width: 800,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
                         color: Colors.black.withOpacity(0.02),
@@ -233,45 +233,93 @@ class _CajaPageState extends ConsumerState<CajaPage> {
                             ),
                           ),
                           Expanded(
-                            child: ListView.separated(
-                              itemCount: _aperturas.length,
-                              separatorBuilder: (context, index) =>
-                                  const Divider(),
-                              itemBuilder: (context, index) {
-                                final apertura = _aperturas[index];
-                                String formattedDate =
-                                    DateFormat.yMMMMEEEEd('es_ES')
-                                        .add_Hm()
-                                        .format(apertura.createdAt);
-                                String cierreCantidad =
-                                    apertura.cantidadCierre != null
-                                        ? apertura.cantidadCierre.toString()
-                                        : 'N/A';
-                                return ListTile(
-                                  leading: const Icon(
-                                    Icons.check_box,
-                                    color: Colors.green,
-                                  ),
-                                  title: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                          'Aperturó con saldo: L ${apertura.cantidad}'),
-                                      Text(
-                                          'Cerró con saldo: L $cierreCantidad'),
-                                    ],
-                                  ),
-                                  subtitle: Text('Fecha: $formattedDate'),
-                                  trailing: IconButton(
-                                    onPressed: () async {
-                                      await _editarCajaModal(apertura.id!);
-                                    },
-                                    icon: const Icon(Icons.edit),
-                                    color: Colors.blue,
-                                  ),
-                                );
-                              },
+                            child: RefreshIndicator(
+                              onRefresh: () => ref
+                                  .read(cajaAbiertaProvider.notifier)
+                                  .refresh(),
+                              child: ListView.separated(
+                                itemCount: _aperturas.length,
+                                separatorBuilder: (context, index) =>
+                                    const Divider(),
+                                itemBuilder: (context, index) {
+                                  final apertura = _aperturas[index];
+                                  String formattedDate =
+                                      DateFormat.yMMMMEEEEd('es_ES')
+                                          .add_Hm()
+                                          .format(apertura.createdAt);
+                                  String cierreCantidad =
+                                      apertura.cantidadCierre != null
+                                          ? apertura.cantidadCierre.toString()
+                                          : 'N/A';
+                                  String totalEfectivo =
+                                      apertura.totalEfectivo != null
+                                          ? apertura.totalEfectivo.toString()
+                                          : 'N/A';
+                                  String totalTarjeta =
+                                      apertura.totalTarjeta != null
+                                          ? apertura.totalTarjeta.toString()
+                                          : 'N/A';
+                                  String totalTransferencia =
+                                      apertura.totalTransferencia != null
+                                          ? apertura.totalTransferencia
+                                              .toString()
+                                          : 'N/A';
+                                  double ingresosTotales = 0.0;
+                                  apertura.totalEfectivo != null
+                                      ? ingresosTotales +=
+                                          apertura.totalEfectivo!
+                                      : null;
+                                  apertura.totalTarjeta != null
+                                      ? ingresosTotales +=
+                                          apertura.totalTarjeta!
+                                      : null;
+                                  apertura.totalTransferencia != null
+                                      ? ingresosTotales +=
+                                          apertura.totalTransferencia!
+                                      : null;
+                                  String totalGastos =
+                                      apertura.totalGastos != null
+                                          ? apertura.totalGastos.toString()
+                                          : 'N/A';
+                                  String totalIngresosDelDia = '';
+                                  totalIngresosDelDia =
+                                      ingresosTotales.toString();
+                                  return ListTile(
+                                    leading: const Icon(
+                                      Icons.check_box,
+                                      color: Colors.green,
+                                    ),
+                                    title: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                            'Aperturó con saldo: L ${apertura.cantidad}'),
+                                        Text(
+                                            'Efectivo con el que cerró en la caja: L $cierreCantidad'),
+                                        Text(
+                                            'Total efectivo del día: L $totalEfectivo'),
+                                        Text(
+                                            'Total POS del día: L $totalTarjeta'),
+                                        Text(
+                                            'Total transferencia del día: L $totalTransferencia'),
+                                        Text(
+                                            'Total de INGRESOS: L $totalIngresosDelDia'),
+                                        Text(
+                                            'Total gastos del día: L $totalGastos'),
+                                      ],
+                                    ),
+                                    subtitle: Text('Fecha: $formattedDate'),
+                                    trailing: IconButton(
+                                      onPressed: () async {
+                                        await _editarCajaModal(apertura.id!);
+                                      },
+                                      icon: const Icon(Icons.edit),
+                                      color: Colors.blue,
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ],

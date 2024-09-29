@@ -408,7 +408,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
-  //Aperturar caja e un restaurante
+  //Aperturar caja de un restaurante
   Future<String> aperturarCaja(int restauranteId, double cantidad) async {
     try {
       await state.from('caja').insert({
@@ -921,6 +921,19 @@ class SupabaseManagement extends _$SupabaseManagement {
       return 'success';
     } on PostgrestException catch (e) {
       return 'Ocurrió un error al querer actualizar el registro -> ${e.message}';
+    }
+  }
+
+  Future<bool> cajaCerradaoAbierta(int restauranteId) async {
+    try {
+      final res = await state
+          .from('caja_abierta')
+          .select('abierto')
+          .eq('restaurante_uid', restauranteId);
+      bool statusDeCaja = res.first['abierto'];
+      return statusDeCaja;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error al querer actualizar el registro -> ${e.message}';
     }
   }
 

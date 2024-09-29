@@ -1,21 +1,20 @@
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+
 import 'package:ez_order_ezr/data/registro_caja_modelo.dart';
 import 'package:ez_order_ezr/data/restaurante_modelo.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/borrar_gasto_caja_modal.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/update_gasto_caja_modal.dart';
-import 'package:ez_order_ezr/presentation/providers/caja/caja_abierta.dart';
 import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/duenos_restaurantes_provider.dart';
 import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/restaurante_gastos_caja.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/add_gasto_caja_modal.dart';
-import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 
 class GastosCajaView extends ConsumerStatefulWidget {
   const GastosCajaView({super.key});
@@ -25,11 +24,16 @@ class GastosCajaView extends ConsumerStatefulWidget {
 }
 
 class _GastosCajaViewState extends ConsumerState<GastosCajaView> {
+  int userIdRestaurante = 0;
   List<RegistroCajaModelo> listadoRegistros = [];
 
   @override
   void initState() {
     super.initState();
+    setState(() {
+      userIdRestaurante = int.parse(
+          ref.read(userPublicDataProvider)['id_restaurante'].toString());
+    });
   }
 
   Future<List<RestauranteModelo>> _obtenerRestaurantes() async {
@@ -65,7 +69,7 @@ class _GastosCajaViewState extends ConsumerState<GastosCajaView> {
   Widget build(BuildContext context) {
     RestauranteModelo cajaRestauranteActual =
         ref.watch(restauranteSeleccionadoGastosCajaProvider);
-    final cajaAbierta = ref.watch(cajaAbiertaProvider);
+
     return Container(
       padding: const EdgeInsets.all(15),
       width: double.infinity,
@@ -77,49 +81,68 @@ class _GastosCajaViewState extends ConsumerState<GastosCajaView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          cajaAbierta.when(
-            data: (data) {
-              return data
-                  ? Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton.icon(
-                          onPressed: () async {
-                            await _addGastoCajaModal();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.kGeneralPrimaryOrange,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          icon: const Icon(
-                            Icons.add,
-                            color: Colors.white,
-                          ),
-                          label: const Text(
-                            'Agregar gasto',
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
-                          )),
-                    )
-                  : Container(
-                      padding: const EdgeInsets.all(8),
-                      color: Colors.red,
-                      child: const Text(
-                        'Caja está cerrada',
-                        style: TextStyle(color: Colors.white),
+          FutureBuilder(
+            future: ref
+                .read(supabaseManagementProvider.notifier)
+                .cajaCerradaoAbierta(userIdRestaurante),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Por favor espere.'),
+                      CircularProgressIndicator(),
+                    ],
+                  ),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Text('Ocurrió un error!!'),
+                );
+              }
+
+              if (snapshot.data!) {
+                return Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton.icon(
+                      onPressed: () async {
+                        await _addGastoCajaModal();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.kGeneralPrimaryOrange,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                    );
+                      icon: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
+                      label: const Text(
+                        'Agregar gasto',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      )),
+                );
+              } else {
+                return Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    color: Colors.red,
+                    child: const Text(
+                      'Caja está cerrada',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                );
+              }
             },
-            error: (error, stackTrace) => const Align(
-              alignment: Alignment.centerRight,
-              child: Text('Ocurrió un error'),
-            ),
-            loading: () => const Align(
-              alignment: Alignment.centerRight,
-              child: CircularProgressIndicator(),
-            ),
           ),
           Center(
             child: Column(

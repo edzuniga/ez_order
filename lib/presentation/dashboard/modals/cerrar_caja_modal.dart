@@ -1,10 +1,12 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:ez_order_ezr/data/caja_apertura_modelo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:ez_order_ezr/data/caja_apertura_modelo.dart';
+import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/reportes_valores_provider.dart';
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/providers/caja/caja_abierta.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
@@ -19,6 +21,40 @@ class CerrarCajaModal extends ConsumerStatefulWidget {
 
 class _CerrarCajaModalState extends ConsumerState<CerrarCajaModal> {
   bool _isSendingData = false;
+  double gastosTotales = 0.0;
+  double cierreCajavalor = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    hacerCalculosDeCierre();
+  }
+
+  Future<void> hacerCalculosDeCierre() async {
+    setState(() => _isSendingData = true);
+    int userIdRestaurante = int.parse(
+        ref.read(userPublicDataProvider)['id_restaurante'].toString());
+
+    await ref
+        .read(valoresReportesProvider.notifier)
+        .hacerCalculosReporte(userIdRestaurante);
+
+    final gastosDelDia = await ref
+        .read(supabaseManagementProvider.notifier)
+        .getGastosCajaPorRestaurante(userIdRestaurante);
+
+    //Calcular el valor que debe estar en caja
+    cierreCajavalor = await ref
+        .read(supabaseManagementProvider.notifier)
+        .calcularTotalCierreCaja(widget.cajaApertura.restauranteUid);
+
+    for (var element in gastosDelDia) {
+      if (element.egreso != null) {
+        gastosTotales += element.egreso!;
+      }
+    }
+    setState(() => _isSendingData = false);
+  }
 
   @override
   void dispose() {
@@ -27,9 +63,9 @@ class _CerrarCajaModalState extends ConsumerState<CerrarCajaModal> {
 
   @override
   Widget build(BuildContext context) {
+    final valoresReporte = ref.watch(valoresReportesProvider);
     return Container(
-      height: 150,
-      width: 250,
+      width: 350,
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         border: Border.all(
@@ -40,97 +76,137 @@ class _CerrarCajaModalState extends ConsumerState<CerrarCajaModal> {
         color: Colors.white,
       ),
       child: SingleChildScrollView(
-        child: Column(
-          children: [
-            //Título
-            const Text(
-              '¿Está seguro de cerrar la caja?',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            const Gap(25),
-
-            //Botones
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+        child: !_isSendingData
+            ? Column(
+                children: [
+                  //Título
+                  const Text(
+                    '¿Está seguro de cerrar la caja?',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
                   ),
-                  child: Text(
-                    'Cancelar',
-                    style: GoogleFonts.inter(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                const Gap(8),
-                ElevatedButton(
-                  onPressed: _isSendingData
-                      ? () {}
-                      : () async {
-                          setState(() => _isSendingData = true);
+                  const Gap(15),
+                  Text('Aperturó caja: L ${widget.cajaApertura.cantidad}'),
+                  Text('Total efectivo: L ${valoresReporte.totalEfectivo}'),
+                  Text('Total POS: L ${valoresReporte.totalTarjeta}'),
+                  Text(
+                      'Total Transferencia: L ${valoresReporte.totalTransferencia}'),
+                  Text(
+                      'Total de ingresos: L ${valoresReporte.ingresosDiarios}'),
+                  Text('Efectivo que debe haber en caja: L $cierreCajavalor'),
+                  Text('Total de gastos: L $gastosTotales'),
+                  const Gap(25),
 
-                          //Calcular el valor que debe estar en caja
-                          double cierreCajavalor = await ref
-                              .read(supabaseManagementProvider.notifier)
-                              .calcularTotalCierreCaja(
-                                  widget.cajaApertura.restauranteUid);
-                          //Actualizar el valor de caja
-                          CajaAperturaModelo modelo =
-                              widget.cajaApertura.copyWith(
-                            cantidadCierre: cierreCajavalor,
-                          );
-                          await ref
-                              .read(supabaseManagementProvider.notifier)
-                              .actualizarCajaApertura(modelo);
-                          //Cambiar el estado de la CAJA (abierta/cerrada)
-                          ref
-                              .read(supabaseManagementProvider.notifier)
-                              .statusCaja(
-                                  widget.cajaApertura.restauranteUid, false);
-                          //refrescar el estado local del status de la caja
-                          ref.read(cajaAbiertaProvider.notifier).refresh();
-                          setState(() => _isSendingData = false);
-                          if (!context.mounted) return;
-                          Navigator.of(context).pop(true);
+                  //Botones
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
                         },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.kGeneralPrimaryOrange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: _isSendingData
-                      ? SpinPerfect(
-                          infinite: true,
-                          child: const Icon(
-                            Icons.refresh,
-                            color: Colors.white,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                        )
-                      : Text(
-                          'Cerrar',
+                        ),
+                        child: Text(
+                          'Cancelar',
                           style: GoogleFonts.inter(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                ),
-              ],
-            ),
-          ],
-        ),
+                      ),
+                      const Gap(8),
+                      ElevatedButton(
+                        onPressed: _isSendingData
+                            ? () {}
+                            : () async {
+                                setState(() => _isSendingData = true);
+
+                                //Actualizar el valor de caja
+                                CajaAperturaModelo modelo =
+                                    widget.cajaApertura.copyWith(
+                                  cantidadCierre: cierreCajavalor,
+                                  totalEfectivo: valoresReporte.totalEfectivo,
+                                  totalTarjeta: valoresReporte.totalTarjeta,
+                                  totalTransferencia:
+                                      valoresReporte.totalTransferencia,
+                                  totalGastos: gastosTotales,
+                                );
+                                await ref
+                                    .read(supabaseManagementProvider.notifier)
+                                    .actualizarCajaApertura(modelo);
+                                //Cambiar el estado de la CAJA (abierta/cerrada)
+                                ref
+                                    .read(supabaseManagementProvider.notifier)
+                                    .statusCaja(
+                                        widget.cajaApertura.restauranteUid,
+                                        false);
+                                //refrescar el estado local del status de la caja
+                                ref
+                                    .read(cajaAbiertaProvider.notifier)
+                                    .refresh();
+                                setState(() => _isSendingData = false);
+                                if (!context.mounted) return;
+                                Navigator.of(context).pop(true);
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.kGeneralPrimaryOrange,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: _isSendingData
+                            ? SpinPerfect(
+                                infinite: true,
+                                child: const Icon(
+                                  Icons.refresh,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                'Cerrar',
+                                style: GoogleFonts.inter(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                      ),
+                    ],
+                  ),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(),
+                  const Gap(15),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      'Cancelar',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }

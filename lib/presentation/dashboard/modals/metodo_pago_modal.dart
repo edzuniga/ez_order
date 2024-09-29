@@ -1,10 +1,10 @@
-import 'package:ez_order_ezr/presentation/providers/caja/caja_abierta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/data/pedido_model.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/providers/menus_providers/metodo_pago_actual.dart';
@@ -23,12 +23,21 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
   bool _isTryingUpload = false;
   final TextEditingController _conCuantoPagaCliente = TextEditingController();
   double vuelto = 0.00;
+  int userIdRestaurante = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      userIdRestaurante = int.parse(
+          ref.read(userPublicDataProvider)['id_restaurante'].toString());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     PedidoModel pedidoActualInfo = ref.watch(pedidoActualProvider);
     MetodoDePagoEnum metodoSeleccionado = ref.watch(metodoPagoActualProvider);
-    final cajaAbierta = ref.watch(cajaAbiertaProvider);
     return Container(
       height: 700,
       width: 500,
@@ -52,9 +61,31 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                 ],
               ),
             )
-          : cajaAbierta.when(
-              data: (data) {
-                if (data) {
+          : FutureBuilder(
+              future: ref
+                  .read(supabaseManagementProvider.notifier)
+                  .cajaCerradaoAbierta(userIdRestaurante),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Por favor espere.'),
+                        CircularProgressIndicator(),
+                      ],
+                    ),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Text('Ocurrió un error!!'),
+                  );
+                }
+
+                if (snapshot.data!) {
                   return SingleChildScrollView(
                     child: Stack(
                       children: [
@@ -567,14 +598,7 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                     ),
                   );
                 }
-              },
-              error: (error, stacktrace) => const Center(
-                child: Text('Ocurrió un error!! Contacte soporte.'),
-              ),
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
+              }),
     );
   }
 
