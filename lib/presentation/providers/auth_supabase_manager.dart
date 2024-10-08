@@ -26,18 +26,16 @@ class AuthManager extends _$AuthManager {
   }
 
   //Check auth status
-  Future<int> chechAuthStatus() async {
-    //1 = AUTHENTICATED
-    //2 = NOT AUTHENTICATED
+  Future<bool> checkAuthStatus() async {
     final supabase = getSupabaseInstance();
     final session = supabase.auth.currentSession;
 
     if (session != null) {
       state = true;
-      return 1;
+      return state;
     } else {
       state = false;
-      return 2;
+      return state;
     }
   }
 

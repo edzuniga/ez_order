@@ -4,6 +4,8 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import 'package:ez_order_ezr/presentation/dashboard/modals/borrar_pedido_modal.dart';
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/view_factura_modal.dart';
 import 'package:ez_order_ezr/data/factura_modelo.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
@@ -17,9 +19,15 @@ class FacturasDeHoyView extends ConsumerStatefulWidget {
 }
 
 class _FacturasDeHoyViewState extends ConsumerState<FacturasDeHoyView> {
+  String rol = '';
   @override
   void initState() {
     super.initState();
+    if (ref.read(userPublicDataProvider)['rol'] != null) {
+      setState(() {
+        rol = ref.read(userPublicDataProvider)['rol'].toString();
+      });
+    }
   }
 
   @override
@@ -137,6 +145,23 @@ class _FacturasDeHoyViewState extends ConsumerState<FacturasDeHoyView> {
                             ),
                           ),
                           const Gap(15),
+                          //Borrar
+                          (rol != '' && (rol == '1' || rol == '2'))
+                              ? IconButton(
+                                  onPressed: () async {
+                                    await _tryBorrarPedido(factura.uuidPedido);
+                                  },
+                                  tooltip: 'Borrar',
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                  ),
+                                  icon: const Icon(
+                                    Icons.delete_forever,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const SizedBox(),
+                          const Gap(8),
                           //VER
                           IconButton(
                             onPressed: () {
@@ -144,7 +169,7 @@ class _FacturasDeHoyViewState extends ConsumerState<FacturasDeHoyView> {
                             },
                             tooltip: 'Ver',
                             style: IconButton.styleFrom(
-                              backgroundColor: AppColors.kGeneralPrimaryOrange,
+                              backgroundColor: Colors.blue,
                             ),
                             icon: const Icon(
                               Icons.remove_red_eye_outlined,
@@ -178,5 +203,22 @@ class _FacturasDeHoyViewState extends ConsumerState<FacturasDeHoyView> {
         ),
       ),
     );
+  }
+
+  Future<void> _tryBorrarPedido(String uuIdPedido) async {
+    bool? res = await showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.5),
+      builder: (_) => Dialog(
+        elevation: 8,
+        backgroundColor: Colors.transparent,
+        child: BorrarPedidoModal(uuIdPedido: uuIdPedido),
+      ),
+    );
+
+    if (res != null) {
+      setState(() {});
+    }
   }
 }

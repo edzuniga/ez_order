@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:animate_do/animate_do.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +10,7 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/widgets/pedidos_widgets/estadistica_sencilla_mobile_widget.dart';
 import 'package:ez_order_ezr/utils/web_specific.dart';
 import 'package:ez_order_ezr/presentation/providers/reportes/column_table.dart';
@@ -25,7 +25,6 @@ import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/reportes
 import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/restaurante_seleccionado_provider.dart';
 import 'package:ez_order_ezr/data/restaurante_modelo.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
-import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/duenos_restaurantes_provider.dart';
 import 'package:ez_order_ezr/presentation/widgets/pedidos_widgets/estadistica_sencilla_widget.dart';
 
 class ReportesView extends ConsumerStatefulWidget {
@@ -46,18 +45,37 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
   bool _isShowingReport = false;
   bool _isUpdatingDatosDiarios = false;
   bool _isRetrievingGraphData = false;
+  bool _tienePermiso = false;
+  late int userIdRestaurante;
 
   @override
   void initState() {
     super.initState();
-    //Poblar dropdown de restaurantes
-    _obtenerRestaurantes();
+
+    //Verificar si tiene permiso para ver los datos
+    WidgetsBinding.instance.addPostFrameCallback((v) {
+      if (ref.read(userPublicDataProvider)['rol'] == '1' ||
+          ref.read(userPublicDataProvider)['rol'] == '2') {
+        userIdRestaurante = int.parse(
+            ref.read(userPublicDataProvider)['id_restaurante'].toString());
+
+        setRestauranteActual();
+        setState(() => _tienePermiso = true);
+      }
+    });
   }
 
-  Future<List<RestauranteModelo>> _obtenerRestaurantes() async {
-    return await ref
-        .read(duenosResManagerProvider.notifier)
-        .obtenerRestaurantesPorDueno();
+  Future<void> setRestauranteActual() async {
+    RestauranteModelo rest = await ref
+        .read(supabaseManagementProvider.notifier)
+        .obtenerRestaurantePorId(userIdRestaurante);
+    //Asignar el restaurante selecto al provider
+    ref
+        .read(restauranteSeleccionadoProvider.notifier)
+        .setRestauranteSeleccionado(rest);
+
+    await _hacerCalculosReportesDiarios();
+    setState(() {});
   }
 
   @override
@@ -78,15 +96,21 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
     List<DataColumn> columnsTable = ref.watch(pedidosTableColumnsProvider);
 
     if (kIsWeb) {
-      return webView(restauranteActual, context, valoresReporte, datosGrafico,
-          rowsTable, columnsTable);
-    } else {
-      if (orientation == Orientation.portrait) {
-        return mobilePortraitView(restauranteActual, context, valoresReporte,
-            datosGrafico, rowsTable, columnsTable, screenSize);
+      if (_tienePermiso) {
+        return webView(restauranteActual, context, valoresReporte, datosGrafico,
+            rowsTable, columnsTable);
       }
-      return webView(restauranteActual, context, valoresReporte, datosGrafico,
-          rowsTable, columnsTable);
+      return noPermissionView();
+    } else {
+      if (_tienePermiso) {
+        if (orientation == Orientation.portrait) {
+          return mobilePortraitView(restauranteActual, context, valoresReporte,
+              datosGrafico, rowsTable, columnsTable, screenSize);
+        }
+        return webView(restauranteActual, context, valoresReporte, datosGrafico,
+            rowsTable, columnsTable);
+      }
+      return noPermissionView();
     }
   }
 
@@ -112,138 +136,67 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
           child: Column(
             children: [
               //Selector de restaurantes del DUEÑO
-              SizedBox(
-                width: double.infinity,
-                child: Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    SizedBox(
-                      height: 48,
-                      width: 350,
-                      child: DropdownSearch<RestauranteModelo>(
-                        asyncItems: (filter) async {
-                          return await _obtenerRestaurantes();
-                        },
-                        dropdownDecoratorProps: DropDownDecoratorProps(
-                          dropdownSearchDecoration: InputDecoration(
-                            hintText: 'Seleccione restaurante',
-                            hintStyle: GoogleFonts.inter(
-                              color: AppColors.kTextSecondaryGray,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                color: Colors.white,
-                                width: 2.0,
-                              ),
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                color: AppColors.kGeneralPrimaryOrange,
-                                width: 2.0,
-                              ),
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                color: AppColors.kGeneralErrorColor,
-                                width: 2.0,
-                              ),
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            focusedErrorBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                color: AppColors.kGeneralErrorColor,
-                                width: 2.0,
-                              ),
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            filled: true,
-                            fillColor: AppColors.kInputLiteGray,
-                          ),
-                        ),
-                        itemAsString: (RestauranteModelo r) =>
-                            r.restauranteAsString(),
-                        onChanged: (RestauranteModelo? data) async {
-                          if (data != null) {
-                            //Asignar el restaurante selecto al provider
-                            ref
-                                .read(restauranteSeleccionadoProvider.notifier)
-                                .setRestauranteSeleccionado(data);
-                            await _hacerCalculosReportesDiarios();
-                          }
-                        },
-                        selectedItem: restauranteActual,
-                      ),
-                    ),
-                    const Gap(15),
-                    ElevatedButton.icon(
-                      onPressed: _isUpdatingDatosDiarios
-                          ? null
-                          : () async {
-                              if (restauranteActual.nombreRestaurante !=
-                                  'No ha seleccionado...') {
-                                await _hacerCalculosReportesDiarios();
-                              } else {
-                                if (kIsWeb) {
-                                  ScaffoldMessenger.of(context)
-                                      .clearSnackBars();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          backgroundColor: Colors.red,
-                                          content: Text(
-                                              'Debe seleccionar restaurante!!',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                              ))));
-                                } else {
-                                  Fluttertoast.cancel();
-                                  Fluttertoast.showToast(
-                                    msg: 'Debe seleccionar restaurante!!',
-                                    toastLength: Toast.LENGTH_LONG,
-                                    gravity: ToastGravity.CENTER,
-                                    timeInSecForIosWeb: 4,
+              ElevatedButton.icon(
+                onPressed: _isUpdatingDatosDiarios
+                    ? null
+                    : () async {
+                        if (restauranteActual.nombreRestaurante !=
+                            'No ha seleccionado...') {
+                          await _hacerCalculosReportesDiarios();
+                        } else {
+                          if (kIsWeb) {
+                            ScaffoldMessenger.of(context).clearSnackBars();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
                                     backgroundColor: Colors.red,
-                                    textColor: Colors.white,
-                                    fontSize: 16.0,
-                                    webPosition: 'center',
-                                    webBgColor: 'red',
-                                  );
-                                }
-                              }
-                            },
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          )),
-                      icon: _isUpdatingDatosDiarios
-                          ? SpinPerfect(
-                              infinite: true,
-                              child: const Icon(
-                                Icons.refresh,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(
-                              Icons.refresh,
-                              color: Colors.white,
-                            ),
-                      label: Text(
-                        'Actualizar datos diarios',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w800,
+                                    content:
+                                        Text('Debe seleccionar restaurante!!',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ))));
+                          } else {
+                            Fluttertoast.cancel();
+                            Fluttertoast.showToast(
+                              msg: 'Debe seleccionar restaurante!!',
+                              toastLength: Toast.LENGTH_LONG,
+                              gravity: ToastGravity.CENTER,
+                              timeInSecForIosWeb: 4,
+                              backgroundColor: Colors.red,
+                              textColor: Colors.white,
+                              fontSize: 16.0,
+                              webPosition: 'center',
+                              webBgColor: 'red',
+                            );
+                          }
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                    fixedSize: const Size(250, 40),
+                    backgroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    )),
+                icon: _isUpdatingDatosDiarios
+                    ? SpinPerfect(
+                        infinite: true,
+                        child: const Icon(
+                          Icons.refresh,
                           color: Colors.white,
                         ),
+                      )
+                    : const Icon(
+                        Icons.refresh,
+                        color: Colors.white,
                       ),
-                    ),
-                  ],
+                label: Text(
+                  'Actualizar datos diarios',
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-              //const Gap(5),
-              //Containers con estadísticas senciilas del día
+              //Containers con estadísticas sencillas del día
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 width: double.infinity,
@@ -718,68 +671,6 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                 width: double.infinity,
                 child: Row(
                   children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 48,
-                        child: DropdownSearch<RestauranteModelo>(
-                          asyncItems: (filter) async {
-                            return await _obtenerRestaurantes();
-                          },
-                          dropdownDecoratorProps: DropDownDecoratorProps(
-                            dropdownSearchDecoration: InputDecoration(
-                              hintText: 'Seleccione restaurante',
-                              hintStyle: GoogleFonts.inter(
-                                color: AppColors.kTextSecondaryGray,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: Colors.transparent,
-                                  width: 2.0,
-                                ),
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: AppColors.kGeneralPrimaryOrange,
-                                  width: 2.0,
-                                ),
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              errorBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: AppColors.kGeneralErrorColor,
-                                  width: 2.0,
-                                ),
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              focusedErrorBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: AppColors.kGeneralErrorColor,
-                                  width: 2.0,
-                                ),
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              filled: true,
-                              fillColor: AppColors.kInputLiteGray,
-                            ),
-                          ),
-                          itemAsString: (RestauranteModelo r) =>
-                              r.restauranteAsString(),
-                          onChanged: (RestauranteModelo? data) async {
-                            if (data != null) {
-                              //Asignar el restaurante selecto al provider
-                              ref
-                                  .read(
-                                      restauranteSeleccionadoProvider.notifier)
-                                  .setRestauranteSeleccionado(data);
-                              await _hacerCalculosReportesDiarios();
-                            }
-                          },
-                          selectedItem: restauranteActual,
-                        ),
-                      ),
-                    ),
-                    const Gap(10),
                     ElevatedButton.icon(
                       onPressed: _isUpdatingDatosDiarios
                           ? null
@@ -1309,6 +1200,31 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  //View para los que NO tienen permiso de ver esta página
+  Widget noPermissionView() {
+    return Container(
+      padding: const EdgeInsets.all(15),
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.warning_rounded,
+              color: Colors.amber,
+            ),
+            Text('No tienes permiso para ver esta información'),
+          ],
         ),
       ),
     );

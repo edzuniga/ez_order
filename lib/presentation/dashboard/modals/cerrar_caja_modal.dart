@@ -1,4 +1,5 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:ez_order_ezr/data/reporte_modelo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -23,6 +24,7 @@ class _CerrarCajaModalState extends ConsumerState<CerrarCajaModal> {
   bool _isSendingData = false;
   double gastosTotales = 0.0;
   double cierreCajavalor = 0.0;
+  double cierreTotalCaja = 0.0;
 
   @override
   void initState() {
@@ -39,6 +41,8 @@ class _CerrarCajaModalState extends ConsumerState<CerrarCajaModal> {
         .read(valoresReportesProvider.notifier)
         .hacerCalculosReporte(userIdRestaurante);
 
+    ReporteModelo valoresProvi = ref.read(valoresReportesProvider);
+
     final gastosDelDia = await ref
         .read(supabaseManagementProvider.notifier)
         .getGastosCajaPorRestaurante(userIdRestaurante);
@@ -53,6 +57,13 @@ class _CerrarCajaModalState extends ConsumerState<CerrarCajaModal> {
         gastosTotales += element.egreso!;
       }
     }
+
+    //CIERRE DE CAJA (DE ACUERDO AL CLIENTE)
+    cierreTotalCaja = valoresProvi.totalEfectivo +
+        valoresProvi.totalTarjeta +
+        valoresProvi.totalTransferencia -
+        gastosTotales;
+
     setState(() => _isSendingData = false);
   }
 
@@ -89,14 +100,15 @@ class _CerrarCajaModalState extends ConsumerState<CerrarCajaModal> {
                   ),
                   const Gap(15),
                   Text('Aperturó caja: L ${widget.cajaApertura.cantidad}'),
-                  Text('Total efectivo: L ${valoresReporte.totalEfectivo}'),
-                  Text('Total POS: L ${valoresReporte.totalTarjeta}'),
-                  Text(
-                      'Total Transferencia: L ${valoresReporte.totalTransferencia}'),
-                  Text(
-                      'Total de ingresos: L ${valoresReporte.ingresosDiarios}'),
                   Text('Efectivo que debe haber en caja: L $cierreCajavalor'),
+                  Text('Ventas en efectivo: L ${valoresReporte.totalEfectivo}'),
+                  Text('Ventas en POS: L ${valoresReporte.totalTarjeta}'),
+                  Text(
+                      'Ventas por transferencia: L ${valoresReporte.totalTransferencia}'),
+                  Text('Total de VENTAS: L ${valoresReporte.ingresosDiarios}'),
                   Text('Total de gastos: L $gastosTotales'),
+                  Text(
+                      'Cierre de caja (total de ventas - gastos): L $cierreTotalCaja'),
                   const Gap(25),
 
                   //Botones
@@ -137,6 +149,7 @@ class _CerrarCajaModalState extends ConsumerState<CerrarCajaModal> {
                                   totalTransferencia:
                                       valoresReporte.totalTransferencia,
                                   totalGastos: gastosTotales,
+                                  cierreCaja: cierreTotalCaja,
                                 );
                                 await ref
                                     .read(supabaseManagementProvider.notifier)

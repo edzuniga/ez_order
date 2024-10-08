@@ -47,7 +47,6 @@ class DashboardPageIndex extends _$DashboardPageIndex {
         pageTitle = 'Facturación';
         view = const FacturacionView();
         break;
-
       case 4:
         pageTitle = 'Gastos de Caja';
         view = const GastosCajaView();

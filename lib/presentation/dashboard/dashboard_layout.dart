@@ -1,3 +1,4 @@
+import 'package:ez_order_ezr/presentation/providers/auth_supabase_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +14,7 @@ import 'package:ez_order_ezr/presentation/widgets/dashboard_bottom_bar.dart';
 import 'package:ez_order_ezr/utils/secure_storage.dart';
 import 'package:ez_order_ezr/presentation/widgets/custom_appbar.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class DashboardLayout extends ConsumerStatefulWidget {
   const DashboardLayout({super.key});
@@ -25,9 +27,34 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((d) {
-      _getUserData();
+    WidgetsBinding.instance.addPostFrameCallback((d) async {
+      _checkAuthStatus();
     });
+  }
+
+  Future<void> _checkAuthStatus() async {
+    final checkAuthResponse =
+        await ref.read(authManagerProvider.notifier).checkAuthStatus();
+    if (!checkAuthResponse) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            'Debe iniciar sesión',
+            style: GoogleFonts.roboto(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      );
+      context.goNamed(Routes.login);
+    } else {
+      await _getUserData();
+      setState(() {});
+    }
   }
 
   Future<void> _getUserData() async {

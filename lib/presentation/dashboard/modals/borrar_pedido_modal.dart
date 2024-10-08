@@ -115,7 +115,7 @@ class _BorrarPedidoModalState extends ConsumerState<BorrarPedidoModal> {
       setState(() => _isTryingDelete = false);
       if (message == 'success') {
         if (!mounted) return;
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true);
       } else {
         if (!mounted) return;
         Navigator.of(context).pop();

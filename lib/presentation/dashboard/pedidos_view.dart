@@ -60,14 +60,13 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
 
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
+    //final endOfDay = startOfDay.add(const Duration(days: 1));
 
     //Filtración interna del stream general, condicionado por fecha (solo fecha de hoy)
     _pedidosStreamPorEntregar = _stream.map((data) {
       return data.where((pedido) {
         final createdAt = DateTime.parse(pedido['created_at']);
         return createdAt.isAfter(startOfDay) &&
-            createdAt.isBefore(endOfDay) &&
             pedido['en_preparacion'] == true;
       }).toList();
     });
@@ -76,7 +75,6 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
       return data.where((pedido) {
         final createdAt = DateTime.parse(pedido['created_at']);
         return createdAt.isAfter(startOfDay) &&
-            createdAt.isBefore(endOfDay) &&
             pedido['en_preparacion'] == false;
       }).toList();
     });
@@ -2457,7 +2455,7 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
   }
 
   Future<void> _tryBorrarPedido(String uuIdPedido) async {
-    showDialog(
+    bool? res = await showDialog(
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black.withOpacity(0.5),
@@ -2467,6 +2465,10 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
         child: BorrarPedidoModal(uuIdPedido: uuIdPedido),
       ),
     );
+
+    if (res != null) {
+      setState(() {});
+    }
   }
 
   Future<void> _tryChangePedidoStatus(String uuIdPedido) async {

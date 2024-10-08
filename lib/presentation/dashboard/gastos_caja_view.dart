@@ -1,16 +1,16 @@
-import 'package:dropdown_search/dropdown_search.dart';
+//import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
+//import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import 'package:ez_order_ezr/data/registro_caja_modelo.dart';
-import 'package:ez_order_ezr/data/restaurante_modelo.dart';
+//import 'package:ez_order_ezr/data/restaurante_modelo.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/borrar_gasto_caja_modal.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/update_gasto_caja_modal.dart';
-import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/duenos_restaurantes_provider.dart';
-import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/restaurante_gastos_caja.dart';
+//import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/duenos_restaurantes_provider.dart';
+//import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/restaurante_gastos_caja.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
@@ -24,8 +24,8 @@ class GastosCajaView extends ConsumerStatefulWidget {
 }
 
 class _GastosCajaViewState extends ConsumerState<GastosCajaView> {
-  int userIdRestaurante = 0;
-  List<RegistroCajaModelo> listadoRegistros = [];
+  late int userIdRestaurante;
+  //List<RegistroCajaModelo> listadoRegistros = [];
 
   @override
   void initState() {
@@ -36,19 +36,19 @@ class _GastosCajaViewState extends ConsumerState<GastosCajaView> {
     });
   }
 
-  Future<List<RestauranteModelo>> _obtenerRestaurantes() async {
+  /*Future<List<RestauranteModelo>> _obtenerRestaurantes() async {
     return await ref
         .read(duenosResManagerProvider.notifier)
         .obtenerRestaurantesPorDueno();
-  }
+  }*/
 
   Future<List<RegistroCajaModelo>> obtenerRegistrosDeCaja() async {
-    RestauranteModelo cajaRestauranteActual =
-        ref.watch(restauranteSeleccionadoGastosCajaProvider);
+    /*RestauranteModelo cajaRestauranteActual =
+        ref.watch(restauranteSeleccionadoGastosCajaProvider); */
 
     final datosPublicos = ref.watch(userPublicDataProvider);
 
-    if (datosPublicos['rol'] == '1' || datosPublicos['rol'] == '2') {
+    /*if (datosPublicos['rol'] == '1' || datosPublicos['rol'] == '2') {
       if (cajaRestauranteActual.nombreRestaurante != 'No ha seleccionado...') {
         return await ref
             .read(supabaseManagementProvider.notifier)
@@ -58,17 +58,17 @@ class _GastosCajaViewState extends ConsumerState<GastosCajaView> {
         return [];
       }
     } else {
-      return await ref
-          .read(supabaseManagementProvider.notifier)
-          .getGastosCajaPorRestaurante(
-              int.parse(datosPublicos['id_restaurante']!));
-    }
+    } */
+    return await ref
+        .read(supabaseManagementProvider.notifier)
+        .getGastosCajaPorRestaurante(
+            int.parse(datosPublicos['id_restaurante']!));
   }
 
   @override
   Widget build(BuildContext context) {
-    RestauranteModelo cajaRestauranteActual =
-        ref.watch(restauranteSeleccionadoGastosCajaProvider);
+    /* RestauranteModelo cajaRestauranteActual =
+        ref.watch(restauranteSeleccionadoGastosCajaProvider); */
 
     return Container(
       padding: const EdgeInsets.all(15),
@@ -144,7 +144,7 @@ class _GastosCajaViewState extends ConsumerState<GastosCajaView> {
               }
             },
           ),
-          Center(
+          /*Center(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -213,6 +213,7 @@ class _GastosCajaViewState extends ConsumerState<GastosCajaView> {
               ],
             ),
           ),
+          */
           Expanded(
             child: FutureBuilder(
               future: obtenerRegistrosDeCaja(),
@@ -248,7 +249,7 @@ class _GastosCajaViewState extends ConsumerState<GastosCajaView> {
                 }
 
                 List<RegistroCajaModelo> listado = snapshot.data!;
-                return ListView.separated(
+                return ListView.builder(
                     itemBuilder: (context, index) {
                       RegistroCajaModelo registro = listado[index];
                       String formattedDate = DateFormat.yMMMMEEEEd('es_ES')
@@ -295,7 +296,9 @@ class _GastosCajaViewState extends ConsumerState<GastosCajaView> {
                         );
                       }
 
-                      return ListTile(
+                      return const SizedBox();
+
+                      /* return ListTile(
                         leading: const Icon(
                           Icons.check_circle,
                           color: Colors.green,
@@ -303,9 +306,9 @@ class _GastosCajaViewState extends ConsumerState<GastosCajaView> {
                         title: Text('Cantidad: L ${registro.ingreso}'),
                         subtitle: Text(
                             'Fecha y Hora: $formattedDate\nDescripción: ${registro.descripcion}'),
-                      );
+                      ); */
                     },
-                    separatorBuilder: (_, index) => const Divider(),
+                    //separatorBuilder: (_, index) => const Divider(),
                     itemCount: listado.length);
               },
             ),

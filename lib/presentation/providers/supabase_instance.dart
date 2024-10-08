@@ -505,9 +505,10 @@ class SupabaseManagement extends _$SupabaseManagement {
       //Regresar al método de pago "efectivo"
       ref.read(metodoPagoActualProvider.notifier).resetMetodoDePago();
 
-      return 'success';
+      return pedidoUuid;
+      // ignore: unused_catch_clause
     } on PostgrestException catch (e) {
-      return e.message;
+      return 'error';
     }
   }
 
@@ -790,6 +791,16 @@ class SupabaseManagement extends _$SupabaseManagement {
     } on PostgrestException catch (e) {
       return e.message;
     }
+  }
+
+  //Obtener el restaurante (RestauranteModelo)
+  Future<RestauranteModelo> obtenerRestaurantePorId(int idRestaurante) async {
+    Map<String, dynamic> singleRes = await state
+        .from('restaurantes')
+        .select()
+        .eq('id_restaurante', idRestaurante)
+        .single();
+    return RestauranteModelo.fromJson(singleRes);
   }
 
   Future<List<double>> obtenerIngresosTotalesEntreFechas(

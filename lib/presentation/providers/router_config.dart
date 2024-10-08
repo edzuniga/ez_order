@@ -1,14 +1,12 @@
-import 'package:ez_order_ezr/presentation/caja/caja_page.dart';
-import 'package:ez_order_ezr/presentation/dashboard/gastos_caja_view.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:ez_order_ezr/presentation/auth/password_recovery_page.dart';
+import 'package:ez_order_ezr/presentation/caja/caja_page.dart';
+import 'package:ez_order_ezr/presentation/dashboard/gastos_caja_view.dart';
 import 'package:ez_order_ezr/presentation/dashboard/pedidos/en_preparacion_page.dart';
 import 'package:ez_order_ezr/presentation/dashboard/pedidos/entregados_page.dart';
-import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/auth/auth_layout.dart';
 import 'package:ez_order_ezr/presentation/auth/login_view.dart';
 import 'package:ez_order_ezr/presentation/auth/recovery_view.dart';
@@ -169,18 +167,6 @@ GoRouter router(Ref ref) {
         ),
       ),
       GoRoute(
-        name: Routes.pwRecovery,
-        path: '/pw_recovery',
-        pageBuilder: (context, state) => CustomTransitionPage(
-          child: const PasswordRecoveryPage(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-              FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
-        ),
-      ),
-      GoRoute(
         name: Routes.caja,
         path: '/caja',
         pageBuilder: (context, state) => CustomTransitionPage(
@@ -206,23 +192,44 @@ GoRouter router(Ref ref) {
       final isAuthenticated = ref.read(authManagerProvider);
 
       //Rutas accesibles e inaccesibles dependiendo autenticación
-      const accessibleRoutes = ['/', '/recovery', '/pw_recovery'];
-      const unaccessibleRoutes = [
+      const accessibleRoutes = ['/', '/recovery'];
+      const dashboardRoutes = [
         '/pedidos',
         '/agregar_pedido',
         '/reportes',
-        '/cocina',
         '/facturacion',
+        '/gastos_caja',
+      ];
+      const unaccessibleRoutes = [
+        '/cocina',
         '/pedidos_entregados',
         '/en_preparacion',
         '/caja',
-        '/gastos_caja',
       ];
 
-      //Caso específico de '/pw_recovery'
-      /*if (!isAuthenticated && state.matchedLocation == '/pw_recovery') {
-        return '/';
-      }*/
+      WidgetsBinding.instance.addPostFrameCallback((v) {
+        final pageIndexManager = ref.read(dashboardPageIndexProvider.notifier);
+
+        if (dashboardRoutes.contains(state.matchedLocation)) {
+          switch (state.matchedLocation) {
+            case '/pedidos':
+              pageIndexManager.changePageIndex(0);
+              break;
+            case '/agregar_pedido':
+              pageIndexManager.changePageIndex(1);
+              break;
+            case '/reportes':
+              pageIndexManager.changePageIndex(2);
+              break;
+            case '/facturacion':
+              pageIndexManager.changePageIndex(3);
+              break;
+            case '/gastos_caja':
+              pageIndexManager.changePageIndex(4);
+              break;
+          }
+        }
+      });
 
       //Permitir acceso a AUTH sin autenticación
       if (!isAuthenticated &&
@@ -236,23 +243,6 @@ GoRouter router(Ref ref) {
           (unaccessibleRoutes.contains(state.matchedLocation))) {
         // Redirige al usuario a la pantalla de login
         return '/';
-      }
-
-      // Si el usuario está autenticado y trata de acceder a una ruta de AUTH
-      if (isAuthenticated && accessibleRoutes.contains(state.matchedLocation)) {
-        //Antes de redirigir cambia el pageIndex, pageTitle y pageView
-        ref.read(dashboardPageIndexProvider.notifier).changePageIndex(0);
-        // Redirige al usuario al dashboard
-        return '/pedidos';
-      }
-
-      //Casos DEPENDIENDO su ROL (COCINA)
-      if (ref.read(userPublicDataProvider)['rol'] != null) {
-        int rolUsuario =
-            int.parse(ref.read(userPublicDataProvider)['rol'].toString());
-        if (rolUsuario == 4) {
-          return '/cocina';
-        }
       }
 
       return null;

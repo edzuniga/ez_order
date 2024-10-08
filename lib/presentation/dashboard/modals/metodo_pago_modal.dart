@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
 
+import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
+import 'package:ez_order_ezr/presentation/providers/facturacion/detalles_pedido_para_view.dart';
+import 'package:ez_order_ezr/utils/invoice_pdf.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/data/pedido_model.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
@@ -28,10 +34,14 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      userIdRestaurante = int.parse(
-          ref.read(userPublicDataProvider)['id_restaurante'].toString());
-    });
+    userIdRestaurante = int.parse(
+        ref.read(userPublicDataProvider)['id_restaurante'].toString());
+  }
+
+  Future<bool> _chequearCaja() async {
+    return await ref
+        .read(supabaseManagementProvider.notifier)
+        .cajaCerradaoAbierta(userIdRestaurante);
   }
 
   @override
@@ -62,9 +72,7 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
               ),
             )
           : FutureBuilder(
-              future: ref
-                  .read(supabaseManagementProvider.notifier)
-                  .cajaCerradaoAbierta(userIdRestaurante),
+              future: _chequearCaja(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
@@ -297,20 +305,14 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                                                 '¿Con cuánto efectivo pagará el cliente?'),
                                             TextField(
                                               controller: _conCuantoPagaCliente,
-                                              onChanged: (value) {
-                                                if (value == '') {
-                                                  setState(() {
-                                                    vuelto = 0.00;
-                                                  });
-                                                } else {
-                                                  setState(() {
-                                                    vuelto =
-                                                        double.parse(value) -
-                                                            pedidoActualInfo
-                                                                .total;
-                                                  });
-                                                }
-                                              },
+                                              keyboardType: const TextInputType
+                                                  .numberWithOptions(
+                                                  decimal: true),
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter
+                                                    .allow(RegExp(
+                                                        r'^\d*\.?\d{0,2}')),
+                                              ],
                                             ),
                                           ],
                                         ),
@@ -319,9 +321,40 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                                       Expanded(
                                         child: Column(
                                           children: [
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                if (_conCuantoPagaCliente
+                                                        .text ==
+                                                    '') {
+                                                  setState(() {
+                                                    vuelto = 0.00;
+                                                  });
+                                                } else {
+                                                  setState(() {
+                                                    vuelto = double.parse(
+                                                            _conCuantoPagaCliente
+                                                                .text) -
+                                                        pedidoActualInfo.total;
+                                                  });
+                                                }
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.black,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                  )),
+                                              child: const Text(
+                                                'Calcular vuelto',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
                                             const Text('El vuelto es de:'),
                                             Text(
-                                              'L $vuelto',
+                                              'L ${vuelto.toStringAsFixed(2)}',
                                               style: const TextStyle(
                                                   fontWeight: FontWeight.bold),
                                             ),
@@ -610,9 +643,17 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
     final supabaseClient = ref.read(supabaseManagementProvider.notifier);
     setState(() => _isTryingUpload = true);
     PedidoModel pedidoActual = ref.read(pedidoActualProvider);
-    await supabaseClient.agregarPedido(pedidoActual).then((message) {
+    await supabaseClient.agregarPedido(pedidoActual).then((message) async {
       setState(() => _isTryingUpload = false);
-      if (message == 'success') {
+      if (message != 'error') {
+        await ref
+            .read(detallesParaPedidoViewProvider.notifier)
+            .getYSetListado(message);
+
+        final detalles = ref.read(detallesParaPedidoViewProvider);
+
+        await _generatePdfAndPrint(detalles, pedidoActual.numPedido.toString(),
+            pedidoActual.idCliente);
         if (!mounted) return;
         Navigator.of(context).pop(true);
       } else {
@@ -632,5 +673,28 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
         ));
       }
     });
+  }
+
+  Future<bool> _generatePdfAndPrint(List<PedidoDetalleModel> detallesPedido,
+      String numeroPedido, int idCliente) async {
+    String nombreCliente = await ref
+        .read(supabaseManagementProvider.notifier)
+        .getClienteName(idCliente);
+    final pdfData =
+        await generateTicketPdf(detallesPedido, numeroPedido, nombreCliente);
+    // Definir el formato de página de 80mm
+    const receiptFormat = PdfPageFormat(
+      80 * PdfPageFormat.mm,
+      double.infinity,
+      marginTop: 10 * PdfPageFormat.mm,
+      marginBottom: 10 * PdfPageFormat.mm,
+      marginLeft: 3 * PdfPageFormat.mm,
+      marginRight: 3 * PdfPageFormat.mm,
+    );
+
+    return await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdfData,
+      format: receiptFormat,
+    );
   }
 }

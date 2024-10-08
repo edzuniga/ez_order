@@ -89,7 +89,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
-    - assets/lotties/
     - assets/svg/
     - assets/icon/
     - assets/png/

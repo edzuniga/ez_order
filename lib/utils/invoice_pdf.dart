@@ -207,3 +207,91 @@ Future<Uint8List> generateFacturaPdf(
 
   return doc.save();
 }
+
+Future<Uint8List> generateTicketPdf(List<PedidoDetalleModel> detallesPedido,
+    String numeroPedido, String nombreCliente) async {
+  final doc = pw.Document();
+
+  // Define the page format with margins
+  const margin1 = 10 * PdfPageFormat.mm;
+  const margin2 = 3 * PdfPageFormat.mm;
+  const receiptFormat = PdfPageFormat(
+    80 * PdfPageFormat.mm,
+    double.infinity,
+    marginTop: margin1,
+    marginBottom: margin1,
+    marginLeft: margin2,
+    marginRight: margin2,
+  );
+
+  // Formatear fecha y hora
+  DateTime hoy = DateTime.now();
+  String formattedHoy = DateFormat.yMMMEd('es').add_Hm().format(hoy);
+
+  Font fontTitulo = await PdfGoogleFonts.robotoCondensedBold();
+  Font cuerpoFont = await PdfGoogleFonts.robotoRegular();
+  pw.TextStyle estilo = pw.TextStyle(
+    fontSize: 10,
+    font: cuerpoFont,
+    color: PdfColors.black,
+  );
+  pw.TextStyle estiloBold = pw.TextStyle(
+    fontSize: 10,
+    font: fontTitulo,
+    fontWeight: pw.FontWeight.bold,
+    color: PdfColors.black,
+  );
+
+  doc.addPage(
+    pw.Page(
+      pageFormat: receiptFormat,
+      build: (context) {
+        return pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(
+              'PEDIDO # $numeroPedido',
+              style: estiloBold,
+            ),
+            pw.SizedBox(height: 10),
+            pw.Text(formattedHoy, style: estilo),
+            pw.SizedBox(height: 10),
+            pw.Text('Cliente: $nombreCliente', style: estilo),
+            pw.SizedBox(height: 10),
+            pw.Divider(color: PdfColors.black),
+            pw.SizedBox(height: 10),
+            pw.TableHelper.fromTextArray(
+              headerAlignment: pw.Alignment.centerLeft,
+              columnWidths: const {
+                0: pw.FixedColumnWidth(40),
+                1: pw.FlexColumnWidth(),
+                2: pw.FixedColumnWidth(70),
+              },
+              context: context,
+              border: null,
+              headerStyle: estiloBold.copyWith(fontSize: 10),
+              headers: ['#', 'Detalle', 'Cantidad'],
+              data: [
+                ...detallesPedido.asMap().map((index, element) {
+                  return MapEntry(
+                    index,
+                    [
+                      (index + 1).toString(), // Número que inicia desde 1
+                      '${element.nombreMenuItem}',
+                      element.cantidad.toString(),
+                    ],
+                  );
+                }).values,
+              ],
+            ),
+            pw.SizedBox(height: 10),
+            pw.Divider(color: PdfColors.black),
+            pw.SizedBox(height: 10),
+          ],
+        );
+      },
+    ),
+  );
+
+  return doc.save();
+}
