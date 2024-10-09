@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:ez_order_ezr/presentation/providers/reportes/columns_ventas_por_producto.dart';
+import 'package:ez_order_ezr/presentation/providers/reportes/rows_ventas_por_producto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:animate_do/animate_do.dart';
@@ -94,11 +96,22 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
     ReporteModelo valoresReporte = ref.watch(valoresReportesProvider);
     List<DataRow> rowsTable = ref.watch(pedidosTableRowsProvider);
     List<DataColumn> columnsTable = ref.watch(pedidosTableColumnsProvider);
+    List<DataRow> rowsVentasPorProducto =
+        ref.watch(rowsVentasPorProductoProvider);
+    List<DataColumn> columnsVentasPorProducto =
+        ref.watch(columnsVentasPorProductoProvider);
 
     if (kIsWeb) {
       if (_tienePermiso) {
-        return webView(restauranteActual, context, valoresReporte, datosGrafico,
-            rowsTable, columnsTable);
+        return webView(
+            restauranteActual,
+            context,
+            valoresReporte,
+            datosGrafico,
+            rowsTable,
+            columnsTable,
+            rowsVentasPorProducto,
+            columnsVentasPorProducto);
       }
       return noPermissionView();
     } else {
@@ -107,8 +120,15 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
           return mobilePortraitView(restauranteActual, context, valoresReporte,
               datosGrafico, rowsTable, columnsTable, screenSize);
         }
-        return webView(restauranteActual, context, valoresReporte, datosGrafico,
-            rowsTable, columnsTable);
+        return webView(
+            restauranteActual,
+            context,
+            valoresReporte,
+            datosGrafico,
+            rowsTable,
+            columnsTable,
+            rowsVentasPorProducto,
+            columnsVentasPorProducto);
       }
       return noPermissionView();
     }
@@ -121,7 +141,9 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
       ReporteModelo valoresReporte,
       DatosGraficoModelo datosGrafico,
       List<DataRow> rowsTable,
-      List<DataColumn> columnsTable) {
+      List<DataColumn> columnsTable,
+      List<DataRow> rowsVentasPorProducto,
+      List<DataColumn> columnsVentasPorProducto) {
     return Container(
       padding: const EdgeInsets.all(15),
       width: double.infinity,
@@ -135,7 +157,7 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
           key: _reporteFormKey,
           child: Column(
             children: [
-              //Selector de restaurantes del DUEÑO
+              //Botón para actualizar datos diarios
               ElevatedButton.icon(
                 onPressed: _isUpdatingDatosDiarios
                     ? null
@@ -421,219 +443,350 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  Container(
-                    width: 450,
-                    height: 400,
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.black12,
-                        width: 0.5,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: _isShowingReport
-                        ? _isRetrievingGraphData
-                            ? const Center(
-                                child: CircularProgressIndicator(),
-                              )
-                            : LineChart(
-                                LineChartData(
-                                  lineTouchData: LineTouchData(
-                                    handleBuiltInTouches: true,
-                                    touchTooltipData: LineTouchTooltipData(
-                                      getTooltipColor: (touchedSpot) =>
-                                          Colors.white,
-                                    ),
-                                  ),
-                                  gridData: const FlGridData(show: false),
-                                  titlesData: FlTitlesData(
-                                    bottomTitles: AxisTitles(
-                                      axisNameWidget: const Text(
-                                        'Ingresos totales diarios',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      sideTitles: SideTitles(
-                                          showTitles: true,
-                                          reservedSize: 32,
-                                          interval: 1,
-                                          getTitlesWidget: bottomTitleWidgets),
-                                    ),
-                                    rightTitles: const AxisTitles(
-                                      sideTitles: SideTitles(showTitles: false),
-                                    ),
-                                    topTitles: const AxisTitles(
-                                      sideTitles: SideTitles(showTitles: false),
-                                    ),
-                                    leftTitles: AxisTitles(
-                                      sideTitles: SideTitles(
-                                        getTitlesWidget: leftTitleWidgets,
-                                        showTitles: true,
-                                        interval: 1,
-                                        reservedSize: 60,
-                                      ),
-                                    ),
-                                  ),
-                                  borderData: FlBorderData(
-                                    show: true,
-                                    border: const Border(
-                                      bottom: BorderSide(
-                                          color: Colors.black12, width: 1),
-                                      left:
-                                          BorderSide(color: Colors.transparent),
-                                      right:
-                                          BorderSide(color: Colors.transparent),
-                                      top:
-                                          BorderSide(color: Colors.transparent),
-                                    ),
-                                  ),
-                                  lineBarsData: [
-                                    LineChartBarData(
-                                      color: AppColors.kGeneralPrimaryOrange,
-                                      barWidth: 1,
-                                      isStrokeCapRound: true,
-                                      dotData: const FlDotData(show: true),
-                                      belowBarData: BarAreaData(
-                                          show: true,
-                                          color: AppColors.kGeneralOrangeBg
-                                              .withOpacity(0.3)),
-                                      spots: datosGrafico.puntos,
-                                    ),
-                                  ],
-                                  minX: 0,
-                                  minY: 0,
-                                  maxX: datosGrafico.maxX,
-                                  maxY: datosGrafico.maxY,
-                                ),
-                                duration: const Duration(milliseconds: 250),
-                              )
-                        : Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.error_outline,
-                                  color: Colors.black87,
-                                  size: 30,
-                                ),
-                                const Gap(10),
-                                Text(
-                                  'Haga click en Generar reporte\npara mostrar datos!!',
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.inter(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                )
-                              ],
-                            ),
+                  //Gráfico LINEAL
+                  Column(
+                    children: [
+                      const Text('Área de gráfico de ventas'),
+                      Container(
+                        width: 450,
+                        height: 400,
+                        padding: const EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.black12,
+                            width: 0.5,
                           ),
-                  ),
-                  const Gap(5),
-                  Container(
-                    width: 650,
-                    height: 400,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        width: 0.5,
-                        color: Colors.black12,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: _isShowingReport
-                        ? _isRetrievingGraphData
-                            ? const Center(
-                                child: CircularProgressIndicator(),
-                              )
-                            : SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    const Gap(15),
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(
-                                          right: 15,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: _isShowingReport
+                            ? _isRetrievingGraphData
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : LineChart(
+                                    LineChartData(
+                                      lineTouchData: LineTouchData(
+                                        handleBuiltInTouches: true,
+                                        touchTooltipData: LineTouchTooltipData(
+                                          getTooltipColor: (touchedSpot) =>
+                                              Colors.white,
                                         ),
-                                        child: ElevatedButton(
-                                          key: _shareButtonKey,
-                                          onPressed: () async {
-                                            if (kIsWeb) {
-                                              await exportDataTableToPDFAndDownload(
-                                                  rowsTable,
-                                                  _initialDate!,
-                                                  _finalDate!);
-                                            } else {
-                                              await _exportDataTableToPDF(
-                                                  rowsTable);
-                                            }
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.white,
-                                            shape: RoundedRectangleBorder(
-                                              side: const BorderSide(
-                                                  color: AppColors
-                                                      .kGeneralPrimaryOrange),
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
+                                      ),
+                                      gridData: const FlGridData(show: false),
+                                      titlesData: FlTitlesData(
+                                        bottomTitles: AxisTitles(
+                                          axisNameWidget: const Text(
+                                            'Ingresos totales diarios',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
                                             ),
                                           ),
-                                          child: Text(
-                                            'Descargar tabla',
-                                            style: GoogleFonts.inter(
-                                              color: AppColors
-                                                  .kGeneralPrimaryOrange,
-                                              fontWeight: FontWeight.w700,
-                                            ),
+                                          sideTitles: SideTitles(
+                                              showTitles: true,
+                                              reservedSize: 32,
+                                              interval: 1,
+                                              getTitlesWidget:
+                                                  bottomTitleWidgets),
+                                        ),
+                                        rightTitles: const AxisTitles(
+                                          sideTitles:
+                                              SideTitles(showTitles: false),
+                                        ),
+                                        topTitles: const AxisTitles(
+                                          sideTitles:
+                                              SideTitles(showTitles: false),
+                                        ),
+                                        leftTitles: AxisTitles(
+                                          sideTitles: SideTitles(
+                                            getTitlesWidget: leftTitleWidgets,
+                                            showTitles: true,
+                                            interval: 1,
+                                            reservedSize: 60,
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    const Gap(15),
-                                    //Tabla generada
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: FittedBox(
-                                            child: DataTable(
-                                              dataRowMaxHeight: double.infinity,
-                                              columns: columnsTable,
-                                              rows: rowsTable,
-                                              headingTextStyle: const TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          ),
+                                      borderData: FlBorderData(
+                                        show: true,
+                                        border: const Border(
+                                          bottom: BorderSide(
+                                              color: Colors.black12, width: 1),
+                                          left: BorderSide(
+                                              color: Colors.transparent),
+                                          right: BorderSide(
+                                              color: Colors.transparent),
+                                          top: BorderSide(
+                                              color: Colors.transparent),
+                                        ),
+                                      ),
+                                      lineBarsData: [
+                                        LineChartBarData(
+                                          color:
+                                              AppColors.kGeneralPrimaryOrange,
+                                          barWidth: 1,
+                                          isStrokeCapRound: true,
+                                          dotData: const FlDotData(show: true),
+                                          belowBarData: BarAreaData(
+                                              show: true,
+                                              color: AppColors.kGeneralOrangeBg
+                                                  .withOpacity(0.3)),
+                                          spots: datosGrafico.puntos,
                                         ),
                                       ],
+                                      minX: 0,
+                                      minY: 0,
+                                      maxX: datosGrafico.maxX,
+                                      maxY: datosGrafico.maxY,
                                     ),
-                                    const Gap(15),
+                                    duration: const Duration(milliseconds: 250),
+                                  )
+                            : Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline,
+                                      color: Colors.black87,
+                                      size: 30,
+                                    ),
+                                    const Gap(10),
+                                    Text(
+                                      'Haga click en Generar reporte\npara mostrar datos!!',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.inter(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    )
                                   ],
                                 ),
-                              )
-                        : Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.error_outline,
-                                  color: Colors.black87,
-                                  size: 30,
-                                ),
-                                const Gap(10),
-                                Text(
-                                  'Haga click en Generar reporte\npara mostrar datos!!',
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.inter(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                )
-                              ],
-                            ),
+                              ),
+                      ),
+                    ],
+                  ),
+                  const Gap(5),
+                  //Tabla del reporte
+                  Column(
+                    children: [
+                      const Text('Área de tabla de ventas (pedidos)'),
+                      Container(
+                        width: 650,
+                        height: 400,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            width: 0.5,
+                            color: Colors.black12,
                           ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: _isShowingReport
+                            ? _isRetrievingGraphData
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : SingleChildScrollView(
+                                    child: Column(
+                                      children: [
+                                        const Gap(15),
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                              right: 15,
+                                            ),
+                                            child: ElevatedButton(
+                                              key: _shareButtonKey,
+                                              onPressed: () async {
+                                                if (kIsWeb) {
+                                                  await exportDataTableToPDFAndDownload(
+                                                      rowsTable,
+                                                      _initialDate!,
+                                                      _finalDate!);
+                                                } else {
+                                                  await _exportDataTableToPDF(
+                                                      rowsTable);
+                                                }
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.white,
+                                                shape: RoundedRectangleBorder(
+                                                  side: const BorderSide(
+                                                      color: AppColors
+                                                          .kGeneralPrimaryOrange),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              child: Text(
+                                                'Descargar tabla',
+                                                style: GoogleFonts.inter(
+                                                  color: AppColors
+                                                      .kGeneralPrimaryOrange,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const Gap(15),
+                                        //Tabla generada
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: FittedBox(
+                                                child: DataTable(
+                                                  dataRowMaxHeight:
+                                                      double.infinity,
+                                                  columns: columnsTable,
+                                                  rows: rowsTable,
+                                                  headingTextStyle:
+                                                      const TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const Gap(15),
+                                      ],
+                                    ),
+                                  )
+                            : Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline,
+                                      color: Colors.black87,
+                                      size: 30,
+                                    ),
+                                    const Gap(10),
+                                    Text(
+                                      'Haga click en Generar reporte\npara mostrar datos!!',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.inter(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                      ),
+                    ],
+                  ),
+                  //Tabla de ventas por cada ítem del menú
+                  Column(
+                    children: [
+                      const Text('Ventas por producto'),
+                      Container(
+                        width: 650,
+                        height: 400,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            width: 0.5,
+                            color: Colors.black12,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: _isShowingReport
+                            ? _isRetrievingGraphData
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : SingleChildScrollView(
+                                    child: Column(
+                                      children: [
+                                        const Gap(15),
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                              right: 15,
+                                            ),
+                                            child: ElevatedButton(
+                                              key: _shareButtonKey,
+                                              onPressed: () async {
+                                                if (kIsWeb) {
+                                                  await exportDataTableToPDFAndDownload(
+                                                      rowsTable,
+                                                      _initialDate!,
+                                                      _finalDate!);
+                                                } else {
+                                                  await _exportDataTableToPDF(
+                                                      rowsTable);
+                                                }
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.white,
+                                                shape: RoundedRectangleBorder(
+                                                  side: const BorderSide(
+                                                      color: AppColors
+                                                          .kGeneralPrimaryOrange),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              child: Text(
+                                                'Descargar tabla',
+                                                style: GoogleFonts.inter(
+                                                  color: AppColors
+                                                      .kGeneralPrimaryOrange,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const Gap(15),
+                                        //Tabla generada
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: FittedBox(
+                                                child: DataTable(
+                                                  dataRowMaxHeight:
+                                                      double.infinity,
+                                                  columns:
+                                                      columnsVentasPorProducto,
+                                                  rows: rowsVentasPorProducto,
+                                                  headingTextStyle:
+                                                      const TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const Gap(15),
+                                      ],
+                                    ),
+                                  )
+                            : Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline,
+                                      color: Colors.black87,
+                                      size: 30,
+                                    ),
+                                    const Gap(10),
+                                    Text(
+                                      'Haga click en Generar reporte\npara mostrar datos!!',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.inter(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                      ),
+                    ],
                   ),
                 ],
               ),

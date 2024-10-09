@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:ez_order_ezr/presentation/providers/reportes/rows_ventas_por_producto.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
@@ -823,8 +824,9 @@ class SupabaseManagement extends _$SupabaseManagement {
         .eq('id_restaurante', idRestaurante)
         .order('created_at', ascending: true);
 
-    //EXTRA - utilizar el mismo query para generar los rows de la TABLA
+    //EXTRA - utilizar el mismo query para generar los rows de las TABLAS
     await ref.read(pedidosTableRowsProvider.notifier).addDataRows(res);
+    await ref.read(rowsVentasPorProductoProvider.notifier).addDataRows(res);
 
     Map<String, double> dailyTotals = {};
 

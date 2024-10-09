@@ -14,6 +14,7 @@ class PedidosTableRows extends _$PedidosTableRows {
   }
 
   Future<void> addDataRows(List<Map<String, dynamic>> pedidosMap) async {
+    double totalDeTodo = 0.0;
     for (var element in pedidosMap) {
       PedidoModel pedido = PedidoModel.fromJson(element);
       String formattedDate = DateFormat.yMMMd('es').format(pedido.createdAt);
@@ -47,18 +48,34 @@ class PedidosTableRows extends _$PedidosTableRows {
       // Eliminar el espacio final (salto de línea)
       detalleDelPedido = detalleDelPedido.trim();
 
+      //Ir sumando el TOTAL de todo
+      totalDeTodo += pedido.total;
+
       state.add(
         DataRow(
           cells: [
             DataCell(Text(pedido.numPedido.toString())),
             DataCell(Text(detalleDelPedido)),
-            DataCell(Text('L ${pedido.total.toString()}')),
+            DataCell(Text('L ${pedido.total.toStringAsFixed(2)}')),
             DataCell(Text(formattedDate)),
             DataCell(Text(metodoPago)),
           ],
         ),
       );
     }
+
+    //Agregar el último row con el TOTAL de todo
+    state.add(
+      DataRow(
+        cells: [
+          const DataCell(Text('')),
+          const DataCell(Text('TOTAL')),
+          DataCell(Text('L ${totalDeTodo.toStringAsFixed(2)}')),
+          const DataCell(Text('')),
+          const DataCell(Text('')),
+        ],
+      ),
+    );
   }
 
   void clearTableRows() {
