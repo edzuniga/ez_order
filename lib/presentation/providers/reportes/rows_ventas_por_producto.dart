@@ -1,8 +1,9 @@
+import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
 import 'package:ez_order_ezr/data/pedido_model.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
-import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'rows_ventas_por_producto.g.dart';
 
@@ -63,22 +64,6 @@ class RowsVentasPorProducto extends _$RowsVentasPorProducto {
         ),
       );
     }
-
-    /* for (int i = 0; i < idMenuItemsEncontrados.length; i++) {
-      int e = idMenuItemsEncontrados[i];
-      String nombre = await ref
-          .read(supabaseManagementProvider.notifier)
-          .getNombreMenuItem(e);
-      state.add(
-        DataRow(
-          cells: [
-            DataCell(Text(nombre)),
-            DataCell(Text(cantidadPorItem[i].toString())),
-            DataCell(Text('L ${totalesVentasPorItem[i].toStringAsFixed(2)}')),
-          ],
-        ),
-      );
-    } */
   }
 
   void clearTableRows() {

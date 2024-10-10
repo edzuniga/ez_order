@@ -1,3 +1,4 @@
+import 'package:ez_order_ezr/presentation/inventario/inventario_page.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -178,6 +179,18 @@ GoRouter router(Ref ref) {
           ),
         ),
       ),
+      GoRoute(
+        name: Routes.inventario,
+        path: '/inventario',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: const InventarioPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        ),
+      ),
     ],
     errorPageBuilder: (context, state) => CustomTransitionPage(
       child: const ErrorPage(),
@@ -202,6 +215,7 @@ GoRouter router(Ref ref) {
       ];
       const unaccessibleRoutes = [
         '/cocina',
+        '/inventario',
         '/pedidos_entregados',
         '/en_preparacion',
         '/caja',

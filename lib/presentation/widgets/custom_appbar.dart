@@ -141,6 +141,32 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
           datosPublicos['rol'] == '2' || datosPublicos['rol'] == '1'
               ? OutlinedButton.icon(
                   onPressed: () {
+                    context.pushNamed(Routes.inventario);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      side: const BorderSide(width: 1.0),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(
+                    Icons.inventory,
+                    color: AppColors.kGeneralPrimaryOrange,
+                    size: 15,
+                  ),
+                  label: Text(
+                    'Inventario',
+                    style: GoogleFonts.inter(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                )
+              : const SizedBox(),
+          const Gap(10),
+          datosPublicos['rol'] == '2' || datosPublicos['rol'] == '1'
+              ? OutlinedButton.icon(
+                  onPressed: () {
                     context.pushNamed(Routes.caja);
                   },
                   style: OutlinedButton.styleFrom(

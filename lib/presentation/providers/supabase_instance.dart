@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:ez_order_ezr/presentation/providers/reportes/rows_ventas_por_producto.dart';
+import 'package:ez_order_ezr/data/inventario_modelo.dart';
+import 'package:ez_order_ezr/domain/inventario.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
@@ -8,6 +9,7 @@ import 'package:random_string/random_string.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/presentation/providers/reportes/rows_ventas_por_producto.dart';
 import 'package:ez_order_ezr/data/registro_caja_modelo.dart';
 import 'package:ez_order_ezr/data/caja_abierta_modelo.dart';
 import 'package:ez_order_ezr/data/caja_apertura_modelo.dart';
@@ -165,7 +167,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
-//Actualizar un ítem para el menú
+  //Actualizar un ítem para el menú
   Future<String> updateMenuItemFromWeb(MenuItemModel menuItemModel,
       String storagePath, Uint8List? imageBytes, XFile? pickedImage) async {
     //Cuando el image decidió NO cambiarlo
@@ -226,6 +228,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Borrar un ítem del menú
   Future<String> deleteMenuItem(int menuItemId) async {
     try {
       await state.from('menus').delete().eq('id_menu', menuItemId);
@@ -513,6 +516,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Obtener el nombre del cliente por id
   Future<String> getClienteName(int clienteId) async {
     try {
       final res = await state
@@ -528,6 +532,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Obtener el nombre y RTN por id
   Future<List<String>> getClienteNameRtn(int clienteId) async {
     try {
       final res =
@@ -543,6 +548,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Obtener pedido por Uuid
   Future<void> getPedidoPorUuid(String uuidRecibido) async {
     try {
       Map<String, dynamic> singlePedido = await state
@@ -560,6 +566,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Obtener detalles del pedido
   Future<List<PedidoDetalleModel>> getDetallesPedido(String uuIdPedido) async {
     try {
       final res = await state
@@ -576,6 +583,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Contar la cantidad de productos en el menú
   Future<int> countMenuItems() async {
     try {
       if (ref.read(userPublicDataProvider)['id_restaurante'] != null) {
@@ -595,6 +603,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Contar los clientes
   Future<int> countClientes() async {
     try {
       if (ref.read(userPublicDataProvider)['id_restaurante'] != null) {
@@ -614,6 +623,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Contar los pedidos del día
   Future<int> countPedidosDelDia() async {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
@@ -640,6 +650,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Contar los pedidos en preparación del día
   Future<int> countPedidosDelDiaEnPreparacion() async {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
@@ -674,6 +685,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Contar los pedidos del día entregados
   Future<int> countPedidosDelDiaEntregados() async {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
@@ -708,6 +720,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Obtener el nombre del ítem del menú
   Future<String> getNombreMenuItem(int idMenu) async {
     try {
       final res = await state
@@ -722,6 +735,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Obtener el nombre del ítem del menú para cocina
   Future<String> getNombreMenuItemParaCocina(int idMenu) async {
     try {
       final res = await state
@@ -740,6 +754,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Cambiar el estatus del pedido
   Future<String> changePedidoStatus(String uuIdPedido) async {
     try {
       await state
@@ -751,6 +766,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Borrar el pedido
   Future<String> borrarPedido(String uuIdPedido) async {
     try {
       //Primero borrar los detalles
@@ -770,6 +786,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Obtener los restaurantes por dueño
   Future<String> obtenerIdRestaurantesPorDueno(String uuIdDueno) async {
     try {
       List<Map<String, dynamic>> res = await state
@@ -804,6 +821,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     return RestauranteModelo.fromJson(singleRes);
   }
 
+  //Obtener los ingresos totales entre fechas
   Future<List<double>> obtenerIngresosTotalesEntreFechas(
       DateTime initialDate, DateTime finalDate, int idRestaurante) async {
     // Ajusta finalDate para que sea el final del día
@@ -860,6 +878,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     return dailyTotalsList;
   }
 
+  //Obtener las categorías del restaurante
   Future<List<CategoriaModelo>> obtenerCategorias() async {
     Map<String, String> datosPublicos = ref.read(userPublicDataProvider);
     int idRes = int.parse(datosPublicos['id_restaurante'].toString());
@@ -877,6 +896,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Obtener una categoría
   Future<CategoriaModelo> obtenerCategoriaPorId(int idCat) async {
     try {
       Map<String, dynamic> res = await state
@@ -893,6 +913,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Agregar categoría
   Future<String> agregarCategoria(CategoriaModelo cat) async {
     Map<String, dynamic> mapa = cat.toJson();
     try {
@@ -903,6 +924,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Actualizar categoría
   Future<String> actualizarCategoria(CategoriaModelo cat) async {
     Map<String, dynamic> mapa = cat.toJson();
     try {
@@ -916,6 +938,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Actualizar la apertura/cierre de la caja
   Future<String> actualizarCajaApertura(CajaAperturaModelo cajaApertura) async {
     Map<String, dynamic> mapa = cajaApertura.toJson();
     try {
@@ -926,6 +949,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Cambiar el estatus de la caja (abierta/cerrada)
   Future<String> statusCaja(int restauranteId, bool status) async {
     try {
       await state.from('caja_abierta').update({
@@ -937,6 +961,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Revisar si la caja está abierta o cerrada
   Future<bool> cajaCerradaoAbierta(int restauranteId) async {
     try {
       final res = await state
@@ -950,6 +975,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Obtener los datos de la factura
   Future<String> getDatosFactura() async {
     Map<String, String> datosPublicos = ref.read(userPublicDataProvider);
     int idRes = 0;
@@ -977,6 +1003,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Crear datos de la factura
   Future<String> addDatosFactura(DatosFacturaModelo datos) async {
     Map<String, dynamic> mapa = datos.toJson();
     try {
@@ -988,6 +1015,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Actualizar los datos de la factura
   Future<String> actualizarDatosFactura(DatosFacturaModelo datos) async {
     Map<String, dynamic> mapa = datos.toJson();
     try {
@@ -1002,6 +1030,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Obtener las facturas y los detalles del pedido realizado
   Future<List<FacturaModelo>> getFacturasYDetalles() async {
     Map<String, String> datosPublicos = ref.read(userPublicDataProvider);
     int idRes = int.parse(datosPublicos['id_restaurante'].toString());
@@ -1031,6 +1060,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Obtener UNA apertura y/o cierres de caja
   Future<CajaAbiertaModelo> getCajaAbierta(int restauranteId) async {
     try {
       List<Map<String, dynamic>> res = await state
@@ -1048,6 +1078,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Obtener el histórico de apertura/cierre de caja
   Future<List<CajaAperturaModelo>> getCajaAperturasPorRestaurante(
       int restauranteId) async {
     try {
@@ -1067,6 +1098,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Obtener la última apertura/cierre
   Future<CajaAperturaModelo> getCajaApertura(int id) async {
     try {
       List<Map<String, dynamic>> res =
@@ -1082,6 +1114,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Obtener las facturas y detalles por fecha
   Future<List<FacturaModelo>> getFacturasYDetallesPorFecha(
       DateTime fecha) async {
     Map<String, String> datosPublicos = ref.read(userPublicDataProvider);
@@ -1114,6 +1147,7 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Agregar una factura
   Future<String> addFactura(FacturaModelo modelo) async {
     Map<String, dynamic> mapa = modelo.toJson();
     try {
@@ -1147,6 +1181,59 @@ class SupabaseManagement extends _$SupabaseManagement {
       return cantidadInicioCaja;
     } on PostgrestException catch (e) {
       throw 'Ocurrió un error al querer hacer la consulta -> ${e.message}';
+    }
+  }
+
+  //Obtener el inventario de un restaurante
+  Future<List<Inventario>> obtenerInventarioPorRestaurante(
+      int idRestaurante) async {
+    List<Inventario> listado = [];
+    try {
+      final List<Map<String, dynamic>> res = await state
+          .from('inventario')
+          .select()
+          .eq('id_restaurante', idRestaurante);
+
+      for (var element in res) {
+        InventarioModelo modelo = InventarioModelo.fromJson(element);
+        listado.add(modelo);
+      }
+
+      return listado;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error al intentar obtener los datos -> ${e.message}';
+    }
+  }
+
+  //Agregar producto al inventario
+  Future<String> addInventario(InventarioModelo inventario) async {
+    Map<String, dynamic> mapa = inventario.toJson();
+    try {
+      await state.from('inventario').insert(mapa);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return 'Ocurrió un error -> ${e.message}';
+    }
+  }
+
+  //Borrar un producto del inventario
+  Future<String> borrarInventario(int id) async {
+    try {
+      await state.from('inventario').delete().eq('id', id);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return e.message;
+    }
+  }
+
+  //Actualizar Inventario
+  Future<String> actualizarInventario(InventarioModelo inventario) async {
+    Map<String, dynamic> mapa = inventario.toJson();
+    try {
+      await state.from('inventario').update(mapa).eq('id', inventario.id!);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return 'Ocurrió un error al querer actualizar el producto -> ${e.message}';
     }
   }
 }
