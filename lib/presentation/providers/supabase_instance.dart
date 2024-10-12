@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:ez_order_ezr/data/inventario_modelo.dart';
-import 'package:ez_order_ezr/domain/inventario.dart';
+import 'package:ez_order_ezr/data/movimiento_inventario_modelo.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
@@ -9,6 +8,10 @@ import 'package:random_string/random_string.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/data/inventario_modelo.dart';
+import 'package:ez_order_ezr/data/menu_inventario_modelo.dart';
+import 'package:ez_order_ezr/domain/inventario.dart';
+import 'package:ez_order_ezr/domain/menu_inventario.dart';
 import 'package:ez_order_ezr/presentation/providers/reportes/rows_ventas_por_producto.dart';
 import 'package:ez_order_ezr/data/registro_caja_modelo.dart';
 import 'package:ez_order_ezr/data/caja_abierta_modelo.dart';
@@ -566,6 +569,21 @@ class SupabaseManagement extends _$SupabaseManagement {
     }
   }
 
+  //Obtener pedido por Uuid
+  Future<PedidoModel> obtenerPedidoPorUuid(String uuidRecibido) async {
+    try {
+      Map<String, dynamic> singlePedido = await state
+          .from('pedidos')
+          .select()
+          .eq('uuid_pedido', uuidRecibido)
+          .limit(1)
+          .single();
+      return PedidoModel.fromJson(singlePedido);
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error -> ${e.message}';
+    }
+  }
+
   //Obtener detalles del pedido
   Future<List<PedidoDetalleModel>> getDetallesPedido(String uuIdPedido) async {
     try {
@@ -768,8 +786,34 @@ class SupabaseManagement extends _$SupabaseManagement {
 
   //Borrar el pedido
   Future<String> borrarPedido(String uuIdPedido) async {
+    PedidoModel pedido = await obtenerPedidoPorUuid(uuIdPedido);
+
     try {
-      //Primero borrar los detalles
+      //*restaurar el stock original de cada inventario deducido
+      List<PedidoDetalleModel> listadoDetallesPedido =
+          await getDetallesPedido(uuIdPedido);
+
+      for (var menuItem in listadoDetallesPedido) {
+        List<MenuInventario> menuInventario = await ref
+            .read(supabaseManagementProvider.notifier)
+            .obtenerMenuInventarioPorItemMenu(
+                pedido.idRestaurante, menuItem.idMenu);
+
+        for (var element in menuInventario) {
+          Inventario inventario = await ref
+              .read(supabaseManagementProvider.notifier)
+              .obtenerInventarioPorId(element.idInventario);
+          int stockFinal =
+              inventario.stock + (element.cantidadStock * menuItem.cantidad);
+
+          await ref
+              .read(supabaseManagementProvider.notifier)
+              .actualizarStockInventario(stockFinal, element.idInventario);
+        }
+      }
+      //*restaurar el stock original de cada inventario deducido
+
+      //Borrar los detalles
       await state.from('pedidos_items').delete().eq('uuid_pedido', uuIdPedido);
       //Luego borrar la factura asociada a ese pedido
       await state.from('facturas').delete().eq('uuid_pedido', uuIdPedido);
@@ -1192,7 +1236,8 @@ class SupabaseManagement extends _$SupabaseManagement {
       final List<Map<String, dynamic>> res = await state
           .from('inventario')
           .select()
-          .eq('id_restaurante', idRestaurante);
+          .eq('id_restaurante', idRestaurante)
+          .eq('status', true);
 
       for (var element in res) {
         InventarioModelo modelo = InventarioModelo.fromJson(element);
@@ -1202,6 +1247,64 @@ class SupabaseManagement extends _$SupabaseManagement {
       return listado;
     } on PostgrestException catch (e) {
       throw 'Ocurrió un error al intentar obtener los datos -> ${e.message}';
+    }
+  }
+
+  //Obtener el inventario de un restaurante (regresado como MODELO)
+  Future<List<InventarioModelo>> obtenerInventarioPorRestauranteModelos(
+      int idRestaurante) async {
+    List<InventarioModelo> listado = [];
+    try {
+      final List<Map<String, dynamic>> res = await state
+          .from('inventario')
+          .select()
+          .eq('id_restaurante', idRestaurante)
+          .eq('status', true);
+
+      for (var element in res) {
+        InventarioModelo modelo = InventarioModelo.fromJson(element);
+        listado.add(modelo);
+      }
+
+      return listado;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error al intentar obtener los datos -> ${e.message}';
+    }
+  }
+
+  //Obtener UN inventario por ID
+  Future<InventarioModelo> obtenerInventarioPorId(int id) async {
+    List<InventarioModelo> listado = [];
+    try {
+      final Map<String, dynamic> res = await state
+          .from('inventario')
+          .select()
+          .eq('id', id)
+          .limit(1)
+          .single();
+
+      InventarioModelo modelo = InventarioModelo.fromJson(res);
+      listado.add(modelo);
+
+      return listado.first;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error al intentar obtener los datos -> ${e.message}';
+    }
+  }
+
+  //Obtener el nombre del inventario por ID
+  Future<String> nombreInventario(int idInventario) async {
+    try {
+      final Map<String, dynamic> res = await state
+          .from('inventario')
+          .select('nombre')
+          .eq('id', idInventario)
+          .limit(1)
+          .single();
+
+      return res['nombre'].toString();
+    } on PostgrestException catch (e) {
+      return 'Error al querer obtener el nombre -> ${e.message}';
     }
   }
 
@@ -1219,7 +1322,8 @@ class SupabaseManagement extends _$SupabaseManagement {
   //Borrar un producto del inventario
   Future<String> borrarInventario(int id) async {
     try {
-      await state.from('inventario').delete().eq('id', id);
+      //await state.from('inventario').delete().eq('id', id);
+      await state.from('inventario').update({'status': false}).eq('id', id);
       return 'success';
     } on PostgrestException catch (e) {
       return e.message;
@@ -1234,6 +1338,248 @@ class SupabaseManagement extends _$SupabaseManagement {
       return 'success';
     } on PostgrestException catch (e) {
       return 'Ocurrió un error al querer actualizar el producto -> ${e.message}';
+    }
+  }
+
+  //Obtener el inventario asociado a un ítem de menú (por restaurante)
+  Future<List<MenuInventario>> obtenerMenuInventarioPorItemMenu(
+      int idRestaurante, int idMenu) async {
+    List<MenuInventario> listado = [];
+    try {
+      final List<Map<String, dynamic>> res = await state
+          .from('menu_inventario')
+          .select()
+          .eq('id_restaurante', idRestaurante)
+          .eq('id_menu', idMenu);
+
+      for (var element in res) {
+        MenuInventarioModelo modelo = MenuInventarioModelo.fromJson(element);
+        listado.add(modelo);
+      }
+
+      return listado;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error al intentar obtener los datos -> ${e.message}';
+    }
+  }
+
+  //Obtener UN inventario asociado por ID
+  Future<MenuInventario> obtenerMenuInventarioPorId(int id) async {
+    List<MenuInventario> listado = [];
+    try {
+      final Map<String, dynamic> res = await state
+          .from('menu_inventario')
+          .select()
+          .eq('id', id)
+          .limit(1)
+          .single();
+
+      MenuInventarioModelo modelo = MenuInventarioModelo.fromJson(res);
+      listado.add(modelo);
+
+      return listado.first;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error al intentar obtener los datos -> ${e.message}';
+    }
+  }
+
+  //Agregar menú inventario
+  Future<String> addMenuInventario(MenuInventarioModelo menuInventario) async {
+    Map<String, dynamic> mapa = menuInventario.toJson();
+    try {
+      await state.from('menu_inventario').insert(mapa);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return 'Ocurrió un error -> ${e.message}';
+    }
+  }
+
+  //Actualizar Menú Inventario
+  Future<String> actualizarMenuInventario(
+      MenuInventarioModelo menuInventario) async {
+    Map<String, dynamic> mapa = menuInventario.toJson();
+    try {
+      await state
+          .from('menu_inventario')
+          .update(mapa)
+          .eq('id', menuInventario.id!);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return 'Ocurrió un error al querer actualizar el producto -> ${e.message}';
+    }
+  }
+
+  //Borrar un Menú Inventario
+  Future<String> borrarMenuInventario(int id) async {
+    try {
+      await state.from('menu_inventario').delete().eq('id', id);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return e.message;
+    }
+  }
+
+  //Agregar movimiento inventario
+  Future<String> addMovimientoInventario(
+      MovimientoInventarioModelo movimientoInventarioModelo) async {
+    Map<String, dynamic> mapa = movimientoInventarioModelo.toJson();
+    try {
+      await state.from('movimientos_inventario').insert(mapa);
+      await actualizarStockInventarioPorId(
+          movimientoInventarioModelo.idInventario,
+          movimientoInventarioModelo.stock,
+          movimientoInventarioModelo.tipo);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return 'Ocurrió un error -> ${e.message}';
+    }
+  }
+
+  //ACTUALIZAR movimiento inventario
+  Future<String> actualizarMovimientoInventario(
+      MovimientoInventarioModelo movimientoInventarioModelo) async {
+    Map<String, dynamic> mapa = movimientoInventarioModelo.toJson();
+    int stockFinal = 0;
+
+    try {
+      //Obtener el stock original
+      InventarioModelo inventario =
+          await obtenerInventarioPorId(movimientoInventarioModelo.idInventario);
+      int stockOriginal = inventario.stock;
+
+      //obtener los datos ORIGINALES del movimiento que quiere actualizarse
+      MovimientoInventarioModelo movimientoOriginal =
+          await obtenerMovimientoPorId(movimientoInventarioModelo.id!);
+      int stockMovimientoOriginal = movimientoOriginal.stock;
+
+      int diferenciaStock =
+          movimientoInventarioModelo.stock - stockMovimientoOriginal;
+
+      if (movimientoInventarioModelo.tipo == 1) {
+        //Caso cuando es ENTRADA
+        stockFinal = stockOriginal + diferenciaStock;
+      } else {
+        //Caso cuando es SALIDA
+        stockFinal = stockOriginal - diferenciaStock;
+      }
+
+      await actualizarStockInventario(
+          stockFinal, movimientoInventarioModelo.idInventario);
+
+      await state
+          .from('movimientos_inventario')
+          .update(mapa)
+          .eq('id', movimientoInventarioModelo.id!);
+
+      return 'success';
+    } on PostgrestException catch (e) {
+      return 'Ocurrió un error -> ${e.message}';
+    }
+  }
+
+  //Actualizar el stock de un inventario (general)
+  Future<void> actualizarStockInventario(
+      int stockFinal, int idInventario) async {
+    try {
+      await state
+          .from('inventario')
+          .update({'stock': stockFinal}).eq('id', idInventario);
+    } on PostgrestException catch (e) {
+      throw 'Error al querer actualizar el stock en inventario -> ${e.message}';
+    }
+  }
+
+  //Borrar el Movimiento del inventario
+  Future<String> borrarMovimientoInventario(
+      MovimientoInventarioModelo movimientoInventarioModelo) async {
+    int stockFinal = 0;
+
+    try {
+      //Obtener el stock original
+      InventarioModelo inventario =
+          await obtenerInventarioPorId(movimientoInventarioModelo.idInventario);
+      int stockOriginal = inventario.stock;
+
+      if (movimientoInventarioModelo.tipo == 1) {
+        //Caso ENTRADAS
+        stockFinal = stockOriginal - movimientoInventarioModelo.stock;
+      } else {
+        //Caso SALIDAS
+        stockFinal = stockOriginal + movimientoInventarioModelo.stock;
+      }
+
+      await actualizarStockInventario(
+          stockFinal, movimientoInventarioModelo.idInventario);
+
+      await state
+          .from('movimientos_inventario')
+          .delete()
+          .eq('id', movimientoInventarioModelo.id!);
+      return 'success';
+    } on PostgrestException catch (e) {
+      return 'Ocurrió un error -> ${e.message}';
+    }
+  }
+
+  //Actualizar el STOCK del inventario
+  Future<void> actualizarStockInventarioPorId(
+      int idInventario, int variante, int sumaoResta) async {
+    //1 = suma
+    //2 = resta
+    try {
+      Inventario inventario = await obtenerInventarioPorId(idInventario);
+      int valorNuevoStock = sumaoResta == 1
+          ? inventario.stock + variante
+          : inventario.stock - variante;
+      await state
+          .from('inventario')
+          .update({'stock': valorNuevoStock}).eq('id', idInventario);
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error al querer actualizar stock ${e.message}';
+    }
+  }
+
+  //Obtener los movimientos de inventario de un restaurante (id rest)
+  Future<List<MovimientoInventarioModelo>>
+      obtenerMovimientosInventarioPorIdRest(int idRestaurante) async {
+    List<MovimientoInventarioModelo> listado = [];
+    try {
+      final List<Map<String, dynamic>> res = await state
+          .from('movimientos_inventario')
+          .select()
+          .eq('id_restaurante', idRestaurante)
+          .order('id', ascending: false);
+
+      for (var element in res) {
+        MovimientoInventarioModelo modelo =
+            MovimientoInventarioModelo.fromJson(element);
+        listado.add(modelo);
+      }
+
+      return listado;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error al intentar obtener los datos -> ${e.message}';
+    }
+  }
+
+  //Obtener UN movimiento de inventario por ID
+  Future<MovimientoInventarioModelo> obtenerMovimientoPorId(int id) async {
+    List<MovimientoInventarioModelo> listado = [];
+    try {
+      final Map<String, dynamic> res = await state
+          .from('movimientos_inventario')
+          .select()
+          .eq('id', id)
+          .limit(1)
+          .single();
+
+      MovimientoInventarioModelo modelo =
+          MovimientoInventarioModelo.fromJson(res);
+      listado.add(modelo);
+
+      return listado.first;
+    } on PostgrestException catch (e) {
+      throw 'Ocurrió un error al intentar obtener el dato -> ${e.message}';
     }
   }
 }

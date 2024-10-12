@@ -1,3 +1,10 @@
+import 'package:ez_order_ezr/presentation/config/routes.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'package:ez_order_ezr/domain/inventario.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/datatables/inventario_dts.dart';
@@ -5,10 +12,6 @@ import 'package:ez_order_ezr/presentation/modales/inventario_modal.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/widgets/modal_purpose_enum.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class InventarioPage extends ConsumerStatefulWidget {
   const InventarioPage({super.key});
@@ -53,6 +56,36 @@ class _InventarioPageState extends ConsumerState<InventarioPage> {
           'Gestión del Inventario',
           style: TextStyle(color: Colors.white),
         ),
+        actions: [
+          OutlinedButton.icon(
+            onPressed: () async {
+              bool? res = await context.pushNamed(Routes.movimientosInventario);
+
+              if (res != null) {
+                setState(() {});
+              }
+            },
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(width: 1.0, color: Colors.white),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            icon: const Icon(
+              Icons.compare_arrows,
+              color: Colors.white,
+              size: 15,
+            ),
+            label: Text(
+              'Movimientos',
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(width: 25),
+        ],
       ),
       body: Center(
         child: Container(
@@ -77,18 +110,16 @@ class _InventarioPageState extends ConsumerState<InventarioPage> {
               }
 
               if (snapshot.hasError) {
-                String mensaje = snapshot.error.toString();
-                return Center(
+                return const Center(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.warning,
                         color: Colors.yellow,
                       ),
-                      const Text('Ocurrió un error!!'),
-                      Text(mensaje),
+                      Text('Ocurrió un error!!'),
                     ],
                   ),
                 );

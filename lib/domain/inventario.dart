@@ -9,6 +9,7 @@ abstract class Inventario {
     required this.precioCosto,
     required this.stock,
     this.proveedor,
+    required this.status,
   });
 
   final int? id;
@@ -20,4 +21,5 @@ abstract class Inventario {
   final double precioCosto;
   final int stock;
   final String? proveedor;
+  final bool status;
 }

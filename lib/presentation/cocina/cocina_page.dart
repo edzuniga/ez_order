@@ -28,10 +28,15 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
   @override
   void initState() {
     super.initState();
+    _initializeStream();
+  }
+
+  void _initializeStream() {
     int userIdRestaurante = int.parse(
         ref.read(userPublicDataProvider)['id_restaurante'].toString());
     _supabase = ref.read(supabaseManagementProvider);
-    //Stream general filtrado por el id del restaurante
+
+    // Stream general filtrado por el id del restaurante
     _stream = _supabase
         .from('pedidos')
         .stream(primaryKey: ['uuid_pedido'])
@@ -42,7 +47,7 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
     final startOfDay = DateTime(today.year, today.month, today.day);
     final endOfDay = startOfDay.add(const Duration(days: 1));
 
-    //Filtración interna del stream general, condicionado por fecha (solo fecha de hoy)
+    // Filtración interna del stream general, condicionado por fecha (solo fecha de hoy)
     _pedidosStream = _stream.map((data) {
       return data.where((pedido) {
         final createdAt = DateTime.parse(pedido['created_at']);
@@ -50,6 +55,13 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
             createdAt.isBefore(endOfDay) &&
             pedido['en_preparacion'] == true;
       }).toList();
+    });
+  }
+
+  // Función para refrescar el stream
+  void _refreshStream() {
+    setState(() {
+      _initializeStream(); // Vuelve a ejecutar la lógica del stream
     });
   }
 
@@ -77,6 +89,27 @@ class _CocinaPageState extends ConsumerState<CocinaPage> {
               children: [
                 //Custom Appbar para la cocina
                 const CocinaAppBar(),
+                const Gap(8),
+                //Botón para refrescar listado
+                Center(
+                  child: SizedBox(
+                    child: ElevatedButton(
+                      onPressed: _refreshStream,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.kGeneralPrimaryOrange,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        'Refrescar datos',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
                 const Gap(8),
                 //listado de pedidos pendientes
                 screenSize.width <= 750 ? portraitList() : landscapeList(),

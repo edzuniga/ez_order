@@ -1,14 +1,13 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:ez_order_ezr/data/reporte_modelo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:ez_order_ezr/data/reporte_modelo.dart';
 import 'package:ez_order_ezr/data/caja_apertura_modelo.dart';
 import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/reportes_valores_provider.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
-import 'package:ez_order_ezr/presentation/providers/caja/caja_abierta.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 
@@ -161,9 +160,9 @@ class _CerrarCajaModalState extends ConsumerState<CerrarCajaModal> {
                                         widget.cajaApertura.restauranteUid,
                                         false);
                                 //refrescar el estado local del status de la caja
-                                ref
+                                /*ref
                                     .read(cajaAbiertaProvider.notifier)
-                                    .refresh();
+                                    .refresh(); */
                                 setState(() => _isSendingData = false);
                                 if (!context.mounted) return;
                                 Navigator.of(context).pop(true);

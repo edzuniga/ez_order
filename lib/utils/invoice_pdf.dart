@@ -209,8 +209,14 @@ Future<Uint8List> generateFacturaPdf(
 }
 
 Future<Uint8List> generateTicketPdf(List<PedidoDetalleModel> detallesPedido,
-    String numeroPedido, String nombreCliente) async {
+    PedidoModel pedido, String nombreCliente) async {
   final doc = pw.Document();
+
+  String notaAdicional = 'N/A';
+
+  if (pedido.notaAdicional != null) {
+    notaAdicional = pedido.notaAdicional.toString();
+  }
 
   // Define the page format with margins
   const margin1 = 10 * PdfPageFormat.mm;
@@ -250,7 +256,7 @@ Future<Uint8List> generateTicketPdf(List<PedidoDetalleModel> detallesPedido,
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.Text(
-              'PEDIDO # $numeroPedido',
+              'PEDIDO # ${pedido.numPedido}',
               style: estiloBold,
             ),
             pw.SizedBox(height: 10),
@@ -263,20 +269,18 @@ Future<Uint8List> generateTicketPdf(List<PedidoDetalleModel> detallesPedido,
             pw.TableHelper.fromTextArray(
               headerAlignment: pw.Alignment.centerLeft,
               columnWidths: const {
-                0: pw.FixedColumnWidth(40),
-                1: pw.FlexColumnWidth(),
-                2: pw.FixedColumnWidth(70),
+                0: pw.FlexColumnWidth(),
+                1: pw.FixedColumnWidth(70),
               },
               context: context,
               border: null,
               headerStyle: estiloBold.copyWith(fontSize: 10),
-              headers: ['#', 'Detalle', 'Cantidad'],
+              headers: ['Detalle', 'Cantidad'],
               data: [
                 ...detallesPedido.asMap().map((index, element) {
                   return MapEntry(
                     index,
                     [
-                      (index + 1).toString(), // Número que inicia desde 1
                       '${element.nombreMenuItem}',
                       element.cantidad.toString(),
                     ],
@@ -286,6 +290,8 @@ Future<Uint8List> generateTicketPdf(List<PedidoDetalleModel> detallesPedido,
             ),
             pw.SizedBox(height: 10),
             pw.Divider(color: PdfColors.black),
+            pw.SizedBox(height: 10),
+            pw.Text('Nota Adicional: $notaAdicional', style: estilo),
             pw.SizedBox(height: 10),
           ],
         );

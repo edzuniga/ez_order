@@ -44,6 +44,10 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
   @override
   void initState() {
     super.initState();
+    _initializeStream();
+  }
+
+  void _initializeStream() {
     if (ref.read(userPublicDataProvider)['id_restaurante'] != null) {
       int userIdRestaurante = int.parse(
           ref.read(userPublicDataProvider)['id_restaurante'].toString());
@@ -79,6 +83,13 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
       }).toList();
     });
     countMenuSimpleStatistics();
+  }
+
+  // Función para refrescar el stream
+  void _refreshStream() {
+    setState(() {
+      _initializeStream(); // Vuelve a ejecutar la lógica del stream
+    });
   }
 
   @override
@@ -315,14 +326,33 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
                   ),
                   child: Column(
                     children: [
-                      const Center(
-                        child: Text(
-                          'EN PREPARACIÓN',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'EN PREPARACIÓN',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
+                          const Gap(8),
+                          ElevatedButton(
+                            onPressed: _refreshStream,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.kGeneralPrimaryOrange,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Refrescar datos',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       Expanded(
                         child: StreamBuilder(
@@ -1693,14 +1723,33 @@ class _PedidosViewState extends ConsumerState<PedidosView> {
             ),
             child: Column(
               children: [
-                const Center(
-                  child: Text(
-                    'EN PREPARACIÓN',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'EN PREPARACIÓN',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
+                    const Gap(8),
+                    ElevatedButton(
+                      onPressed: _refreshStream,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.kGeneralPrimaryOrange,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        'Refrescar datos',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 Expanded(
                   child: StreamBuilder(

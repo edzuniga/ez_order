@@ -11,6 +11,7 @@ class InventarioModelo extends Inventario {
     required super.precioCosto,
     required super.stock,
     super.proveedor,
+    required super.status,
   });
 
   factory InventarioModelo.fromJson(Map<String, dynamic> json) =>
@@ -28,6 +29,7 @@ class InventarioModelo extends Inventario {
             ? json['stock']
             : int.parse(json['stock'].toString()),
         proveedor: json['proveedor'],
+        status: json['status'],
       );
 
   Map<String, dynamic> toJson() => {
@@ -39,6 +41,7 @@ class InventarioModelo extends Inventario {
         'precio_costo': precioCosto,
         'stock': stock,
         'proveedor': proveedor,
+        'status': status,
       };
 
   InventarioModelo copyWith({
@@ -51,6 +54,7 @@ class InventarioModelo extends Inventario {
     double? precioCosto,
     int? stock,
     String? proveedor,
+    bool? status,
   }) =>
       InventarioModelo(
         id: id ?? this.id,
@@ -62,5 +66,11 @@ class InventarioModelo extends Inventario {
         precioCosto: precioCosto ?? this.precioCosto,
         stock: stock ?? this.stock,
         proveedor: proveedor ?? this.proveedor,
+        status: status ?? this.status,
       );
+
+  //this method will prevent the override of toString
+  String inventarioAsString() {
+    return nombre;
+  }
 }

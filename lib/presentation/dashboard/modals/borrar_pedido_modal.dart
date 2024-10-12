@@ -123,7 +123,7 @@ class _BorrarPedidoModalState extends ConsumerState<BorrarPedidoModal> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.red,
           content: Text(
-            'Ocurrió un error al intentar cancelar el pedido -> $message',
+            'Ocurrió un error al intentar cancelar/borrar el pedido/factura -> $message',
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,

@@ -1,4 +1,7 @@
+import 'package:ez_order_ezr/domain/menu_item.dart';
+import 'package:ez_order_ezr/presentation/inventario/asociar_menu_inventario_page.dart';
 import 'package:ez_order_ezr/presentation/inventario/inventario_page.dart';
+import 'package:ez_order_ezr/presentation/inventario/movimientos_inventario_page.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -191,6 +194,36 @@ GoRouter router(Ref ref) {
           ),
         ),
       ),
+      GoRoute(
+          name: Routes.menuInventario,
+          path: '/menu_inventario',
+          pageBuilder: (context, state) {
+            MenuItem menuItem =
+                state.extra as MenuItem; // 👈 casting is important
+            return CustomTransitionPage(
+              child: AsociarMenuInventarioPage(menuItem: menuItem),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) =>
+                      FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          }),
+      GoRoute(
+          name: Routes.movimientosInventario,
+          path: '/movimientos_inventario',
+          pageBuilder: (context, state) {
+            return CustomTransitionPage(
+              child: const MovimientosInventarioPage(),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) =>
+                      FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          }),
     ],
     errorPageBuilder: (context, state) => CustomTransitionPage(
       child: const ErrorPage(),
@@ -219,6 +252,8 @@ GoRouter router(Ref ref) {
         '/pedidos_entregados',
         '/en_preparacion',
         '/caja',
+        '/menu_inventario',
+        '/movimientos_inventario',
       ];
 
       WidgetsBinding.instance.addPostFrameCallback((v) {

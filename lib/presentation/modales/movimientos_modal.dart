@@ -5,41 +5,42 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:ez_order_ezr/data/inventario_modelo.dart';
 import 'package:ez_order_ezr/domain/inventario.dart';
+import 'package:ez_order_ezr/presentation/widgets/modal_purpose_enum.dart';
+import 'package:ez_order_ezr/data/movimiento_inventario_modelo.dart';
 import 'package:ez_order_ezr/presentation/config/app_colors.dart';
 import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
-import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/widgets/custom_input.dart';
-import 'package:ez_order_ezr/presentation/widgets/modal_purpose_enum.dart';
 
-class InventarioModal extends ConsumerStatefulWidget {
-  const InventarioModal({
+class MovimientosModal extends ConsumerStatefulWidget {
+  const MovimientosModal({
     required this.modalPurpose,
     required this.titulo,
+    this.movimientoModelo,
     this.inventario,
     super.key,
   });
 
   final ModalPurpose modalPurpose;
-  final Inventario? inventario;
   final String titulo;
+  final MovimientoInventarioModelo? movimientoModelo;
+  final Inventario? inventario;
 
   @override
-  ConsumerState<InventarioModal> createState() => _InventarioModalState();
+  ConsumerState<MovimientosModal> createState() => _MovimientosModalState();
 }
 
-class _InventarioModalState extends ConsumerState<InventarioModal> {
-  final GlobalKey<FormState> _inventarioFormKey = GlobalKey<FormState>();
-  final TextEditingController _codigo = TextEditingController();
-  final TextEditingController _nombre = TextEditingController();
-  final TextEditingController _descripcion = TextEditingController();
-  final TextEditingController _precioCosto = TextEditingController();
+class _MovimientosModalState extends ConsumerState<MovimientosModal> {
+  final GlobalKey<FormState> _movimientoInventarioFormKey =
+      GlobalKey<FormState>();
   final TextEditingController _stock = TextEditingController();
-  final TextEditingController _proveedor = TextEditingController();
-
+  final TextEditingController _descripcion = TextEditingController();
   bool _isSendingData = false;
   late String _botonString;
+  late int _stockDisponible;
+
+  int? selectedTipo;
+  bool sobrepasaCantidadStock = false;
 
   @override
   void initState() {
@@ -49,27 +50,32 @@ class _InventarioModalState extends ConsumerState<InventarioModal> {
     if (widget.modalPurpose == ModalPurpose.update) {
       _getFieldValues();
     }
+    if (widget.modalPurpose == ModalPurpose.add) {
+      _stockDisponible = widget.inventario!.stock;
+    } else {
+      _obtenerStock();
+    }
   }
 
   Future<void> _getFieldValues() async {
     setState(() {
-      _codigo.text = widget.inventario!.codigo.toString();
-      _nombre.text = widget.inventario!.nombre;
-      _descripcion.text = widget.inventario!.descripcion.toString();
-      _precioCosto.text = widget.inventario!.precioCosto.toString();
-      _stock.text = widget.inventario!.stock.toString();
-      _proveedor.text = widget.inventario!.proveedor.toString();
+      _stock.text = widget.movimientoModelo!.stock.toString();
+      _descripcion.text = widget.movimientoModelo!.descripcion;
+      selectedTipo = widget.movimientoModelo!.tipo;
     });
+  }
+
+  Future<void> _obtenerStock() async {
+    Inventario inventarioProvi = await ref
+        .read(supabaseManagementProvider.notifier)
+        .obtenerInventarioPorId(widget.movimientoModelo!.idInventario);
+    _stockDisponible = inventarioProvi.stock;
   }
 
   @override
   void dispose() {
-    _codigo.dispose();
-    _nombre.dispose();
-    _descripcion.dispose();
-    _precioCosto.dispose();
     _stock.dispose();
-    _proveedor.dispose();
+    _descripcion.dispose();
     super.dispose();
   }
 
@@ -89,7 +95,7 @@ class _InventarioModalState extends ConsumerState<InventarioModal> {
       ),
       child: widget.modalPurpose != ModalPurpose.delete
           ? Form(
-              key: _inventarioFormKey,
+              key: _movimientoInventarioFormKey,
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -107,7 +113,7 @@ class _InventarioModalState extends ConsumerState<InventarioModal> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '${widget.titulo} producto',
+                            '${widget.titulo} movimiento',
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
@@ -124,41 +130,105 @@ class _InventarioModalState extends ConsumerState<InventarioModal> {
                       ),
                     ),
 
-                    //Código
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: CustomInputField(
-                              controlador: _codigo,
-                              label: 'Código del producto',
-                              isRequired: true,
+                    //Información del producto de inventario
+                    widget.modalPurpose == ModalPurpose.add
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              width: double.infinity,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                color: AppColors.kGeneralPrimaryOrange
+                                    .withOpacity(0.05),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                      'Nombre del producto: ${widget.inventario!.nombre}'),
+                                  Text(
+                                    'Stock disponible: ${widget.inventario!.stock}',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : const SizedBox(),
 
-                    //Nombre
+                    //Tipo de movimiento (entrada / salida)
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 10,
                       ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: CustomInputField(
-                              controlador: _nombre,
-                              label: 'Nombre del producto',
-                              isRequired: true,
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButtonFormField<int>(
+                          value: selectedTipo,
+                          items: const [
+                            DropdownMenuItem<int>(
+                                value: 1, child: Text('Entrada')),
+                            DropdownMenuItem<int>(
+                                value: 2, child: Text('Salida')),
+                          ],
+                          decoration: InputDecoration(
+                            hintText: 'Tipo de movimiento',
+                            hintStyle: GoogleFonts.inter(
+                              color: AppColors.kTextSecondaryGray,
                             ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                color: Colors.white,
+                                width: 2.0,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                color: AppColors.kGeneralPrimaryOrange,
+                                width: 2.0,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                color: AppColors.kGeneralErrorColor,
+                                width: 2.0,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                color: AppColors.kGeneralErrorColor,
+                                width: 2.0,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            filled: true,
+                            fillColor: AppColors.kInputLiteGray,
                           ),
-                        ],
+                          validator: (v) {
+                            if (v == null) {
+                              return 'Campo obligatorio';
+                            }
+                            return null;
+                          },
+                          onChanged: widget.modalPurpose == ModalPurpose.add
+                              ? (v) {
+                                  setState(() {
+                                    selectedTipo = v;
+                                    if (v == 1) {
+                                      sobrepasaCantidadStock = false;
+                                    }
+                                  });
+                                }
+                              : null,
+                        ),
                       ),
                     ),
 
@@ -173,28 +243,9 @@ class _InventarioModalState extends ConsumerState<InventarioModal> {
                           Expanded(
                             child: CustomInputField(
                               controlador: _descripcion,
-                              label: 'Descripción',
-                              isTextArea: true,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    //Precio de costo
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: CustomInputField(
-                              controlador: _precioCosto,
-                              label: 'Precio de costo',
+                              label: 'Descripción del movimiento',
                               isRequired: true,
-                              isMoney: true,
+                              isTextArea: true,
                             ),
                           ),
                         ],
@@ -212,7 +263,7 @@ class _InventarioModalState extends ConsumerState<InventarioModal> {
                           Expanded(
                             child: CustomInputField(
                               controlador: _stock,
-                              label: 'Stock',
+                              label: 'Cantidad de Stock',
                               isRequired: true,
                               isInt: true,
                             ),
@@ -221,24 +272,30 @@ class _InventarioModalState extends ConsumerState<InventarioModal> {
                       ),
                     ),
 
-                    //Proveedor
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: CustomInputField(
-                              controlador: _proveedor,
-                              label: 'Proveedor',
-                              isRequired: true,
+                    //Mensaje de STOCK sobrepasado
+                    sobrepasaCantidadStock
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              width: double.infinity,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                color: AppColors.kGeneralErrorColor,
+                              ),
+                              child: const Text(
+                                'La cantidad no puede ser mayor al stock disponible',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              ),
+                            ),
+                          )
+                        : const SizedBox(),
 
                     //Botones cancelar y agregar
                     Padding(
@@ -270,51 +327,56 @@ class _InventarioModalState extends ConsumerState<InventarioModal> {
                             onPressed: _isSendingData
                                 ? () {}
                                 : () async {
-                                    if (_inventarioFormKey.currentState!
+                                    if (_movimientoInventarioFormKey
+                                        .currentState!
                                         .validate()) {
-                                      //Obtener el ID del restaurante
-                                      int? idRes = int.tryParse(ref
-                                          .read(userPublicDataProvider)[
-                                              'id_restaurante']
-                                          .toString());
-
-                                      if (widget.modalPurpose ==
-                                          ModalPurpose.add) {
-                                        if (idRes != null) {
-                                          InventarioModelo inventario =
-                                              InventarioModelo(
-                                            createdAt: DateTime.now(),
-                                            idRestaurante: idRes,
-                                            codigo: _codigo.text,
-                                            nombre: _nombre.text,
-                                            descripcion: _descripcion.text,
-                                            precioCosto:
-                                                double.parse(_precioCosto.text),
-                                            stock: int.parse(_stock.text),
-                                            proveedor: _proveedor.text,
-                                            status: true,
-                                          );
-                                          await tryAddInventario(inventario);
-                                        }
+                                      if (int.parse(_stock.text) >
+                                              _stockDisponible &&
+                                          selectedTipo == 2 &&
+                                          widget.modalPurpose ==
+                                              ModalPurpose.add) {
+                                        setState(() =>
+                                            sobrepasaCantidadStock = true);
                                       } else {
-                                        if (idRes != null) {
-                                          InventarioModelo inventario =
-                                              InventarioModelo(
-                                            id: widget.inventario!.id,
-                                            createdAt:
-                                                widget.inventario!.createdAt,
+                                        setState(() =>
+                                            sobrepasaCantidadStock = false);
+
+                                        if (widget.modalPurpose ==
+                                            ModalPurpose.add) {
+                                          MovimientoInventarioModelo
+                                              movimientoInventario =
+                                              MovimientoInventarioModelo(
+                                            createdAt: DateTime.now(),
+                                            idInventario:
+                                                widget.inventario!.id!,
+                                            descripcion: _descripcion.text,
+                                            stock: int.parse(_stock.text),
+                                            tipo: selectedTipo!,
                                             idRestaurante: widget
                                                 .inventario!.idRestaurante,
-                                            codigo: _codigo.text,
-                                            nombre: _nombre.text,
-                                            descripcion: _descripcion.text,
-                                            precioCosto:
-                                                double.parse(_precioCosto.text),
-                                            stock: int.parse(_stock.text),
-                                            proveedor: _proveedor.text,
-                                            status: true,
                                           );
-                                          await tryUpdateInventario(inventario);
+
+                                          await tryCrearMovimientoInventario(
+                                              movimientoInventario);
+                                        } else {
+                                          MovimientoInventarioModelo
+                                              movimientoInventario =
+                                              MovimientoInventarioModelo(
+                                            id: widget.movimientoModelo!.id,
+                                            createdAt: widget
+                                                .movimientoModelo!.createdAt,
+                                            idInventario: widget
+                                                .movimientoModelo!.idInventario,
+                                            descripcion: _descripcion.text,
+                                            stock: int.parse(_stock.text),
+                                            tipo: selectedTipo!,
+                                            idRestaurante: widget
+                                                .movimientoModelo!
+                                                .idRestaurante,
+                                          );
+
+                                          await tryUpdateMovimientoInventario(
+                                              movimientoInventario);
                                         }
                                       }
                                     }
@@ -365,7 +427,7 @@ class _InventarioModalState extends ConsumerState<InventarioModal> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${widget.titulo} producto',
+                        '${widget.titulo} movimiento',
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
@@ -425,7 +487,8 @@ class _InventarioModalState extends ConsumerState<InventarioModal> {
                       //Botón de aceptar
                       ElevatedButton(
                         onPressed: () async {
-                          await tryDeleteInventario(widget.inventario!.id!);
+                          await tryDeleteMovimientoInventario(
+                              widget.movimientoModelo!);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.kGeneralErrorColor,
@@ -449,11 +512,13 @@ class _InventarioModalState extends ConsumerState<InventarioModal> {
     );
   }
 
-  Future<void> tryAddInventario(InventarioModelo inventario) async {
+  Future<void> tryCrearMovimientoInventario(
+      MovimientoInventarioModelo movimientoInventario) async {
     setState(() => _isSendingData = true);
     final supabase = ref.read(supabaseManagementProvider.notifier);
 
-    String mensaje = await supabase.addInventario(inventario);
+    String mensaje =
+        await supabase.addMovimientoInventario(movimientoInventario);
 
     if (!mounted) return;
 
@@ -486,11 +551,13 @@ class _InventarioModalState extends ConsumerState<InventarioModal> {
     }
   }
 
-  Future<void> tryUpdateInventario(InventarioModelo inventario) async {
+  Future<void> tryUpdateMovimientoInventario(
+      MovimientoInventarioModelo movimientoInventario) async {
     setState(() => _isSendingData = true);
     final supabase = ref.read(supabaseManagementProvider.notifier);
 
-    String mensaje = await supabase.actualizarInventario(inventario);
+    String mensaje =
+        await supabase.actualizarMovimientoInventario(movimientoInventario);
 
     if (!mounted) return;
 
@@ -523,11 +590,13 @@ class _InventarioModalState extends ConsumerState<InventarioModal> {
     }
   }
 
-  Future<void> tryDeleteInventario(int id) async {
+  Future<void> tryDeleteMovimientoInventario(
+      MovimientoInventarioModelo movimientoInventario) async {
     setState(() => _isSendingData = true);
     final supabase = ref.read(supabaseManagementProvider.notifier);
 
-    String mensaje = await supabase.borrarInventario(id);
+    String mensaje =
+        await supabase.borrarMovimientoInventario(movimientoInventario);
 
     if (!mounted) return;
 

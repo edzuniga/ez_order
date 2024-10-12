@@ -17,6 +17,8 @@ class Routes {
 
   //Inventario Route
   static const String inventario = 'inventario';
+  static const String menuInventario = 'menu_inventario';
+  static const String movimientosInventario = 'movimientos_inventario';
 
   //En preparación Route
   static const String enPreparacion = 'en_preparacion';

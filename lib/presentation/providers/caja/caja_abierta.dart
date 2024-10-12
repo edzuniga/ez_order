@@ -1,25 +1,30 @@
-import 'package:ez_order_ezr/presentation/providers/duenos_restaurantes/restaurante_caja_provider.dart';
-import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import 'package:ez_order_ezr/presentation/providers/supabase_instance.dart';
+import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 
 part 'caja_abierta.g.dart';
 
 @riverpod
 class CajaAbierta extends _$CajaAbierta {
   @override
-  Future<bool> build() async {
-    int? idRes = ref.read(cajaRestauranteSeleccionadoProvider).idRestaurante;
-    if (idRes != null) {
-      final cajaAbierta = await ref
-          .read(supabaseManagementProvider.notifier)
-          .getCajaAbierta(idRes);
-      return cajaAbierta.abierto;
-    }
+  bool build() {
     return false;
   }
 
-  //Función para refrescar el provider (listado)
-  Future<void> refresh() {
-    return ref.refresh(cajaAbiertaProvider.future);
+  Future<bool> chequearSiCajaEstaAbierta() async {
+    //Obtener el id del restaurante
+    int userIdRestaurante = int.parse(
+        ref.read(userPublicDataProvider)['id_restaurante'].toString());
+
+    //setear el valor
+    state = await ref
+        .read(supabaseManagementProvider.notifier)
+        .cajaCerradaoAbierta(userIdRestaurante);
+    return state;
+  }
+
+  resetCajaStatus() {
+    state = false;
   }
 }

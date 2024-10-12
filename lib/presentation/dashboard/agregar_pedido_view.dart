@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:ez_order_ezr/presentation/config/routes.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/add_menu_mobile.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/descuento_mobile_modal.dart';
 import 'package:ez_order_ezr/presentation/dashboard/modals/metodo_pago_mobile_modal.dart';
@@ -651,35 +653,58 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                               await _deleteMenuItemModal(
                                                   itemMenu);
                                               break;
+
+                                            //Caso asociar inventario
+                                            case 3:
+                                              context.pushNamed(
+                                                  Routes.menuInventario,
+                                                  extra: itemMenu);
+                                              break;
                                           }
                                         },
                                         itemBuilder: (ctx) {
                                           return <PopupMenuEntry<int>>[
                                             const PopupMenuItem(
-                                                value: 1,
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceEvenly,
-                                                  children: [
-                                                    Icon(Icons.edit),
-                                                    Gap(5),
-                                                    Text('Editar'),
-                                                  ],
-                                                )),
+                                              value: 1,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceEvenly,
+                                                children: [
+                                                  Icon(Icons.edit),
+                                                  Gap(5),
+                                                  Text('Editar'),
+                                                ],
+                                              ),
+                                            ),
                                             const PopupMenuDivider(),
                                             const PopupMenuItem(
-                                                value: 2,
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceEvenly,
-                                                  children: [
-                                                    Icon(Icons.delete_forever),
-                                                    Gap(5),
-                                                    Text('Borrar'),
-                                                  ],
-                                                )),
+                                              value: 2,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceEvenly,
+                                                children: [
+                                                  Icon(Icons.delete_forever),
+                                                  Gap(5),
+                                                  Text('Borrar'),
+                                                ],
+                                              ),
+                                            ),
+                                            const PopupMenuDivider(),
+                                            const PopupMenuItem(
+                                              value: 3,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceEvenly,
+                                                children: [
+                                                  Icon(Icons.inventory),
+                                                  Gap(5),
+                                                  Text('Asociar'),
+                                                ],
+                                              ),
+                                            ),
                                           ];
                                         },
                                         child: const Icon(
@@ -1703,6 +1728,13 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                               await _deleteMenuItemModal(
                                                   itemMenu);
                                               break;
+
+                                            //Caso asociar inventario
+                                            case 3:
+                                              context.pushNamed(
+                                                  Routes.menuInventario,
+                                                  extra: itemMenu);
+                                              break;
                                           }
                                         },
                                         itemBuilder: (ctx) {
@@ -1732,6 +1764,20 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                                     Text('Borrar'),
                                                   ],
                                                 )),
+                                            const PopupMenuDivider(),
+                                            const PopupMenuItem(
+                                              value: 3,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceEvenly,
+                                                children: [
+                                                  Icon(Icons.inventory),
+                                                  Gap(5),
+                                                  Text('Asociar'),
+                                                ],
+                                              ),
+                                            ),
                                           ];
                                         },
                                         child: const Icon(

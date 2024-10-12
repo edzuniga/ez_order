@@ -1,3 +1,4 @@
+import 'package:ez_order_ezr/domain/inventario.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
+import 'package:ez_order_ezr/domain/menu_inventario.dart';
+import 'package:ez_order_ezr/presentation/providers/caja/caja_abierta.dart';
 import 'package:ez_order_ezr/data/pedido_detalle_model.dart';
 import 'package:ez_order_ezr/presentation/providers/facturacion/detalles_pedido_para_view.dart';
 import 'package:ez_order_ezr/utils/invoice_pdf.dart';
@@ -30,18 +33,21 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
   final TextEditingController _conCuantoPagaCliente = TextEditingController();
   double vuelto = 0.00;
   int userIdRestaurante = 0;
+  bool cajaAbiertaOCerrada = false;
 
   @override
   void initState() {
     super.initState();
     userIdRestaurante = int.parse(
         ref.read(userPublicDataProvider)['id_restaurante'].toString());
+    _chequearCaja();
   }
 
-  Future<bool> _chequearCaja() async {
-    return await ref
-        .read(supabaseManagementProvider.notifier)
-        .cajaCerradaoAbierta(userIdRestaurante);
+  Future<void> _chequearCaja() async {
+    cajaAbiertaOCerrada = await ref
+        .read(cajaAbiertaProvider.notifier)
+        .chequearSiCajaEstaAbierta();
+    setState(() {});
   }
 
   @override
@@ -71,567 +77,523 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
                 ],
               ),
             )
-          : FutureBuilder(
-              future: _chequearCaja(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Por favor espere.'),
-                        CircularProgressIndicator(),
-                      ],
-                    ),
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return const Center(
-                    child: Text('Ocurrió un error!!'),
-                  );
-                }
-
-                if (snapshot.data!) {
-                  return SingleChildScrollView(
-                    child: Stack(
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const Gap(20),
-                            Text(
-                              'Método de pago',
-                              style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.kTextPrimaryBlack,
-                              ),
+          : cajaAbiertaOCerrada
+              ? SingleChildScrollView(
+                  child: Stack(
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Gap(20),
+                          Text(
+                            'Método de pago',
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.kTextPrimaryBlack,
                             ),
-                            const Gap(5),
-                            Text(
-                              'Seleccione el método de pago',
-                              style: GoogleFonts.inter(
-                                fontStyle: FontStyle.italic,
-                                color: Colors.grey,
-                              ),
+                          ),
+                          const Gap(5),
+                          Text(
+                            'Seleccione el método de pago',
+                            style: GoogleFonts.inter(
+                              fontStyle: FontStyle.italic,
+                              color: Colors.grey,
                             ),
-                            const Gap(30),
-                            //EFECTIVO y TARJETA
-                            Row(
-                              children: [
-                                //EFECTIVO
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      _setMetodoDePago(
-                                          MetodoDePagoEnum.efectivo);
-                                    },
-                                    child: Container(
-                                      height: 128,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: metodoSeleccionado ==
-                                                  MetodoDePagoEnum.efectivo
-                                              ? AppColors.kGeneralPrimaryOrange
-                                              : const Color(0xFFE1E1E1),
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
+                          ),
+                          const Gap(30),
+                          //EFECTIVO y TARJETA
+                          Row(
+                            children: [
+                              //EFECTIVO
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    _setMetodoDePago(MetodoDePagoEnum.efectivo);
+                                  },
+                                  child: Container(
+                                    height: 128,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: metodoSeleccionado ==
+                                                MetodoDePagoEnum.efectivo
+                                            ? AppColors.kGeneralPrimaryOrange
+                                            : const Color(0xFFE1E1E1),
                                       ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          SvgPicture.asset(
-                                              'assets/svg/efectivo.svg',
-                                              width: 50,
-                                              height: 50,
-                                              fit: BoxFit.contain,
-                                              semanticsLabel: 'Efectivo'),
-                                          const Gap(5),
-                                          Text(
-                                            'Efectivo',
-                                            style: GoogleFonts.inter(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w700),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const Gap(10),
-                                //TARJETA
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      _setMetodoDePago(
-                                          MetodoDePagoEnum.tarjeta);
-                                    },
-                                    child: Container(
-                                      height: 128,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: metodoSeleccionado ==
-                                                  MetodoDePagoEnum.tarjeta
-                                              ? AppColors.kGeneralPrimaryOrange
-                                              : const Color(0xFFE1E1E1),
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          SvgPicture.asset(
-                                              'assets/svg/tarjeta.svg',
-                                              width: 50,
-                                              height: 50,
-                                              fit: BoxFit.contain,
-                                              semanticsLabel: 'Tarjeta'),
-                                          const Gap(5),
-                                          Text(
-                                            'Tarjeta',
-                                            style: GoogleFonts.inter(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w700),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Gap(10),
-                            //TRANSFERENCIA y DELIVERY
-                            Row(
-                              children: [
-                                //TRANSFERENCIA
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      _setMetodoDePago(
-                                          MetodoDePagoEnum.transferencia);
-                                    },
-                                    child: Container(
-                                      height: 128,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: metodoSeleccionado ==
-                                                  MetodoDePagoEnum.transferencia
-                                              ? AppColors.kGeneralPrimaryOrange
-                                              : const Color(0xFFE1E1E1),
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          SvgPicture.asset(
-                                              'assets/svg/transferencia.svg',
-                                              width: 50,
-                                              height: 50,
-                                              fit: BoxFit.contain,
-                                              semanticsLabel: 'Transferencia'),
-                                          const Gap(5),
-                                          Text(
-                                            'Transferencia',
-                                            style: GoogleFonts.inter(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w700),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const Gap(10),
-                                //DELIVERY
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      _setMetodoDePago(
-                                          MetodoDePagoEnum.delivery);
-                                    },
-                                    child: Container(
-                                      height: 128,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: metodoSeleccionado ==
-                                                  MetodoDePagoEnum.delivery
-                                              ? AppColors.kGeneralPrimaryOrange
-                                              : const Color(0xFFE1E1E1),
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          SvgPicture.asset(
-                                              'assets/svg/delivery.svg',
-                                              width: 50,
-                                              height: 50,
-                                              fit: BoxFit.contain,
-                                              semanticsLabel: 'Delivery'),
-                                          const Gap(5),
-                                          Text(
-                                            'Delivery',
-                                            style: GoogleFonts.inter(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w700),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Gap(15),
-
-                            metodoSeleccionado == MetodoDePagoEnum.efectivo
-                                ? Row(
-                                    children: [
-                                      const Gap(10),
-                                      Expanded(
-                                        child: Column(
-                                          children: [
-                                            const Text(
-                                                '¿Con cuánto efectivo pagará el cliente?'),
-                                            TextField(
-                                              controller: _conCuantoPagaCliente,
-                                              keyboardType: const TextInputType
-                                                  .numberWithOptions(
-                                                  decimal: true),
-                                              inputFormatters: [
-                                                FilteringTextInputFormatter
-                                                    .allow(RegExp(
-                                                        r'^\d*\.?\d{0,2}')),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const Gap(10),
-                                      Expanded(
-                                        child: Column(
-                                          children: [
-                                            ElevatedButton(
-                                              onPressed: () {
-                                                if (_conCuantoPagaCliente
-                                                        .text ==
-                                                    '') {
-                                                  setState(() {
-                                                    vuelto = 0.00;
-                                                  });
-                                                } else {
-                                                  setState(() {
-                                                    vuelto = double.parse(
-                                                            _conCuantoPagaCliente
-                                                                .text) -
-                                                        pedidoActualInfo.total;
-                                                  });
-                                                }
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.black,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                  )),
-                                              child: const Text(
-                                                'Calcular vuelto',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ),
-                                            const Text('El vuelto es de:'),
-                                            Text(
-                                              'L ${vuelto.toStringAsFixed(2)}',
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const Gap(10),
-                                    ],
-                                  )
-                                : const SizedBox(),
-
-                            const Gap(15),
-                            //Detalles de factura (subtotal, impuesto, importe..., etc..)
-                            Container(
-                              decoration: BoxDecoration(
-                                color: AppColors.kInputLiteGray,
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: ExpansionTile(
-                                dense: true,
-                                title: const Text(
-                                  'Detalles de facturación',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                trailing:
-                                    const Icon(Icons.arrow_drop_down_outlined),
-                                children: [
-                                  //Área de Subtotal
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      const Gap(15),
-                                      const Icon(
-                                        Icons.circle_outlined,
-                                        color: AppColors.kTextSecondaryGray,
-                                        size: 8,
-                                      ),
-                                      const Gap(5),
-                                      Text(
-                                        'Subtotal:',
-                                        style: GoogleFonts.inter(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 10,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        'L ${pedidoActualInfo.subtotal}',
-                                        style: const TextStyle(fontSize: 10),
-                                      ),
-                                      const Gap(15),
-                                    ],
-                                  ),
-                                  //Área de Exonerado
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      const Gap(15),
-                                      const Icon(
-                                        Icons.circle_outlined,
-                                        color: AppColors.kTextSecondaryGray,
-                                        size: 8,
-                                      ),
-                                      const Gap(5),
-                                      Text(
-                                        'Importe exonerado:',
-                                        style: GoogleFonts.inter(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 10,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        'L ${pedidoActualInfo.importeExonerado}',
-                                        style: const TextStyle(fontSize: 10),
-                                      ),
-                                      const Gap(15),
-                                    ],
-                                  ),
-                                  //Área de Exento
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      const Gap(15),
-                                      const Icon(
-                                        Icons.circle_outlined,
-                                        color: AppColors.kTextSecondaryGray,
-                                        size: 8,
-                                      ),
-                                      const Gap(5),
-                                      Text(
-                                        'Importe exento:',
-                                        style: GoogleFonts.inter(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 10,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        'L ${pedidoActualInfo.importeExento}',
-                                        style: const TextStyle(fontSize: 10),
-                                      ),
-                                      const Gap(15),
-                                    ],
-                                  ),
-                                  //Área de Gravado
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      const Gap(15),
-                                      const Icon(
-                                        Icons.circle_outlined,
-                                        color: AppColors.kTextSecondaryGray,
-                                        size: 8,
-                                      ),
-                                      const Gap(5),
-                                      Text(
-                                        'Importe gravado:',
-                                        style: GoogleFonts.inter(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 10,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        'L ${pedidoActualInfo.importeGravado}',
-                                        style: const TextStyle(fontSize: 10),
-                                      ),
-                                      const Gap(15),
-                                    ],
-                                  ),
-                                  //Área de descuento
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      const Gap(15),
-                                      const Icon(
-                                        Icons.circle_outlined,
-                                        color: AppColors.kTextSecondaryGray,
-                                        size: 8,
-                                      ),
-                                      const Gap(5),
-                                      Text(
-                                        'Descuento:',
-                                        style: GoogleFonts.inter(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 10,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        'L ${pedidoActualInfo.descuento}',
-                                        style: const TextStyle(fontSize: 10),
-                                      ),
-                                      const Gap(15),
-                                    ],
-                                  ),
-                                  //Área de ISV
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      const Gap(15),
-                                      const Icon(
-                                        Icons.circle_outlined,
-                                        color: AppColors.kTextSecondaryGray,
-                                        size: 8,
-                                      ),
-                                      const Gap(5),
-                                      Text(
-                                        'ISV (15%):',
-                                        style: GoogleFonts.inter(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 10,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        'L ${pedidoActualInfo.impuestos}',
-                                        style: const TextStyle(fontSize: 10),
-                                      ),
-                                      const Gap(15),
-                                    ],
-                                  ),
-                                  const Gap(5),
-                                ],
-                              ),
-                            ),
-
-                            const Gap(40),
-                            SizedBox(
-                              width: 350,
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  await _tryConfirmarPedido();
-                                },
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        AppColors.kGeneralPrimaryOrange,
-                                    shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
-                                    )),
-                                child: RichText(
-                                  text: TextSpan(
-                                    text: 'Confirmar orden por ',
-                                    style: GoogleFonts.inter(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 16,
                                     ),
-                                    children: [
-                                      TextSpan(
-                                          text: 'L ${pedidoActualInfo.total}',
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        SvgPicture.asset(
+                                            'assets/svg/efectivo.svg',
+                                            width: 50,
+                                            height: 50,
+                                            fit: BoxFit.contain,
+                                            semanticsLabel: 'Efectivo'),
+                                        const Gap(5),
+                                        Text(
+                                          'Efectivo',
                                           style: GoogleFonts.inter(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          )),
-                                    ],
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w700),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
+                              const Gap(10),
+                              //TARJETA
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    _setMetodoDePago(MetodoDePagoEnum.tarjeta);
+                                  },
+                                  child: Container(
+                                    height: 128,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: metodoSeleccionado ==
+                                                MetodoDePagoEnum.tarjeta
+                                            ? AppColors.kGeneralPrimaryOrange
+                                            : const Color(0xFFE1E1E1),
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        SvgPicture.asset(
+                                            'assets/svg/tarjeta.svg',
+                                            width: 50,
+                                            height: 50,
+                                            fit: BoxFit.contain,
+                                            semanticsLabel: 'Tarjeta'),
+                                        const Gap(5),
+                                        Text(
+                                          'Tarjeta',
+                                          style: GoogleFonts.inter(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w700),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Gap(10),
+                          //TRANSFERENCIA y DELIVERY
+                          Row(
+                            children: [
+                              //TRANSFERENCIA
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    _setMetodoDePago(
+                                        MetodoDePagoEnum.transferencia);
+                                  },
+                                  child: Container(
+                                    height: 128,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: metodoSeleccionado ==
+                                                MetodoDePagoEnum.transferencia
+                                            ? AppColors.kGeneralPrimaryOrange
+                                            : const Color(0xFFE1E1E1),
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        SvgPicture.asset(
+                                            'assets/svg/transferencia.svg',
+                                            width: 50,
+                                            height: 50,
+                                            fit: BoxFit.contain,
+                                            semanticsLabel: 'Transferencia'),
+                                        const Gap(5),
+                                        Text(
+                                          'Transferencia',
+                                          style: GoogleFonts.inter(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w700),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const Gap(10),
+                              //DELIVERY
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    _setMetodoDePago(MetodoDePagoEnum.delivery);
+                                  },
+                                  child: Container(
+                                    height: 128,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: metodoSeleccionado ==
+                                                MetodoDePagoEnum.delivery
+                                            ? AppColors.kGeneralPrimaryOrange
+                                            : const Color(0xFFE1E1E1),
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        SvgPicture.asset(
+                                            'assets/svg/delivery.svg',
+                                            width: 50,
+                                            height: 50,
+                                            fit: BoxFit.contain,
+                                            semanticsLabel: 'Delivery'),
+                                        const Gap(5),
+                                        Text(
+                                          'Delivery',
+                                          style: GoogleFonts.inter(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w700),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Gap(15),
+
+                          metodoSeleccionado == MetodoDePagoEnum.efectivo
+                              ? Row(
+                                  children: [
+                                    const Gap(10),
+                                    Expanded(
+                                      child: Column(
+                                        children: [
+                                          const Text(
+                                              '¿Con cuánto efectivo pagará el cliente?'),
+                                          TextField(
+                                            controller: _conCuantoPagaCliente,
+                                            keyboardType: const TextInputType
+                                                .numberWithOptions(
+                                                decimal: true),
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter.allow(
+                                                  RegExp(r'^\d*\.?\d{0,2}')),
+                                            ],
+                                            onChanged: (v) {
+                                              if (_conCuantoPagaCliente.text ==
+                                                  '') {
+                                                setState(() {
+                                                  vuelto = 0.00;
+                                                });
+                                              } else {
+                                                setState(() {
+                                                  vuelto = double.parse(
+                                                          _conCuantoPagaCliente
+                                                              .text) -
+                                                      pedidoActualInfo.total;
+                                                });
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Gap(10),
+                                    Expanded(
+                                      child: Column(
+                                        children: [
+                                          const Text('El vuelto es de:'),
+                                          Text(
+                                            'L ${vuelto.toStringAsFixed(2)}',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Gap(10),
+                                  ],
+                                )
+                              : const SizedBox(),
+
+                          const Gap(15),
+                          //Detalles de factura (subtotal, impuesto, importe..., etc..)
+                          Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.kInputLiteGray,
+                              borderRadius: BorderRadius.circular(5),
                             ),
-                          ],
+                            child: ExpansionTile(
+                              dense: true,
+                              title: const Text(
+                                'Detalles de facturación',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              trailing:
+                                  const Icon(Icons.arrow_drop_down_outlined),
+                              children: [
+                                //Área de Subtotal
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    const Gap(15),
+                                    const Icon(
+                                      Icons.circle_outlined,
+                                      color: AppColors.kTextSecondaryGray,
+                                      size: 8,
+                                    ),
+                                    const Gap(5),
+                                    Text(
+                                      'Subtotal:',
+                                      style: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      'L ${pedidoActualInfo.subtotal}',
+                                      style: const TextStyle(fontSize: 10),
+                                    ),
+                                    const Gap(15),
+                                  ],
+                                ),
+                                //Área de Exonerado
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    const Gap(15),
+                                    const Icon(
+                                      Icons.circle_outlined,
+                                      color: AppColors.kTextSecondaryGray,
+                                      size: 8,
+                                    ),
+                                    const Gap(5),
+                                    Text(
+                                      'Importe exonerado:',
+                                      style: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      'L ${pedidoActualInfo.importeExonerado}',
+                                      style: const TextStyle(fontSize: 10),
+                                    ),
+                                    const Gap(15),
+                                  ],
+                                ),
+                                //Área de Exento
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    const Gap(15),
+                                    const Icon(
+                                      Icons.circle_outlined,
+                                      color: AppColors.kTextSecondaryGray,
+                                      size: 8,
+                                    ),
+                                    const Gap(5),
+                                    Text(
+                                      'Importe exento:',
+                                      style: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      'L ${pedidoActualInfo.importeExento}',
+                                      style: const TextStyle(fontSize: 10),
+                                    ),
+                                    const Gap(15),
+                                  ],
+                                ),
+                                //Área de Gravado
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    const Gap(15),
+                                    const Icon(
+                                      Icons.circle_outlined,
+                                      color: AppColors.kTextSecondaryGray,
+                                      size: 8,
+                                    ),
+                                    const Gap(5),
+                                    Text(
+                                      'Importe gravado:',
+                                      style: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      'L ${pedidoActualInfo.importeGravado}',
+                                      style: const TextStyle(fontSize: 10),
+                                    ),
+                                    const Gap(15),
+                                  ],
+                                ),
+                                //Área de descuento
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    const Gap(15),
+                                    const Icon(
+                                      Icons.circle_outlined,
+                                      color: AppColors.kTextSecondaryGray,
+                                      size: 8,
+                                    ),
+                                    const Gap(5),
+                                    Text(
+                                      'Descuento:',
+                                      style: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      'L ${pedidoActualInfo.descuento}',
+                                      style: const TextStyle(fontSize: 10),
+                                    ),
+                                    const Gap(15),
+                                  ],
+                                ),
+                                //Área de ISV
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    const Gap(15),
+                                    const Icon(
+                                      Icons.circle_outlined,
+                                      color: AppColors.kTextSecondaryGray,
+                                      size: 8,
+                                    ),
+                                    const Gap(5),
+                                    Text(
+                                      'ISV (15%):',
+                                      style: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      'L ${pedidoActualInfo.impuestos}',
+                                      style: const TextStyle(fontSize: 10),
+                                    ),
+                                    const Gap(15),
+                                  ],
+                                ),
+                                const Gap(5),
+                              ],
+                            ),
+                          ),
+
+                          const Gap(40),
+                          //Botón de confirmar
+                          SizedBox(
+                            width: 350,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                await _tryConfirmarPedido();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      AppColors.kGeneralPrimaryOrange,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  )),
+                              child: RichText(
+                                text: TextSpan(
+                                  text: 'Confirmar orden por ',
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 16,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                        text: 'L ${pedidoActualInfo.total}',
+                                        style: GoogleFonts.inter(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        )),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(false);
+                          },
+                          style: IconButton.styleFrom(
+                            backgroundColor: AppColors.kGeneralFadedGray,
+                          ),
+                          icon: const Icon(Icons.close),
                         ),
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: IconButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(false);
-                            },
-                            style: IconButton.styleFrom(
-                              backgroundColor: AppColors.kGeneralFadedGray,
-                            ),
-                            icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                )
+              : Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.warning,
+                            color: Colors.yellow,
+                          ),
+                          Text('La caja se encuentra cerrada!!'),
+                        ],
+                      ),
+                      const Gap(15),
+                      ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.kGeneralPrimaryOrange,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                      ],
-                    ),
-                  );
-                } else {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.warning,
-                              color: Colors.yellow,
-                            ),
-                            Text('La caja se encuentra cerrada!!'),
-                          ],
+                        child: const Text(
+                          'Regresar',
+                          style: TextStyle(color: Colors.white),
                         ),
-                        const Gap(15),
-                        ElevatedButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.kGeneralPrimaryOrange,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'Regresar',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-              }),
+                      ),
+                    ],
+                  ),
+                ),
     );
   }
 
@@ -644,7 +606,6 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
     setState(() => _isTryingUpload = true);
     PedidoModel pedidoActual = ref.read(pedidoActualProvider);
     await supabaseClient.agregarPedido(pedidoActual).then((message) async {
-      setState(() => _isTryingUpload = false);
       if (message != 'error') {
         await ref
             .read(detallesParaPedidoViewProvider.notifier)
@@ -652,11 +613,34 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
 
         final detalles = ref.read(detallesParaPedidoViewProvider);
 
-        await _generatePdfAndPrint(detalles, pedidoActual.numPedido.toString(),
-            pedidoActual.idCliente);
+        //*----------Actualizar STOCKS de ítems ASOCIADOS
+        for (var menuItem in detalles) {
+          List<MenuInventario> menuInventario = await ref
+              .read(supabaseManagementProvider.notifier)
+              .obtenerMenuInventarioPorItemMenu(
+                  userIdRestaurante, menuItem.idMenu);
+
+          for (var element in menuInventario) {
+            Inventario inventario = await ref
+                .read(supabaseManagementProvider.notifier)
+                .obtenerInventarioPorId(element.idInventario);
+            int stockFinal =
+                inventario.stock - (element.cantidadStock * menuItem.cantidad);
+
+            await ref
+                .read(supabaseManagementProvider.notifier)
+                .actualizarStockInventario(stockFinal, element.idInventario);
+          }
+        }
+        //*----------Actualizar STOCKS de ítems ASOCIADOS
+
+        await _generatePdfAndPrint(
+            detalles, pedidoActual, pedidoActual.idCliente);
+        setState(() => _isTryingUpload = false);
         if (!mounted) return;
         Navigator.of(context).pop(true);
       } else {
+        setState(() => _isTryingUpload = false);
         if (!mounted) return;
         Navigator.of(context).pop(false);
         ScaffoldMessenger.of(context).clearSnackBars();
@@ -676,12 +660,12 @@ class _MetodoPagoModalState extends ConsumerState<MetodoPagoModal> {
   }
 
   Future<bool> _generatePdfAndPrint(List<PedidoDetalleModel> detallesPedido,
-      String numeroPedido, int idCliente) async {
+      PedidoModel pedido, int idCliente) async {
     String nombreCliente = await ref
         .read(supabaseManagementProvider.notifier)
         .getClienteName(idCliente);
     final pdfData =
-        await generateTicketPdf(detallesPedido, numeroPedido, nombreCliente);
+        await generateTicketPdf(detallesPedido, pedido, nombreCliente);
     // Definir el formato de página de 80mm
     const receiptFormat = PdfPageFormat(
       80 * PdfPageFormat.mm,

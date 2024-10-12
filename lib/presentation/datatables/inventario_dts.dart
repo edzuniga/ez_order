@@ -1,8 +1,9 @@
-import 'package:ez_order_ezr/presentation/config/app_colors.dart';
-import 'package:ez_order_ezr/presentation/modales/inventario_modal.dart';
-import 'package:ez_order_ezr/presentation/widgets/modal_purpose_enum.dart';
 import 'package:flutter/material.dart';
 
+import 'package:ez_order_ezr/presentation/config/app_colors.dart';
+import 'package:ez_order_ezr/presentation/modales/inventario_modal.dart';
+import 'package:ez_order_ezr/presentation/modales/movimientos_modal.dart';
+import 'package:ez_order_ezr/presentation/widgets/modal_purpose_enum.dart';
 import 'package:ez_order_ezr/domain/inventario.dart';
 
 class InventarioTableSource extends DataTableSource {
@@ -88,6 +89,16 @@ class InventarioTableSource extends DataTableSource {
                   await _updateInventarioModal(producto);
                 },
               ),
+              IconButton(
+                tooltip: 'Movimientos',
+                icon: const Icon(
+                  Icons.compare_arrows,
+                  color: AppColors.kGeneralPrimaryOrange,
+                ),
+                onPressed: () async {
+                  await _movimientosModal(producto);
+                },
+              ),
             ],
           ),
         ),
@@ -136,6 +147,27 @@ class InventarioTableSource extends DataTableSource {
         child: InventarioModal(
           titulo: 'Borrar',
           modalPurpose: ModalPurpose.delete,
+          inventario: inventario,
+        ),
+      ),
+    );
+
+    if (res) {
+      actualizarEstado();
+    }
+  }
+
+  Future<void> _movimientosModal(Inventario inventario) async {
+    bool res = await showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.5),
+      builder: (_) => Dialog(
+        elevation: 8,
+        backgroundColor: Colors.transparent,
+        child: MovimientosModal(
+          modalPurpose: ModalPurpose.add,
+          titulo: 'Agregar',
           inventario: inventario,
         ),
       ),
