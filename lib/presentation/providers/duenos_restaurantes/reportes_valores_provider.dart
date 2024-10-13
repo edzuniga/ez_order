@@ -41,9 +41,13 @@ class ValoresReportes extends _$ValoresReportes {
     );
   }
 
-  Future<void> hacerCalculosReporte(int idRestaurante) async {
+  Future<void> hacerCalculosReporte(int idRestaurante,
+      {DateTime? fechaCierreAnterior}) async {
     final today = DateTime.now();
-    final startOfDay = DateTime(today.year, today.month, today.day);
+    DateTime startOfDay = DateTime(today.year, today.month, today.day);
+    if (fechaCierreAnterior != null) {
+      startOfDay = fechaCierreAnterior;
+    }
     final supa = ref.read(supabaseManagementProvider);
     try {
       //Cantidad de Productos en el MENÚ

@@ -19,19 +19,22 @@ class AperturarCajaModal extends ConsumerStatefulWidget {
 class _AperturarCajaModalState extends ConsumerState<AperturarCajaModal> {
   final TextEditingController _cantidadInicialController =
       TextEditingController();
+  final TextEditingController _personaEnCajaController =
+      TextEditingController();
   final GlobalKey<FormState> _aperturarCajaFormKey = GlobalKey<FormState>();
   bool _isSendingData = false;
 
   @override
   void dispose() {
     _cantidadInicialController.dispose();
+    _personaEnCajaController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 240,
+      height: 310,
       width: 350,
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -56,7 +59,7 @@ class _AperturarCajaModalState extends ConsumerState<AperturarCajaModal> {
                 ),
               ),
               const Gap(25),
-              //Nuevo ticket (Input)
+              //Efectivo para aperturar caja
               SizedBox(
                 width: 250,
                 child: TextFormField(
@@ -70,6 +73,58 @@ class _AperturarCajaModalState extends ConsumerState<AperturarCajaModal> {
                   autofillHints: const [AutofillHints.name],
                   decoration: InputDecoration(
                     labelText: 'Efectivo inicial en caja',
+                    labelStyle: GoogleFonts.inter(
+                      color: AppColors.kTextPrimaryBlack,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: Color(0xFFe0e3e7),
+                        width: 2.0,
+                      ),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: AppColors.kGeneralPrimaryOrange,
+                        width: 2.0,
+                      ),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: AppColors.kGeneralErrorColor,
+                        width: 2.0,
+                      ),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: AppColors.kGeneralErrorColor,
+                        width: 2.0,
+                      ),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    filled: true,
+                    fillColor: AppColors.kInputLiteGray,
+                  ),
+                  style: GoogleFonts.inter(),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) {
+                      return 'Campo requerido';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              const Gap(15),
+              //Persona en caja
+              SizedBox(
+                width: 300,
+                child: TextFormField(
+                  controller: _personaEnCajaController,
+                  autofillHints: const [AutofillHints.name],
+                  decoration: InputDecoration(
+                    labelText: 'Persona en caja',
                     labelStyle: GoogleFonts.inter(
                       color: AppColors.kTextPrimaryBlack,
                     ),
@@ -150,7 +205,8 @@ class _AperturarCajaModalState extends ConsumerState<AperturarCajaModal> {
                                   .aperturarCaja(
                                       widget.restauranteId,
                                       double.parse(
-                                          _cantidadInicialController.text));
+                                          _cantidadInicialController.text),
+                                      _personaEnCajaController.text);
                               //Cambiar el estado de la CAJA (abierta/cerrada)
                               ref
                                   .read(supabaseManagementProvider.notifier)

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:ez_order_ezr/data/movimiento_inventario_modelo.dart';
+import 'package:ez_order_ezr/presentation/providers/reportes/rows_inventario_table.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
@@ -369,23 +370,20 @@ class SupabaseManagement extends _$SupabaseManagement {
 
   //Obtener Gastos de Caja por restaurante
   Future<List<RegistroCajaModelo>> getGastosCajaPorRestaurante(
-      int restauranteId) async {
+      int restauranteId,
+      {DateTime? fechaCierreAnterior}) async {
     List<RegistroCajaModelo> listado = [];
+    final today = DateTime.now();
+    DateTime startOfDay = DateTime(today.year, today.month, today.day);
+    if (fechaCierreAnterior != null) {
+      startOfDay = fechaCierreAnterior;
+    }
     try {
-      // Obtener la fecha actual
-      final DateTime today = DateTime.now();
       final res = await state
           .from('registros_caja')
           .select()
           .eq('restaurante_id', restauranteId)
-          .gte('created_at',
-              today.toString().substring(0, 10)) // desde el inicio del día
-          .lt(
-              'created_at',
-              today
-                  .add(const Duration(days: 1))
-                  .toString()
-                  .substring(0, 10)) // antes del siguiente día
+          .gte('created_at', startOfDay)
           .order('id', ascending: false);
 
       for (var element in res) {
@@ -416,12 +414,14 @@ class SupabaseManagement extends _$SupabaseManagement {
   }
 
   //Aperturar caja de un restaurante
-  Future<String> aperturarCaja(int restauranteId, double cantidad) async {
+  Future<String> aperturarCaja(
+      int restauranteId, double cantidad, String personaEnCaja) async {
     try {
       await state.from('caja').insert({
         'created_at': DateTime.now().toIso8601String(),
         'restaurante_uid': restauranteId,
         'cantidad': cantidad,
+        'persona_en_caja': personaEnCaja,
       });
       return 'success';
     } on PostgrestException catch (e) {
@@ -886,9 +886,20 @@ class SupabaseManagement extends _$SupabaseManagement {
         .eq('id_restaurante', idRestaurante)
         .order('created_at', ascending: true);
 
+    List<Map<String, dynamic>> res2 = await state
+        .from('movimientos_inventario')
+        .select()
+        .gte('created_at', initialDate.toIso8601String())
+        .lte('created_at', adjustedFinalDate.toIso8601String())
+        .eq('id_restaurante', idRestaurante)
+        .order('created_at', ascending: true);
+
     //EXTRA - utilizar el mismo query para generar los rows de las TABLAS
     await ref.read(pedidosTableRowsProvider.notifier).addDataRows(res);
     await ref.read(rowsVentasPorProductoProvider.notifier).addDataRows(res);
+    await ref
+        .read(rowsMovimientosInventarioProvider.notifier)
+        .addDataRows(res2);
 
     Map<String, double> dailyTotals = {};
 
@@ -1209,10 +1220,12 @@ class SupabaseManagement extends _$SupabaseManagement {
       final res = await getCajaAperturasPorRestaurante(resId);
       double cantidadInicioCaja =
           res.first.cantidad; //Cantidad de inicio de caja
+      DateTime ultimaFecha = res.first.createdAt;
 
       //Obtener los gastos del día
-      List<RegistroCajaModelo> listado =
-          await getGastosCajaPorRestaurante(resId);
+      List<RegistroCajaModelo> listado = await getGastosCajaPorRestaurante(
+          resId,
+          fechaCierreAnterior: ultimaFecha);
 
       for (RegistroCajaModelo element in listado) {
         if (element.egreso != null) {

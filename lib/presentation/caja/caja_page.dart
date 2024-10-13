@@ -231,6 +231,8 @@ class _CajaPageState extends ConsumerState<CajaPage> {
                                       Text(
                                           'Aperturó con saldo: L ${apertura.cantidad}'),
                                       Text(
+                                          'Persona en caja: ${apertura.personaEnCaja}'),
+                                      Text(
                                           'Efectivo que debe haber en caja: L $cierreCantidad'),
                                       Text(
                                           'Ventas en efectivo: L $totalEfectivo'),
@@ -260,6 +262,7 @@ class _CajaPageState extends ConsumerState<CajaPage> {
                       ),
                     ),
                   ),
+                  const Gap(20),
                 ],
               ),
             ),
@@ -369,6 +372,7 @@ class _CajaPageState extends ConsumerState<CajaPage> {
     List<CajaAperturaModelo> cajaAperturaList = await ref
         .read(supabaseManagementProvider.notifier)
         .getCajaAperturasPorRestaurante(restauranteId);
+
     CajaAperturaModelo modelo = cajaAperturaList.first;
 
     if (!mounted) return;

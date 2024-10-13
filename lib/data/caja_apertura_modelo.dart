@@ -12,6 +12,7 @@ class CajaAperturaModelo extends CajaApertura {
     super.totalTransferencia,
     super.totalGastos,
     super.cierreCaja,
+    super.personaEnCaja,
   });
 
   factory CajaAperturaModelo.fromJson(Map<String, dynamic> json) =>
@@ -27,6 +28,7 @@ class CajaAperturaModelo extends CajaApertura {
             double.tryParse(json['total_transferencia'].toString()),
         totalGastos: double.tryParse(json['total_gastos'].toString()),
         cierreCaja: double.tryParse(json['cierre_caja'].toString()),
+        personaEnCaja: json['persona_en_caja'],
       );
 
   Map<String, dynamic> toJson() => {
@@ -39,6 +41,7 @@ class CajaAperturaModelo extends CajaApertura {
         'total_transferencia': totalTransferencia,
         'total_gastos': totalGastos,
         'cierre_caja': cierreCaja,
+        'persona_en_caja': personaEnCaja,
       };
 
   CajaAperturaModelo copyWith({
@@ -52,6 +55,7 @@ class CajaAperturaModelo extends CajaApertura {
     double? totalTransferencia,
     double? totalGastos,
     double? cierreCaja,
+    String? personaEnCaja,
   }) =>
       CajaAperturaModelo(
         id: id ?? this.id,
@@ -64,5 +68,6 @@ class CajaAperturaModelo extends CajaApertura {
         totalTransferencia: totalTransferencia ?? this.totalTransferencia,
         totalGastos: totalGastos ?? this.totalGastos,
         cierreCaja: cierreCaja ?? this.cierreCaja,
+        personaEnCaja: personaEnCaja ?? this.personaEnCaja,
       );
 }

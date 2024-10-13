@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'package:ez_order_ezr/presentation/providers/reportes/columns_ventas_por_producto.dart';
-import 'package:ez_order_ezr/presentation/providers/reportes/rows_ventas_por_producto.dart';
+import 'package:ez_order_ezr/presentation/providers/reportes/columns_inventario_table.dart';
+import 'package:ez_order_ezr/presentation/providers/reportes/rows_inventario_table.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:animate_do/animate_do.dart';
@@ -12,6 +12,8 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:ez_order_ezr/presentation/providers/reportes/columns_ventas_por_producto.dart';
+import 'package:ez_order_ezr/presentation/providers/reportes/rows_ventas_por_producto.dart';
 import 'package:ez_order_ezr/presentation/providers/users_data.dart';
 import 'package:ez_order_ezr/presentation/widgets/pedidos_widgets/estadistica_sencilla_mobile_widget.dart';
 import 'package:ez_order_ezr/utils/web_specific.dart';
@@ -100,18 +102,25 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
         ref.watch(rowsVentasPorProductoProvider);
     List<DataColumn> columnsVentasPorProducto =
         ref.watch(columnsVentasPorProductoProvider);
+    List<DataRow> rowsMovimientosInventario =
+        ref.watch(rowsMovimientosInventarioProvider);
+    List<DataColumn> columnsMovimientosInventario =
+        ref.watch(columnsMovimientosInventarioTableProvider);
 
     if (kIsWeb) {
       if (_tienePermiso) {
         return webView(
-            restauranteActual,
-            context,
-            valoresReporte,
-            datosGrafico,
-            rowsTable,
-            columnsTable,
-            rowsVentasPorProducto,
-            columnsVentasPorProducto);
+          restauranteActual,
+          context,
+          valoresReporte,
+          datosGrafico,
+          rowsTable,
+          columnsTable,
+          rowsVentasPorProducto,
+          columnsVentasPorProducto,
+          rowsMovimientosInventario,
+          columnsMovimientosInventario,
+        );
       }
       return noPermissionView();
     } else {
@@ -121,14 +130,17 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
               datosGrafico, rowsTable, columnsTable, screenSize);
         }
         return webView(
-            restauranteActual,
-            context,
-            valoresReporte,
-            datosGrafico,
-            rowsTable,
-            columnsTable,
-            rowsVentasPorProducto,
-            columnsVentasPorProducto);
+          restauranteActual,
+          context,
+          valoresReporte,
+          datosGrafico,
+          rowsTable,
+          columnsTable,
+          rowsVentasPorProducto,
+          columnsVentasPorProducto,
+          rowsMovimientosInventario,
+          columnsMovimientosInventario,
+        );
       }
       return noPermissionView();
     }
@@ -136,14 +148,17 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
 
   //View para WEB, tanto en Landscape y Portrait y móviles en landscape
   Widget webView(
-      RestauranteModelo restauranteActual,
-      BuildContext context,
-      ReporteModelo valoresReporte,
-      DatosGraficoModelo datosGrafico,
-      List<DataRow> rowsTable,
-      List<DataColumn> columnsTable,
-      List<DataRow> rowsVentasPorProducto,
-      List<DataColumn> columnsVentasPorProducto) {
+    RestauranteModelo restauranteActual,
+    BuildContext context,
+    ReporteModelo valoresReporte,
+    DatosGraficoModelo datosGrafico,
+    List<DataRow> rowsTable,
+    List<DataColumn> columnsTable,
+    List<DataRow> rowsVentasPorProducto,
+    List<DataColumn> columnsVentasPorProducto,
+    List<DataRow> rowsMovimientosInventario,
+    List<DataColumn> columnsMovimientosInventario,
+  ) {
     return Container(
       padding: const EdgeInsets.all(15),
       width: double.infinity,
@@ -601,7 +616,8 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                                                   await exportDataTableToPDFAndDownload(
                                                       rowsTable,
                                                       _initialDate!,
-                                                      _finalDate!);
+                                                      _finalDate!,
+                                                      1);
                                                 } else {
                                                   await _exportDataTableToPDF(
                                                       rowsTable);
@@ -710,9 +726,10 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                                               onPressed: () async {
                                                 if (kIsWeb) {
                                                   await exportDataTableToPDFAndDownload(
-                                                      rowsTable,
+                                                      rowsVentasPorProducto,
                                                       _initialDate!,
-                                                      _finalDate!);
+                                                      _finalDate!,
+                                                      2);
                                                 } else {
                                                   await _exportDataTableToPDF(
                                                       rowsTable);
@@ -751,6 +768,120 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                                                   columns:
                                                       columnsVentasPorProducto,
                                                   rows: rowsVentasPorProducto,
+                                                  headingTextStyle:
+                                                      const TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const Gap(15),
+                                      ],
+                                    ),
+                                  )
+                            : Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline,
+                                      color: Colors.black87,
+                                      size: 30,
+                                    ),
+                                    const Gap(10),
+                                    Text(
+                                      'Haga click en Generar reporte\npara mostrar datos!!',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.inter(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                      ),
+                    ],
+                  ),
+                  //Tabla de movimientos de inventario
+                  Column(
+                    children: [
+                      const Text('Movimientos de inventario'),
+                      Container(
+                        width: 650,
+                        height: 400,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            width: 0.5,
+                            color: Colors.black12,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: _isShowingReport
+                            ? _isRetrievingGraphData
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : SingleChildScrollView(
+                                    child: Column(
+                                      children: [
+                                        const Gap(15),
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                              right: 15,
+                                            ),
+                                            child: ElevatedButton(
+                                              key: _shareButtonKey,
+                                              onPressed: () async {
+                                                if (kIsWeb) {
+                                                  await exportDataTableToPDFAndDownload(
+                                                      rowsMovimientosInventario,
+                                                      _initialDate!,
+                                                      _finalDate!,
+                                                      3);
+                                                } else {
+                                                  await _exportDataTableToPDF(
+                                                      rowsTable);
+                                                }
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.white,
+                                                shape: RoundedRectangleBorder(
+                                                  side: const BorderSide(
+                                                      color: AppColors
+                                                          .kGeneralPrimaryOrange),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              child: Text(
+                                                'Descargar tabla',
+                                                style: GoogleFonts.inter(
+                                                  color: AppColors
+                                                      .kGeneralPrimaryOrange,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const Gap(15),
+                                        //Tabla generada
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: FittedBox(
+                                                child: DataTable(
+                                                  dataRowMaxHeight:
+                                                      double.infinity,
+                                                  columns:
+                                                      columnsMovimientosInventario,
+                                                  rows:
+                                                      rowsMovimientosInventario,
                                                   headingTextStyle:
                                                       const TextStyle(
                                                           fontWeight:
@@ -1279,7 +1410,8 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
                                               await exportDataTableToPDFAndDownload(
                                                   rowsTable,
                                                   _initialDate!,
-                                                  _finalDate!);
+                                                  _finalDate!,
+                                                  1);
                                             } else {
                                               await _exportDataTableToPDF(
                                                   rowsTable);
@@ -1394,6 +1526,9 @@ class _ReportesViewState extends ConsumerState<ReportesView> {
 
   Future<void> _hacerCalculosGenerales() async {
     ref.read(pedidosTableRowsProvider.notifier).clearTableRows();
+    ref.read(rowsMovimientosInventarioProvider.notifier).clearTableRows();
+    ref.read(rowsVentasPorProductoProvider.notifier).clearTableRows();
+
     setState(() {
       _isShowingReport = true;
       _isRetrievingGraphData = true;

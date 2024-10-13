@@ -10,6 +10,7 @@ abstract class CajaApertura {
     this.totalTransferencia,
     this.totalGastos,
     this.cierreCaja,
+    this.personaEnCaja,
   });
 
   final int? id;
@@ -22,4 +23,5 @@ abstract class CajaApertura {
   final double? totalTransferencia;
   final double? totalGastos;
   final double? cierreCaja;
+  final String? personaEnCaja;
 }

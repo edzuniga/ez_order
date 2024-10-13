@@ -36,15 +36,24 @@ class _CerrarCajaModalState extends ConsumerState<CerrarCajaModal> {
     int userIdRestaurante = int.parse(
         ref.read(userPublicDataProvider)['id_restaurante'].toString());
 
-    await ref
-        .read(valoresReportesProvider.notifier)
-        .hacerCalculosReporte(userIdRestaurante);
+    //Obtener el último caja aperturaModelo
+    List<CajaAperturaModelo> listCajaAperturas = await ref
+        .read(supabaseManagementProvider.notifier)
+        .getCajaAperturasPorRestaurante(userIdRestaurante);
+    CajaAperturaModelo ultimaCajaApertura = listCajaAperturas.first;
+
+    DateTime ultimaFecha = ultimaCajaApertura.createdAt;
+
+    await ref.read(valoresReportesProvider.notifier).hacerCalculosReporte(
+        userIdRestaurante,
+        fechaCierreAnterior: ultimaFecha);
 
     ReporteModelo valoresProvi = ref.read(valoresReportesProvider);
 
     final gastosDelDia = await ref
         .read(supabaseManagementProvider.notifier)
-        .getGastosCajaPorRestaurante(userIdRestaurante);
+        .getGastosCajaPorRestaurante(userIdRestaurante,
+            fechaCierreAnterior: ultimaFecha);
 
     //Calcular el valor que debe estar en caja
     cierreCajavalor = await ref

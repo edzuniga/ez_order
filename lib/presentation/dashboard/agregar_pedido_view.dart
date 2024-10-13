@@ -663,7 +663,7 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                           }
                                         },
                                         itemBuilder: (ctx) {
-                                          return <PopupMenuEntry<int>>[
+                                          List<PopupMenuEntry<int>> items = [
                                             const PopupMenuItem(
                                               value: 1,
                                               child: Row(
@@ -691,21 +691,34 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                                 ],
                                               ),
                                             ),
-                                            const PopupMenuDivider(),
-                                            const PopupMenuItem(
-                                              value: 3,
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceEvenly,
-                                                children: [
-                                                  Icon(Icons.inventory),
-                                                  Gap(5),
-                                                  Text('Asociar'),
-                                                ],
-                                              ),
-                                            ),
                                           ];
+
+                                          // Agregar elementos adicionales si se cumple la condición
+                                          if (ref.read(userPublicDataProvider)[
+                                                      'rol'] ==
+                                                  '1' ||
+                                              ref.read(userPublicDataProvider)[
+                                                      'rol'] ==
+                                                  '2') {
+                                            items.addAll([
+                                              const PopupMenuDivider(),
+                                              const PopupMenuItem(
+                                                value: 3,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceEvenly,
+                                                  children: [
+                                                    Icon(Icons.inventory),
+                                                    Gap(5),
+                                                    Text('Asociar'),
+                                                  ],
+                                                ),
+                                              ),
+                                            ]);
+                                          }
+
+                                          return items;
                                         },
                                         child: const Icon(
                                           Icons.more_horiz,
@@ -1738,47 +1751,62 @@ class _AgregarPedidoViewState extends ConsumerState<AgregarPedidoView> {
                                           }
                                         },
                                         itemBuilder: (ctx) {
-                                          return <PopupMenuEntry<int>>[
+                                          List<PopupMenuEntry<int>> items = [
                                             const PopupMenuItem(
-                                                value: 1,
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceEvenly,
-                                                  children: [
-                                                    Icon(Icons.edit),
-                                                    Gap(5),
-                                                    Text('Editar'),
-                                                  ],
-                                                )),
-                                            const PopupMenuDivider(),
-                                            const PopupMenuItem(
-                                                value: 2,
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceEvenly,
-                                                  children: [
-                                                    Icon(Icons.delete_forever),
-                                                    Gap(5),
-                                                    Text('Borrar'),
-                                                  ],
-                                                )),
-                                            const PopupMenuDivider(),
-                                            const PopupMenuItem(
-                                              value: 3,
+                                              value: 1,
                                               child: Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment
                                                         .spaceEvenly,
                                                 children: [
-                                                  Icon(Icons.inventory),
+                                                  Icon(Icons.edit),
                                                   Gap(5),
-                                                  Text('Asociar'),
+                                                  Text('Editar'),
+                                                ],
+                                              ),
+                                            ),
+                                            const PopupMenuDivider(),
+                                            const PopupMenuItem(
+                                              value: 2,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceEvenly,
+                                                children: [
+                                                  Icon(Icons.delete_forever),
+                                                  Gap(5),
+                                                  Text('Borrar'),
                                                 ],
                                               ),
                                             ),
                                           ];
+
+                                          // Agregar elementos adicionales si se cumple la condición
+                                          if (ref.read(userPublicDataProvider)[
+                                                      'rol'] ==
+                                                  '1' ||
+                                              ref.read(userPublicDataProvider)[
+                                                      'rol'] ==
+                                                  '2') {
+                                            items.addAll([
+                                              const PopupMenuDivider(),
+                                              const PopupMenuItem(
+                                                value: 3,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceEvenly,
+                                                  children: [
+                                                    Icon(Icons.inventory),
+                                                    Gap(5),
+                                                    Text('Asociar'),
+                                                  ],
+                                                ),
+                                              ),
+                                            ]);
+                                          }
+
+                                          return items;
                                         },
                                         child: const Icon(
                                           Icons.more_horiz,
